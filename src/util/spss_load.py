@@ -6,15 +6,17 @@ import spss_converter
 import pandas as pd
 
 def load_df(path: Path) -> pd.DataFrame:
+    full_path = Path("data") / path
+
     if path.suffix == ".csv":
-        return pd.read_csv(path)
+        return pd.read_csv(full_path, sep = ";")
 
     if path.suffix == ".sav":
-        return spss_converter.to_dataframe(path)[0]
+        return spss_converter.to_dataframe(full_path)[0]
 
     raise NotImplementedError
 
 if __name__ == "__main__":
-    test_df = load_df(Path("data/ai09e_EN_1.0p.csv"))
+    test_df = load_df(Path("ai09e_EN_1.0p.csv"))
 
     print(test_df)
