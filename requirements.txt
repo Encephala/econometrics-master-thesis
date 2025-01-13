@@ -1,3 +1,6 @@
 pandas
-spss-converter
+numpy
 matplotlib
+scipy
+
+spss-converter
