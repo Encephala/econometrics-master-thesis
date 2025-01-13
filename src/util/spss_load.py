@@ -6,15 +6,19 @@ import spss_converter
 import pandas as pd
 
 def load_df(path: Path) -> pd.DataFrame:
-    full_path = Path("data") / path
+    """Given the file name, loads it from the data directory."""
+    full_path = Path("../data") / path
 
     if path.suffix == ".csv":
-        return pd.read_csv(full_path, sep = ";")
+        result = pd.read_csv(full_path, sep = ";")
 
-    if path.suffix == ".sav":
-        return spss_converter.to_dataframe(full_path)[0]
+    elif path.suffix == ".sav":
+        result = spss_converter.to_dataframe(full_path)[0]
 
-    raise NotImplementedError
+    else:
+        raise NotImplementedError
+
+    return result.set_index("nomem_encr")
 
 if __name__ == "__main__":
     test_df = load_df(Path("ai09e_EN_1.0p.csv"))

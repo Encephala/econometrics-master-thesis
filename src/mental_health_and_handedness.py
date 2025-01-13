@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats as sps
 
-from util.spss_load import load_df
+from util import load_df
 
 health = load_df(Path("ch23p_EN_1.0p.csv"))
 handedness = load_df(Path("db10a_EN_1.0p.sav"))
