@@ -1,6 +1,7 @@
 import pandas as pd
 
 from .data_load import load_df
+from .assemble_panel import assemble_wide_panel
 
 def strip_column_prefixes(df: pd.DataFrame) -> pd.DataFrame:
     """Takes all columns that represent a questionnaire question (with a wacky heuristic),
