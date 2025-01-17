@@ -1,6 +1,6 @@
 import pandas as pd
 
-from .spss_load import load_df
+from .data_load import load_df
 
 def strip_column_prefixes(df: pd.DataFrame) -> pd.DataFrame:
     """Takes all columns that represent a questionnaire question (with a wacky heuristic),

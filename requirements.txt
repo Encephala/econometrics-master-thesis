@@ -2,5 +2,3 @@ pandas
 numpy
 matplotlib
 scipy
-
-spss-converter

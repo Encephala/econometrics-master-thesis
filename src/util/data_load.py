@@ -2,7 +2,6 @@
 
 from pathlib import Path
 
-import spss_converter
 import pandas as pd
 
 def load_df(path: Path) -> pd.DataFrame:
@@ -13,7 +12,10 @@ def load_df(path: Path) -> pd.DataFrame:
         result = pd.read_csv(full_path, sep = ";")
 
     elif path.suffix == ".sav":
-        result = spss_converter.to_dataframe(full_path)[0]
+        result = pd.read_spss(full_path)
+
+    elif path.suffix == ".dta":
+        result = pd.read_stata(full_path)
 
     else:
         raise NotImplementedError
@@ -21,6 +23,7 @@ def load_df(path: Path) -> pd.DataFrame:
     return result.set_index("nomem_encr")
 
 if __name__ == "__main__":
-    test_df = load_df(Path("ai09e_EN_1.0p.csv"))
-
-    print(test_df)
+    for test_file in ["ai09e_EN_1.0p.sav", "ch23p_EN_1.0p.csv", "cp24p_EN_1.0p.dta"]:
+        test_df = load_df(Path(test_file))
+        print(test_df)
+        print(test_df.dtypes)
