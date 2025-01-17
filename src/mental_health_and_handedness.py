@@ -8,7 +8,7 @@ import scipy.stats as sps
 
 from util import load_df
 
-health = load_df(Path("ch23p_EN_1.0p.csv"))
+health = load_df(Path("ch23p_EN_1.0p.sav"))
 handedness = load_df(Path("db10a_EN_1.0p.sav"))
 
 merged = health[["nomem_encr", "ch23p015"]].merge(handedness[["nomem_encr", "db10a003"]])\
