@@ -1,11 +1,15 @@
 #!/usr/bin/env python3
 
-#%%
-from util import load_panel_cached
+#%% imports
+import semopy
+
+from util import load_wide_panel_cached, standardise_wide_column
+
+#%% data loading
+leisure_panel = load_wide_panel_cached("cs").rename(columns = standardise_wide_column)
+health_panel = load_wide_panel_cached("ch").rename(columns = standardise_wide_column)
 
 #%%
-leisure_panel = load_panel_cached("cs")
-health_panel = load_panel_cached("ch")
+# model = semopy.Model()
 
-print(leisure_panel)
-print(health_panel)
+# %%

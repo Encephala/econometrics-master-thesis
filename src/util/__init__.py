@@ -2,6 +2,17 @@ from pathlib import Path
 
 import pandas as pd
 
+def standardise_wide_column(column_name: str) -> str:
+    """Simple function to standardise column names, e.g. "cs12e001" -> "cs1_12"."""
+    if not column_name[-3:].isnumeric():
+        return column_name
+
+    prefix = column_name[:2]
+    year = int(column_name[2:4])
+    question = int(column_name[-3:])
+
+    return f"{prefix}{question}_{year}"
+
 def strip_column_prefixes(df: pd.DataFrame) -> pd.DataFrame:
     """Takes all columns that represent a questionnaire question (with a wacky heuristic),
     and removes the questionnaire prefix."""
@@ -36,16 +47,10 @@ def load_df(path: Path) -> pd.DataFrame:
 
     return result.set_index("nomem_encr")
 
-if __name__ == "__main__":
-    for test_file in ["ai09e_EN_1.0p.sav", "cp24p_EN_1.0p.dta"]:
-        test_df = load_df(Path(test_file))
-        print(test_df)
-        print(test_df.dtypes)
-
 # I sure hope LISS actually uses a consistent prefix for its studies
 def assemble_wide_panel(prefix: str) -> pd.DataFrame:
     """Loads all files starting with the given prefix and merges them into a wide-form dataframe.
-    This is done on the assumption that there are no duplicate files containing the same data."""
+    This is done on the assumption that there are no duplicate files containing the same column names."""
     result = pd.DataFrame()
 
     for file in Path("../data").glob(prefix + "*"):
@@ -63,7 +68,7 @@ def assemble_wide_panel(prefix: str) -> pd.DataFrame:
 
     return result
 
-def load_panel_cached(prefix: str) -> pd.DataFrame:
+def load_wide_panel_cached(prefix: str) -> pd.DataFrame:
     """`assemble_wide_panel`, but checks for a cached version on file first,
     and creates this cache if it doesn't exist."""
 
