@@ -16,11 +16,19 @@ health_panel = load_wide_panel_cached("ch").rename(columns=standardise_wide_colu
 
 # %% selecting columns
 happiness = select_question_wide(health_panel, HAPPINESS)
+happiness = happiness.apply(
+    lambda column: pd.Categorical(
+        column, categories=["never", "seldom", "sometimes", "often", "mostly", "continuously"], ordered=True
+    ),  # pyright: ignore[reportCallIssue, reportArgumentType]
+)
+
 fitness = select_question_wide(leisure_panel, FITNESS)
+fitness = fitness.apply(lambda column: pd.Categorical(column, categories=["no", "yes"], ordered=True))  # pyright: ignore[reportCallIssue, reportArgumentType]
 
 # %% build quick-and-dirty semopy model
-complete_data = pd.concat([happiness, fitness], join="outer", axis="columns").dropna()
-model_definition = ModelBuilder().with_y(HAPPINESS).with_x(FITNESS).build(complete_data)
+# TODO: cast categorical data to ints and then tell model that it's ordinal stuff
+complete_data = pd.concat([happiness, fitness], join="outer", axis="columns").apply(lambda column: column.cat.codes)
+model_definition = ModelBuilder().with_y(HAPPINESS, ordinal=True).with_x(FITNESS, ordinal=True).build(complete_data)
 
 model = semopy.Model(model_definition)
 

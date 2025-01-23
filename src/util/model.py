@@ -6,16 +6,22 @@ import pandas as pd
 
 class ModelBuilder:
     y: str
+    y_ordinal: bool
+
     x: str
+    x_ordinal: bool
+
     w: list[str]  # TODO
     lag_structure: list[int]  # TODO
 
-    def with_y(self, y: str) -> Self:
+    def with_y(self, y: str, *, ordinal: bool = False) -> Self:
         self.y = y
+        self.y_ordinal = ordinal
         return self
 
-    def with_x(self, x: str) -> Self:
+    def with_x(self, x: str, *, ordinal: bool = False) -> Self:
         self.x = x
+        self.x_ordinal = ordinal
         return self
 
     def with_w(self, w: list[str]) -> Self:
@@ -31,7 +37,7 @@ class ModelBuilder:
         return self
 
     def build(self, data: pd.DataFrame) -> str:
-        result = ""
+        result = []
 
         columns = data.columns
 
@@ -50,14 +56,28 @@ class ModelBuilder:
         # For now, assumes lag structure: (1)
         # Hence, build a regression for each year after the first
         for year in range(overlap_start + 1, overlap_end):
-            regression = f"{self.y}_{year} ~ {self.x}_{year - 1}\n"
+            y_name = f"{self.y}_{year}"
+            x_name = f"{self.x}_{year}"
 
-            result += regression
+            if y_name not in columns or x_name not in columns:
+                warnings.warn(f"For {year=}, either {y_name} or {x_name} was not found", stacklevel=2)
+                continue
 
-        if result == "":
+            regression = f"{y_name} ~ {x_name}\n"
+            result.append(regression)
+
+            if self.y_ordinal is not None:
+                result.append(f"DEFINE(ordinal) {y_name}\n")
+
+            if self.x_ordinal is not None:
+                result.append(f"DEFINE(ordinal) {x_name}\n")
+
+        # TODO: implement some stuff to make it less likely that I forget to properly order an ordinal column
+
+        if len(result) == 0:
             warnings.warn("Result empty, no model defined", stacklevel=2)
 
-        return result
+        return "\n".join(result)
 
 
 if __name__ == "__main__":
