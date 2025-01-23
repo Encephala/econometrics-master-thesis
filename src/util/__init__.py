@@ -2,6 +2,18 @@ from pathlib import Path
 
 import pandas as pd
 
+
+def select_question_wide(df: pd.DataFrame, question_id: str) -> pd.DataFrame:
+    selected_columns = list(
+        filter(lambda name: name[: name.find("_")] == question_id, df.columns)
+    )
+
+    if len(selected_columns) == 0:
+        raise UserWarning("No columns selected")  # noqa: TRY003
+
+    return df[selected_columns]
+
+
 def standardise_wide_column(column_name: str) -> str:
     """Simple function to standardise column names, e.g. "cs12e001" -> "cs1_12"."""
     if not column_name[-3:].isnumeric():
