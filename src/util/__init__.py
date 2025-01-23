@@ -15,7 +15,8 @@ def select_question_wide(df: pd.DataFrame, question_id: str) -> pd.DataFrame:
 
 
 def standardise_wide_column(column_name: str) -> str:
-    """Simple function to standardise column names, e.g. "cs12e001" -> "cs1_12"."""
+    """Simple function to standardise column names, e.g. "cs12e005" -> "cs5_12"."""
+    # Skip non-question columns, e.g. cs12e_m
     if not column_name[-3:].isnumeric():
         return column_name
 
@@ -24,6 +25,7 @@ def standardise_wide_column(column_name: str) -> str:
     question = int(column_name[-3:])
 
     return f"{prefix}{question}_{year}"
+
 
 def strip_column_prefixes(df: pd.DataFrame) -> pd.DataFrame:
     """Takes all columns that represent a questionnaire question (with a wacky heuristic),
@@ -35,14 +37,15 @@ def strip_column_prefixes(df: pd.DataFrame) -> pd.DataFrame:
     for col in columns:
         length = len(col)
 
-        if col[length - 3:].isnumeric():
-            new_columns.append(col[length - 3:])
+        if col[length - 3 :].isnumeric():
+            new_columns.append(col[length - 3 :])
         else:
             new_columns.append(col)
 
     df.columns = new_columns
 
     return df
+
 
 def load_df(path: Path) -> pd.DataFrame:
     """Given the file name, loads it from the data directory."""
@@ -59,6 +62,7 @@ def load_df(path: Path) -> pd.DataFrame:
 
     return result.set_index("nomem_encr")
 
+
 # I sure hope LISS actually uses a consistent prefix for its studies
 def assemble_wide_panel(prefix: str) -> pd.DataFrame:
     """Loads all files starting with the given prefix and merges them into a wide-form dataframe.
@@ -73,12 +77,13 @@ def assemble_wide_panel(prefix: str) -> pd.DataFrame:
 
         result = result.merge(
             new_df[new_columns],
-            how = "outer",
-            left_index = True,
-            right_index = True,
+            how="outer",
+            left_index=True,
+            right_index=True,
         )
 
     return result
+
 
 def load_wide_panel_cached(prefix: str) -> pd.DataFrame:
     """`assemble_wide_panel`, but checks for a cached version on file first,
@@ -87,7 +92,7 @@ def load_wide_panel_cached(prefix: str) -> pd.DataFrame:
     path = f"../data/{prefix}_wide.pkl"
 
     if Path(path).exists():
-        return pd.read_pickle(path) # noqa: S301
+        return pd.read_pickle(path)  # noqa: S301
 
     assembled = assemble_wide_panel(prefix)
 
