@@ -1,6 +1,6 @@
 from .data import (
     select_question_wide,
-    standardise_wide_column,
+    standardise_wide_column_name,
     strip_column_prefixes,
     load_df,
     assemble_wide_panel,

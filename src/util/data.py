@@ -13,7 +13,7 @@ def select_question_wide(df: pd.DataFrame, question_id: str) -> pd.DataFrame:
     return df[selected_columns]
 
 
-def standardise_wide_column(column_name: str) -> str:
+def standardise_wide_column_name(column_name: str) -> str:
     """Simple function to standardise column names, e.g. "cs12e005" -> "cs5_12"."""
     # Skip non-question columns, e.g. cs12e_m
     if not column_name[-3:].isnumeric():
