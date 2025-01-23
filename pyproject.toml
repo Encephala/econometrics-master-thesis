@@ -1,0 +1,17 @@
+[project]
+name = "econometrics_thesis_jonathan_rietveld"
+version = "0.0.1"
+readme = "README.md"
+license = { file = "LICENSE" }
+
+dependencies = [
+    "pandas",
+    "numpy",
+    "matplotlib",
+    "scipy",
+
+    "semopy",
+]
+
+[tool.ruff]
+line-length = 120
