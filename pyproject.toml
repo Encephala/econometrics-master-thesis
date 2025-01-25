@@ -1,6 +1,6 @@
 [project]
 name = "econometrics_thesis_jonathan_rietveld"
-version = "0.0.1"
+dynamic = ["version"]
 readme = "README.md"
 license = { file = "LICENSE" }
 
