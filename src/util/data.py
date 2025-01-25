@@ -81,12 +81,17 @@ def assemble_wide_panel(prefix: str) -> pd.DataFrame:
             right_index=True,
         )
 
+    if len(result) == 0:
+        warnings.warn(f"No data loaded for {prefix=}", stacklevel=2)
+
     return result
 
 
 def load_wide_panel_cached(prefix: str) -> pd.DataFrame:
     """`assemble_wide_panel`, but checks for a cached version on file first,
-    and creates this cache if it doesn't exist."""
+    and creates this cache if it doesn't exist.
+
+    Note to self: no cache invalidation happens :^)."""
 
     path = f"../data/{prefix}_wide.pkl"
 
@@ -95,6 +100,9 @@ def load_wide_panel_cached(prefix: str) -> pd.DataFrame:
 
     assembled = assemble_wide_panel(prefix)
 
-    assembled.to_pickle(path)
+    if len(assembled) != 0:
+        assembled.to_pickle(path)
+    else:
+        warnings.warn("Not writing empty cache", stacklevel=2)
 
     return assembled
