@@ -7,4 +7,4 @@ from .data import (
     load_wide_panel_cached,
 )
 
-from .model import ModelBuilder
+from .model import ModelDefinitionBuilder

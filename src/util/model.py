@@ -4,7 +4,7 @@ import warnings
 import pandas as pd
 
 
-class ModelBuilder:
+class ModelDefinitionBuilder:
     y: str
     y_ordinal: bool
 
@@ -50,29 +50,31 @@ class ModelBuilder:
         x_end = max((int(column[column.find("_") + 1 :]) for column in x_columns))
 
         # TODO?: Yield some information on the breadth of the overlap?
+        # TODO: I can be more efficient with the data if x starts earlier than y
         overlap_start = max(x_start, y_start)
         overlap_end = min(x_end, y_end)
 
-        # For now, assumes lag structure: (1)
-        # Hence, build a regression for each year after the first
-        for year in range(overlap_start + 1, overlap_end):
-            y_name = f"{self.y}_{year}"
-            x_name = f"{self.x}_{year}"
+        # Build a regression starting max_lag years after the overlap
+        lag_structure = self.lag_structure if self.lag_structure is not None else [1]
 
-            if y_name not in columns or x_name not in columns:
-                warnings.warn(f"For {year=}, either {y_name} or {x_name} was not found", stacklevel=2)
+        for year in range(overlap_start + max(lag_structure), overlap_end):
+            y_name = f"{self.y}_{year}"
+            x_names = [f"{self.x}_{year - lag}" for lag in lag_structure]
+
+            if y_name not in columns or x_names not in columns:
+                warnings.warn(f"For {year=}, either {y_name} or {x_names} was not found", stacklevel=2)
                 continue
 
-            regression = f"{y_name} ~ {x_name}\n"
+            regression = f"{y_name} ~ {x_names}\n"
             result.append(regression)
 
-            if self.y_ordinal is not None:
+            if self.y_ordinal:
                 result.append(f"DEFINE(ordinal) {y_name}\n")
 
-            if self.x_ordinal is not None:
-                result.append(f"DEFINE(ordinal) {x_name}\n")
+            if self.x_ordinal:
+                result.append(f"DEFINE(ordinal) {' '.join(x_names)}\n")
 
-        # TODO: implement some stuff to make it less likely that I forget to properly order an ordinal column
+        # TODO?: implement some stuff to make it less likely that I forget to properly order an ordinal column
 
         if len(result) == 0:
             warnings.warn("Result empty, no model defined", stacklevel=2)
@@ -81,4 +83,4 @@ class ModelBuilder:
 
 
 if __name__ == "__main__":
-    ModelBuilder().build(pd.DataFrame())
+    ModelDefinitionBuilder().build(pd.DataFrame())

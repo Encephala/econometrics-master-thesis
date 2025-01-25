@@ -44,12 +44,8 @@ print(
     ).sort_index()
 )
 
-left_hand_stats = merged[merged["Handedness"] == LEFT_HANDED][
-    "Mental Health"
-].describe()
-right_hand_stats = merged[merged["Handedness"] == RIGHT_HANDED][
-    "Mental Health"
-].describe()
+left_hand_stats = merged[merged["Handedness"] == LEFT_HANDED]["Mental Health"].describe()
+right_hand_stats = merged[merged["Handedness"] == RIGHT_HANDED]["Mental Health"].describe()
 
 print(left_hand_stats)
 
