@@ -12,7 +12,7 @@ dependencies = [
 
     "pyreadstat",
 
-    "semopy",
+    "semopy @ git+https://github.com/Encephala/semopy.git@master",
 ]
 
 [tool.ruff]
