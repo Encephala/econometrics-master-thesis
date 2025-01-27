@@ -11,8 +11,8 @@ class ModelDefinitionBuilder:
     x: str
     x_ordinal: bool
 
-    w: list[str]  # TODO
-    lag_structure: list[int]  # TODO
+    w: list[str] | None = None  # TODO
+    lag_structure: list[int] | None = None
 
     def with_y(self, y: str, *, ordinal: bool = False) -> Self:
         self.y = y
@@ -69,7 +69,7 @@ class ModelDefinitionBuilder:
                 warnings.warn(f"For {year_y=}, either {y_name} or one of {x_names} was not found", stacklevel=2)
                 continue
 
-            regression = f"{y_name} ~ {x_names}\n"
+            regression = f"{y_name} ~ {' + '.join(x_names)}\n"
             result.append(regression)
 
             if self.y_ordinal:
