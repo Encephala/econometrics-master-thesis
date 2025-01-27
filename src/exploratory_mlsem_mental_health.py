@@ -25,11 +25,15 @@ happiness = happiness.apply(
 fitness = select_question_wide(leisure_panel, FITNESS)
 fitness = fitness.apply(lambda column: pd.Categorical(column, categories=["no", "yes"], ordered=True))  # pyright: ignore[reportCallIssue, reportArgumentType]
 
-# %% build quick-and-dirty semopy model
-complete_data = pd.concat([happiness, fitness], join="outer", axis="columns").apply(lambda column: column.cat.codes)
-model_definition = (
-    ModelDefinitionBuilder().with_y(HAPPINESS, ordinal=True).with_x(FITNESS, ordinal=True).build(complete_data)
+# %% build simple semopy model
+complete_data = pd.concat([happiness, fitness], join="outer", axis="columns").apply(
+    lambda column: pd.Series(column).cat.codes
 )
+model_definition = (
+    ModelDefinitionBuilder().with_y(HAPPINESS, ordinal=False).with_x(FITNESS, ordinal=True).build(complete_data)
+)
+
+print(model_definition)
 
 model = semopy.Model(model_definition)
 
