@@ -56,10 +56,10 @@ class ModelDefinitionBuilder:
 
         # if x goes far enough back, start when y starts
         # else, start as soon as we can
-        first_year_y = y_start if x_start + max(lag_structure) <= y_start else x_start + max(lag_structure)
+        first_year_y = max(y_start, x_start + max(lag_structure))
         # if x goes far enough forward, stop when x_stops
         # else, stop when y stops
-        last_year_y = x_end + min(lag_structure) if x_end + min(lag_structure) <= y_end else y_end
+        last_year_y = min(x_end + min(lag_structure), y_end)
 
         for year_y in range(first_year_y, last_year_y):
             y_name = f"{self.y}_{year_y}"
