@@ -91,7 +91,9 @@ class ModelDefinitionBuilder:
     def _make_x_predetermined(self, first_year_y: int, last_year_x: int):
         for year in range(first_year_y, last_year_x):  # TODO: This doesn't properly respect variable lag structure
             y_current_name = f"{self.y}_{year}"
-            x_future_names = [f"{self.x}_{future_year}" for future_year in range(year + 1, last_year_x + 1)]
+            x_future_names = [
+                f"gamma{i}*{self.x}_{future_year}" for i, future_year in enumerate(range(year + 1, last_year_x + 1))
+            ]
 
             # Sanity check that no y_years are included that shouldn't be
             # (doesn't check for y_years that aren't included but should be)
