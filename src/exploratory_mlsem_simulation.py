@@ -32,7 +32,7 @@ for t in range(T):
 
 lag_structure = [1]
 model_definition = (
-    ModelDefinitionBuilder().with_x("x").with_y("y").with_lag_structure(lag_structure).build(complete_data)
+    ModelDefinitionBuilder().with_x("x").with_y("y").with_lag_structure(lag_structure).build(complete_data.columns)
 )
 
 print(f"Model definition:\n{model_definition}")
