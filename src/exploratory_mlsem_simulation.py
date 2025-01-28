@@ -10,16 +10,20 @@ from util import ModelDefinitionBuilder
 N = 500
 T = 5
 
-RHO = 0
+RHO = 0.42
 BETA = 0.69
 
-epsilon = np.random.normal(0, 1, size=(N, T))  # noqa: NPY002
+rng = np.random.default_rng()
+epsilon = rng.normal(0, np.sqrt(3), size=(N, T))
 
 # TODO: Correlate x with the previous epsilon (reverse causality)
-x = np.array(list(range(N)) * T).reshape((N, T)) + np.random.normal(0, 2, size=(N, T))  # noqa: NPY002
+x = rng.normal(5, 3, size=(N, T))
 
-y = np.empty((N, T))
-y[:, 0] = 0
+y = np.empty([N, T])
+# TODO: if y_0 is a constant, the covariance matrix becomes non-PD.
+# I think that's because I'm not properly treating y_0 as exogenous?
+# Like it shouldn't be a problem.
+y[:, 0] = rng.normal(0, 0.1, size=N)
 
 for t in range(1, T):
     y[:, t] = RHO * y[:, t - 1] + BETA * x[:, t - 1] + epsilon[:, t]

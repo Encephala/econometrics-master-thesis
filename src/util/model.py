@@ -109,7 +109,10 @@ class ModelDefinitionBuilder:
                 warnings.warn(f"For {year_y=}, either {y_name} or one of {x_names} was not in the data", stacklevel=2)
                 continue
 
-            rvals = [f"rho0*{self.y}_{year_y - 1}", *(f"beta{i}*{name}" for i, name in enumerate(x_names))]
+            rvals = [
+                f"rho0*{self.y}_{year_y - 1}",
+                *(f"beta{i}*{name}" for i, name in zip(self.lag_structure, x_names, strict=True)),
+            ]
 
             regression = f"{y_name} ~ {' + '.join(rvals)}"
             self._regressions.append(regression)
