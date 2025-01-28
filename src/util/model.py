@@ -69,14 +69,14 @@ class ModelDefinitionBuilder:
                 warnings.warn(f"For {year_y=}, either {y_name} or one of {x_names} was not found", stacklevel=2)
                 continue
 
-            regression = f"{y_name} ~ {' + '.join(x_names)}\n"
+            regression = f"{y_name} ~ {' + '.join(x_names)}"
             result.append(regression)
 
             if self.y_ordinal:
-                result.append(f"DEFINE(ordinal) {y_name}\n")
+                result.append(f"DEFINE(ordinal) {y_name}")
 
             if self.x_ordinal:
-                result.append(f"DEFINE(ordinal) {' '.join(x_names)}\n")
+                result.append(f"DEFINE(ordinal) {' '.join(x_names)}")
 
         # TODO?: implement some stuff to make it less likely that I forget to properly order an ordinal column
 
