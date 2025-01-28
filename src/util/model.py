@@ -14,6 +14,14 @@ class ModelDefinitionBuilder:
     w: list[str] | None = None  # TODO
     lag_structure: list[int] | None = None
 
+    def __init__(self):
+        self._regressions: list[str] = []
+        self._measurements: list[str] = []
+        self._covariances: list[str] = []
+        self._operations: list[str] = []
+
+    # TODO?: implement some stuff to make it less likely that I forget to properly order an ordinal column,
+    # since imported categorical data has arbitrary category to index coding
     def with_y(self, y: str, *, ordinal: bool = False) -> Self:
         self.y = y
         self.y_ordinal = ordinal
@@ -35,8 +43,6 @@ class ModelDefinitionBuilder:
         return self
 
     def build(self, data: pd.DataFrame) -> str:
-        result = []
-
         columns = data.columns
 
         y_columns = [col for col in columns if col.startswith(self.y)]
@@ -63,6 +69,20 @@ class ModelDefinitionBuilder:
         last_year_y = min(x_end + min(lag_structure), y_end)
         last_year_x = last_year_y - min(lag_structure)
 
+        # Allow for pre-determined variables, i.e. arbitrary correlation between x and previous values of y
+        # NOTE: The very first year of y in the data is considered exogenous, but first_year_y is the first regression
+        # that we do, so this range correctly starts for the first endogenous y
+        for year in range(first_year_y, last_year_x):  # TODO: This doesn't properly respect variable lag structure
+            y_current_name = f"{self.y}_{year}"
+            x_future_names = [f"{self.x}_{future_year}" for future_year in range(year + 1, last_year_x + 1)]
+
+            if len(x_future_names) == 0:
+                print("stupid")
+                continue
+
+            covariance = f"{y_current_name} ~~ {' + '.join(x_future_names)}"
+            self._covariances.append(covariance)
+
         for year_y in range(first_year_y, last_year_y + 1):
             y_name = f"{self.y}_{year_y}"
             x_names = [f"{self.x}_{year_y - lag}" for lag in lag_structure]
@@ -71,40 +91,29 @@ class ModelDefinitionBuilder:
                 warnings.warn(f"For {year_y=}, either {y_name} or one of {x_names} was not in the data", stacklevel=2)
                 continue
 
-            rvals = [f"rho_0*{self.y}_{year_y - 1}", *(f"beta{i}*{name}" for i, name in enumerate(x_names))]
+            rvals = [f"rho0*{self.y}_{year_y - 1}", *(f"beta{i}*{name}" for i, name in enumerate(x_names))]
 
             regression = f"{y_name} ~ {' + '.join(rvals)}"
-            result.append(regression)
+            self._regressions.append(regression)
 
             if self.y_ordinal:
-                result.append(f"DEFINE(ordinal) {y_name}")
+                self._operations.append(f"DEFINE(ordinal) {y_name}")
 
             if self.x_ordinal:
-                result.append(f"DEFINE(ordinal) {' '.join(x_names)}")
+                self._operations.append(f"DEFINE(ordinal) {' '.join(x_names)}")
 
             # Fix variance for y to be constant in time
-            result.append(f"{y_name} ~~ sigma*{y_name}")
+            self._covariances.append(f"{y_name} ~~ sigma*{y_name}")
 
-        # Allow for pre-determined variables, i.e. arbitrary correlation between x and previous values of y
-        # NOTE: The very first year of y in the data is considered exogenous, but first_year_y is the first regression
-        # that we do, so this range correctly starts for the first endogenous y
-        for year in range(first_year_y, last_year_y + 1):
-            y_current_name = f"{self.y}_{year}"
-            x_future_names = [f"{self.x}_{future_year}" for future_year in range(year + 1, last_year_x + 1)]
-
-            if len(x_future_names) == 0:
-                continue
-
-            operation = f"{y_current_name} ~~ {' + '.join(x_future_names)}"
-            result.append(operation)
-
-        # TODO?: implement some stuff to make it less likely that I forget to properly order an ordinal column,
-        # since imported categorical data has arbitrary category to index coding
-
-        if len(result) == 0:
-            warnings.warn("Result empty, no model defined", stacklevel=2)
-
-        return "\n".join(result)
+        return f"""# Regressions (structural part)
+{"\n".join([*self._regressions, ""])}
+# Measurement part
+{"\n".join([*self._measurements, ""])}
+# Additional covariances
+{"\n".join([*self._covariances, ""])}
+# Operations/constraints
+{"\n".join(self._operations)}
+"""
 
 
 if __name__ == "__main__":
