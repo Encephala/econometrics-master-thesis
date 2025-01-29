@@ -17,7 +17,7 @@ BETA1 = 1.69
 GAMMA1 = 0.75
 GAMMA2 = 0.20
 GAMMA4 = 1
-DELTA0 = 420
+DELTA0 = 50
 SIGMA = np.sqrt(3)
 
 rng = np.random.default_rng()
