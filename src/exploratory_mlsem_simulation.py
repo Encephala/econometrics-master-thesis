@@ -41,9 +41,8 @@ for t in range(T):
     complete_data[f"y_{t}"] = y[:, t]
     complete_data[f"x_{t}"] = x[:, t]
 
-lag_structure = [1]
 model_definition = (
-    ModelDefinitionBuilder().with_x("x").with_y("y").with_lag_structure(lag_structure).build(complete_data.columns)
+    ModelDefinitionBuilder().with_x("x").with_y("y", lag_structure=[1, 2, 3]).build(complete_data.columns)
 )
 
 print(f"Model definition:\n{model_definition}")

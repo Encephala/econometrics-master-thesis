@@ -7,12 +7,13 @@ import pandas as pd
 class ModelDefinitionBuilder:
     y: str
     y_ordinal: bool
+    y_lag_structure: list[int]
 
     x: str
     x_ordinal: bool
+    x_lag_structure: list[int]
 
     w: list[str]  # TODO
-    lag_structure: list[int]
 
     def __init__(self):
         self._regressions: list[str] = []
@@ -21,28 +22,23 @@ class ModelDefinitionBuilder:
         self._operations: list[str] = []
 
         self.w = []
-        self.lag_structure = [1]
 
-    # TODO?: implement some stuff to make it less likely that I forget to properly order an ordinal column,
-    # since imported categorical data has arbitrary category to index coding
-    def with_y(self, y: str, *, ordinal: bool = False) -> Self:
+    def with_y(self, y: str, *, lag_structure: list[int] | None = None, ordinal: bool = False) -> Self:
         self.y = y
         self.y_ordinal = ordinal
+        self.y_lag_structure = lag_structure if lag_structure is not None else [1]
         return self
 
-    def with_x(self, x: str, *, ordinal: bool = False) -> Self:
+    def with_x(self, x: str, *, lag_structure: list[int] | None = None, ordinal: bool = False) -> Self:
         self.x = x
         self.x_ordinal = ordinal
+        self.x_lag_structure = lag_structure if lag_structure is not None else [1]
         return self
 
     def with_w(self, w: list[str]) -> Self:
         raise NotImplementedError
 
         self.w = w
-        return self
-
-    def with_lag_structure(self, lag_structure: list[int]) -> Self:
-        self.lag_structure = lag_structure
         return self
 
     def build(self, available_columns: "pd.Index[str]") -> str:
@@ -75,13 +71,12 @@ class ModelDefinitionBuilder:
         # but then we have to also add those columns to the df to prevent index errors
         # If x goes far enough back, the first regression is when y starts
         # else, start as soon as we can due to x
-        # TODO: Update this so that it is correct when we include a lag structure for y
-        first_year_y = max(y_start, x_start + max(self.lag_structure))
-        first_year_x = first_year_y - max(self.lag_structure)
+        first_year_y = max(y_start + max(self.y_lag_structure), x_start + max(self.x_lag_structure))
+        first_year_x = first_year_y - max(self.x_lag_structure)
         # If x does not go far enough forward, stop when x_stops
         # else, stop when y stops
-        last_year_y = min(x_end + min(self.lag_structure), y_end)
-        last_year_x = last_year_y - min(self.lag_structure)
+        last_year_y = min(x_end + min(self.x_lag_structure), y_end)
+        last_year_x = last_year_y - min(self.x_lag_structure)
 
         return first_year_y, last_year_y, first_year_x, last_year_x
 
@@ -103,27 +98,34 @@ class ModelDefinitionBuilder:
             self._covariances.append(covariance)
 
     def _build_regressions(self, available_columns: "pd.Index[str]", first_year_y: int, last_year_y: int):
+        # TODO: actually implement y lag structure
         for year_y in range(first_year_y, last_year_y + 1):
             y_name = f"{self.y}_{year_y}"
-            x_names = [f"{self.x}_{year_y - lag}" for lag in self.lag_structure]
+            y_lag_names = [f"{self.y}_{year_y - lag}" for lag in self.y_lag_structure]
+            x_lag_names = [f"{self.x}_{year_y - lag}" for lag in self.x_lag_structure]
 
-            if y_name not in available_columns or any(x_name not in available_columns for x_name in x_names):
-                warnings.warn(f"For {year_y=}, either {y_name} or one of {x_names} was not in the data", stacklevel=2)
+            if any(name not in available_columns for name in y_lag_names) or any(
+                name not in available_columns for name in x_lag_names
+            ):
+                warnings.warn(
+                    f"For {year_y=}, either one of {y_lag_names} or one of {x_lag_names} was not in the data",
+                    stacklevel=2,
+                )
                 continue
 
             rvals = [
-                f"rho0*{self.y}_{year_y - 1}",
-                *(f"beta{i}*{name}" for i, name in zip(self.lag_structure, x_names, strict=True)),
+                *(f"rho{i}*{name}" for i, name in zip(self.y_lag_structure, y_lag_names, strict=True)),
+                *(f"beta{i}*{name}" for i, name in zip(self.x_lag_structure, x_lag_names, strict=True)),
             ]
 
             regression = f"{y_name} ~ {' + '.join(rvals)}"
             self._regressions.append(regression)
 
             if self.y_ordinal:
-                self._operations.append(f"DEFINE(ordinal) {y_name}")
+                self._operations.append(f"DEFINE(ordinal) {' '.join(y_lag_names)}")
 
             if self.x_ordinal:
-                self._operations.append(f"DEFINE(ordinal) {' '.join(x_names)}")
+                self._operations.append(f"DEFINE(ordinal) {' '.join(x_lag_names)}")
 
             # Fix variance for y to be constant in time
             self._covariances.append(f"{y_name} ~~ sigma*{y_name}")
