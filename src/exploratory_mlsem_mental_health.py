@@ -29,9 +29,7 @@ fitness = fitness.apply(lambda column: pd.Categorical(column, categories=["no", 
 complete_data = pd.concat([happiness, fitness], join="outer", axis="columns").apply(
     lambda column: pd.Series(column).cat.codes
 )
-model_definition = (
-    ModelDefinitionBuilder().with_y(HAPPINESS, ordinal=False).with_x(FITNESS, ordinal=True).build(complete_data)
-)
+model_definition = ModelDefinitionBuilder().with_y(HAPPINESS).with_x(FITNESS).build(complete_data.columns)
 
 print(model_definition)
 
@@ -39,5 +37,3 @@ model = semopy.Model(model_definition)
 
 # %% fit the model
 result = model.fit(complete_data)
-
-# %%

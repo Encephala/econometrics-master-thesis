@@ -62,15 +62,16 @@ class OrdinalVariableSet(set[Variable]):
 
 
 class ModelDefinitionBuilder:
-    y: str
+    y_name: str
     y_ordinal: bool
     y_lag_structure: list[int]
 
-    x: str
+    x_name: str
     x_ordinal: bool
     x_lag_structure: list[int]
 
-    w: list[str]  # TODO
+    w_names: list[str]
+    w_ordinal: list[bool]
 
     def __init__(self):
         self._regressions: set[Regression] = set()
@@ -78,24 +79,23 @@ class ModelDefinitionBuilder:
         self._covariances: set[Covariance] = set()
         self._ordinals = OrdinalVariableSet()
 
-        self.w = []
+        self.w_names = []
 
-    def with_y(self, y: str, *, lag_structure: list[int] | None = None, ordinal: bool = False) -> Self:
-        self.y = y
+    def with_y(self, name: str, *, lag_structure: list[int] | None = None, ordinal: bool = False) -> Self:
+        self.y_name = name
         self.y_ordinal = ordinal
         self.y_lag_structure = lag_structure if lag_structure is not None else [1]
         return self
 
-    def with_x(self, x: str, *, lag_structure: list[int] | None = None, ordinal: bool = False) -> Self:
-        self.x = x
+    def with_x(self, name: str, *, lag_structure: list[int] | None = None, ordinal: bool = False) -> Self:
+        self.x_name = name
         self.x_ordinal = ordinal
         self.x_lag_structure = lag_structure if lag_structure is not None else [1]
         return self
 
-    def with_w(self, w: list[str]) -> Self:
-        raise NotImplementedError
-
-        self.w = w
+    def with_w(self, names: list[str], ordinal: list[bool] | None = None) -> Self:
+        self.w_names = names
+        self.w_ordinal = ordinal if ordinal is not None else [False] * len(names)
         return self
 
     def build(self, available_columns: "pd.Index[str]") -> str:
@@ -116,16 +116,20 @@ class ModelDefinitionBuilder:
 """
 
     def _determine_start_and_end_years(self, available_columns: "pd.Index[str]") -> Tuple[int, int, int, int]:
-        y_years = [int(column[column.find("_") + 1 :]) for column in available_columns if column.startswith(self.y)]
+        y_years = [
+            int(column[column.find("_") + 1 :]) for column in available_columns if column.startswith(self.y_name)
+        ]
         y_start = min(y_years)
         y_end = max(y_years)
 
-        x_years = [int(column[column.find("_") + 1 :]) for column in available_columns if column.startswith(self.x)]
+        x_years = [
+            int(column[column.find("_") + 1 :]) for column in available_columns if column.startswith(self.x_name)
+        ]
         x_start = min(x_years)
         x_end = max(x_years)
 
         # TODO?: When using FIML/handling missing data, perhaps the `max` and `min` in these two statements should swap,
-        # but then we have to also add those columns to the df to prevent index errors
+        # but then we have to also add those columns to the df to prevent index errors.
         # If x goes far enough back, the first regression is when y starts
         # else, start as soon as we can due to x
         first_year_y = max(y_start + max(self.y_lag_structure), x_start + max(self.x_lag_structure))
@@ -139,29 +143,27 @@ class ModelDefinitionBuilder:
 
     def _build_regressions(self, available_columns: "pd.Index[str]", first_year_y: int, last_year_y: int):
         for year_y in range(first_year_y, last_year_y + 1):
-            y = Variable(f"{self.y}_{year_y}")
-            y_lags = [Variable(f"{self.y}_{year_y - lag}") for lag in self.y_lag_structure]
-            x_lags = [Variable(f"{self.x}_{year_y - lag}") for lag in self.x_lag_structure]
+            y = Variable(f"{self.y_name}_{year_y}")
 
-            if any(variable.name not in available_columns for variable in y_lags) or any(
-                variable.name not in available_columns for variable in x_lags
+            y_lags = [Variable(f"{self.y_name}_{year_y - lag}", f"rho{lag}") for lag in self.y_lag_structure]
+            x_lags = [Variable(f"{self.x_name}_{year_y - lag}", f"beta{lag}") for lag in self.x_lag_structure]
+
+            w = [Variable(f"{name}_{year_y}", f"delta0_{j}") for j, name in enumerate(self.w_names)]
+
+            if (
+                any(variable.name not in available_columns for variable in y_lags)
+                or any(variable.name not in available_columns for variable in x_lags)
+                or any(variable.name not in available_columns for variable in w)
             ):
                 warnings.warn(
-                    f"For {year_y=}, either one of {y_lags} or one of {x_lags} was not in the data",
+                    f"For {year_y=}, one of {y_lags=}, {x_lags=} or {w=} was not in the data",
                     stacklevel=2,
                 )
+                # TODO: Is there a better option than ditching the whole regression because one of the vars is missing?
                 continue
 
-            rvals = [
-                *(Variable(variable.name, f"rho{i}") for i, variable in zip(self.y_lag_structure, y_lags, strict=True)),
-                *(
-                    Variable(variable.name, f"beta{i}")
-                    for i, variable in zip(self.x_lag_structure, x_lags, strict=True)
-                ),
-            ]
-
-            regression = Regression(y, rvals)
-            self._regressions.add(regression)
+            rvals = [*y_lags, *x_lags, *w]
+            self._regressions.add(Regression(y, rvals))
 
             # All y_lags and x_lags are included as regressors,
             # so don't have to check with self._regressions_contain here
@@ -171,6 +173,10 @@ class ModelDefinitionBuilder:
             if self.x_ordinal:
                 self._ordinals.update(x_lags)
 
+            for variable, is_ordinal in zip(w, self.w_ordinal, strict=True):
+                if is_ordinal:
+                    self._ordinals.add(variable)
+
             # Fix variance for y to be constant in time
             self._covariances.add(Covariance(y, [y]))
 
@@ -179,9 +185,9 @@ class ModelDefinitionBuilder:
     # that we do, so this range correctly starts for the first endogenous y
     def _make_x_predetermined(self, first_year_y: int, last_year_x: int):
         for year in range(first_year_y, last_year_x):  # TODO: This doesn't properly respect variable lag structure
-            y_current = Variable(f"{self.y}_{year}")
+            y_current = Variable(f"{self.y_name}_{year}")
             x_future = [
-                Variable(f"{self.x}_{future_year}", f"gamma{i}")
+                Variable(f"{self.x_name}_{future_year}", f"gamma{i}")
                 for i, future_year in enumerate(range(year + 1, last_year_x + 1))
             ]
 
@@ -191,11 +197,13 @@ class ModelDefinitionBuilder:
 
             # Filter future x's that don't exist in the regressions,
             # for instance due to data missing for a year
+            # TODO: Rather than having this check, the loop should probably just run over the regressions.
+            # But then how do I maintan temporal order of regressions?
+            # Why do I even use a set xdd
             x_future = [variable for variable in x_future if self._regressions_contain(variable)]
 
             if len(x_future) != 0:
-                covariance = Covariance(y_current, x_future)
-                self._covariances.add(covariance)
+                self._covariances.add(Covariance(y_current, x_future))
 
     def _regressions_contain(self, variable: Variable) -> bool:
         return any(variable in regression.rvals for regression in self._regressions)
