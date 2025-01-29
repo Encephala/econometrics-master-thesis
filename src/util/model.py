@@ -178,7 +178,7 @@ class ModelDefinitionBuilder:
                     self._ordinals.add(variable)
 
             # Fix variance for y to be constant in time
-            self._covariances.add(Covariance(y, [y]))
+            self._covariances.add(Covariance(y, [Variable(y.name, "sigma")]))
 
     # Allow for pre-determined variables, i.e. arbitrary correlation between x and previous values of y
     # NOTE: The very first year of y in the data is considered exogenous, but first_year_y is the first regression
