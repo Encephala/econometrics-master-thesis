@@ -79,9 +79,9 @@ class ModelDefinitionBuilder:
     w_ordinal: list[bool] | None = None
 
     def __init__(self):
-        self._regressions: set[Regression] = set()
-        self._measurements: set[Measurement] = set()
-        self._covariances: set[Covariance] = set()
+        self._regressions: list[Regression] = []
+        self._measurements: list[Measurement] = []
+        self._covariances: list[Covariance] = []
         self._ordinals = OrdinalVariableSet()
 
         self.w_names = []
@@ -125,11 +125,11 @@ class ModelDefinitionBuilder:
         self._make_x_predetermined()
 
         return f"""# Regressions (structural part)
-{"\n".join([*sorted(map(str, self._regressions)), ""])}
+{"\n".join([*map(str, self._regressions), ""])}
 # Measurement part
-{"\n".join([*sorted(map(str, self._measurements)), ""])}
+{"\n".join([*map(str, self._measurements), ""])}
 # Additional covariances
-{"\n".join([*sorted(map(str, self._covariances)), ""])}
+{"\n".join([*map(str, self._covariances), ""])}
 # Operations/constraints
 {self._ordinals.build()}
 """
@@ -184,7 +184,7 @@ class ModelDefinitionBuilder:
                 continue
 
             rvals = [*y_lags, *x_lags, *w]
-            self._regressions.add(Regression(y, rvals, year_y))
+            self._regressions.append(Regression(y, rvals, year_y))
 
             # All y_lags and x_lags are included as regressors,
             # so don't have to check with self._regressions_contain here
@@ -200,7 +200,7 @@ class ModelDefinitionBuilder:
                     self._ordinals.add(variable)
 
             # Fix variance for y to be constant in time
-            self._covariances.add(Covariance(y, [Variable(y.name, y.wave, "sigma")]))
+            self._covariances.append(Covariance(y, [Variable(y.name, y.wave, "sigma")]))
 
     # Allow for pre-determined variables, i.e. arbitrary correlation between x and previous values of y
     # NOTE: The very first value of y in the data is considered exogenous and thus it can't be correlated with future x
@@ -216,4 +216,4 @@ class ModelDefinitionBuilder:
             ]
 
             if len(x_future) != 0:
-                self._covariances.add(Covariance(y_current, x_future))
+                self._covariances.append(Covariance(y_current, x_future))
