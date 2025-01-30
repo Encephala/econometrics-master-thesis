@@ -70,8 +70,8 @@ class ModelDefinitionBuilder:
     x_ordinal: bool
     x_lag_structure: list[int]
 
-    w_names: list[str]
-    w_ordinal: list[bool]
+    w_names: list[str] | None = None
+    w_ordinal: list[bool] | None = None
 
     def __init__(self):
         self._regressions: set[Regression] = set()
@@ -148,7 +148,11 @@ class ModelDefinitionBuilder:
             y_lags = [Variable(f"{self.y_name}_{year_y - lag}", f"rho{lag}") for lag in self.y_lag_structure]
             x_lags = [Variable(f"{self.x_name}_{year_y - lag}", f"beta{lag}") for lag in self.x_lag_structure]
 
-            w = [Variable(f"{name}_{year_y}", f"delta0_{j}") for j, name in enumerate(self.w_names)]
+            w = (
+                [Variable(f"{name}_{year_y}", f"delta0_{j}") for j, name in enumerate(self.w_names)]
+                if self.w_names is not None
+                else []
+            )
 
             if (
                 any(variable.name not in available_columns for variable in y_lags)
@@ -173,7 +177,8 @@ class ModelDefinitionBuilder:
             if self.x_ordinal:
                 self._ordinals.update(x_lags)
 
-            for variable, is_ordinal in zip(w, self.w_ordinal, strict=True):
+            w_ordinal = self.w_ordinal if self.w_ordinal is not None else []
+            for variable, is_ordinal in zip(w, w_ordinal, strict=True):
                 if is_ordinal:
                     self._ordinals.add(variable)
 
