@@ -29,7 +29,12 @@ fitness = fitness.apply(lambda column: pd.Categorical(column, categories=["no", 
 complete_data = pd.concat([happiness, fitness], join="outer", axis="columns").apply(
     lambda column: pd.Series(column).cat.codes
 )
-model_definition = ModelDefinitionBuilder().with_y(HAPPINESS).with_x(FITNESS).build(complete_data.columns)
+model_definition = (
+    ModelDefinitionBuilder()
+    .with_y(HAPPINESS, lag_structure=[1, 2])
+    .with_x(FITNESS, lag_structure=[0, 1, 2])
+    .build(complete_data.columns)
+)
 
 print(model_definition)
 

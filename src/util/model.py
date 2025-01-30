@@ -89,13 +89,23 @@ class ModelDefinitionBuilder:
     def with_y(self, name: str, *, lag_structure: list[int] | None = None, ordinal: bool = False) -> Self:
         self.y_name = name
         self.y_ordinal = ordinal
-        self.y_lag_structure = lag_structure if lag_structure is not None else [1]
+        if lag_structure is not None:
+            # Zero lag breaks the regression, negative lags break the logic for when the first/last regressions are
+            assert all(i > 0 for i in lag_structure), "Invalid lags provided for y"
+            self.y_lag_structure = lag_structure
+        else:
+            self.y_lag_structure = [1]
         return self
 
     def with_x(self, name: str, *, lag_structure: list[int] | None = None, ordinal: bool = False) -> Self:
         self.x_name = name
         self.x_ordinal = ordinal
-        self.x_lag_structure = lag_structure if lag_structure is not None else [1]
+        if lag_structure is not None:
+            # Negative lags break the logic for when the first/last regressions are
+            assert all(i >= 0 for i in lag_structure), "Invalid lags provided for x"
+            self.x_lag_structure = lag_structure
+        else:
+            self.x_lag_structure = [1]
         return self
 
     def with_w(self, names: list[str], ordinal: list[bool] | None = None) -> Self:
