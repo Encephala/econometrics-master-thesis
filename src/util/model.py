@@ -205,7 +205,11 @@ class ModelDefinitionBuilder:
     # Allow for pre-determined variables, i.e. arbitrary correlation between x and previous values of y
     # NOTE: The very first value of y in the data is considered exogenous and thus it can't be correlated with future x
     def _make_x_predetermined(self):
-        all_regressors = [rval for regression in self._regressions for rval in regression.rvals]
+        # Establish list of used regressors, as defining covariances between y and unused x is meaningless
+        # (and causes the model to crash)
+        all_regressors = []
+        for regression in self._regressions:
+            all_regressors.extend(rval for rval in regression.rvals if rval not in all_regressors)
 
         for regression in self._regressions:
             y_current = regression.lval
