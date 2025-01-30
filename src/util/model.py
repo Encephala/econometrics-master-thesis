@@ -104,9 +104,13 @@ class ModelDefinitionBuilder:
         return self
 
     def build(self, available_columns: "pd.Index[str]") -> str:
-        first_year_y, last_year_y = self._determine_start_and_end_years(available_columns)
+        available_variables = [
+            Variable(column[: column.rfind("_")], int(column[column.rfind("_") + 1 :])) for column in available_columns
+        ]
 
-        self._build_regressions(available_columns, first_year_y, last_year_y)
+        first_year_y, last_year_y = self._determine_start_and_end_years(available_variables)
+
+        self._build_regressions(available_variables, first_year_y, last_year_y)
 
         self._make_x_predetermined()
 
@@ -120,16 +124,12 @@ class ModelDefinitionBuilder:
 {self._ordinals.build()}
 """
 
-    def _determine_start_and_end_years(self, available_columns: "pd.Index[str]") -> Tuple[int, int]:
-        y_years = [
-            int(column[column.find("_") + 1 :]) for column in available_columns if column.startswith(self.y_name)
-        ]
+    def _determine_start_and_end_years(self, available_variables: "list[Variable]") -> Tuple[int, int]:
+        y_years = [variable.wave for variable in available_variables if variable.name == self.y_name]
         y_start = min(y_years)
         y_end = max(y_years)
 
-        x_years = [
-            int(column[column.find("_") + 1 :]) for column in available_columns if column.startswith(self.x_name)
-        ]
+        x_years = [variable.wave for variable in available_variables if variable.name == self.x_name]
         x_start = min(x_years)
         x_end = max(x_years)
 
@@ -144,11 +144,11 @@ class ModelDefinitionBuilder:
 
         return first_year_y, last_year_y
 
-    def _build_regressions(self, available_columns: "pd.Index[str]", first_year_y: int, last_year_y: int):
+    def _build_regressions(self, available_variables: "list[Variable]", first_year_y: int, last_year_y: int):
         for year_y in range(first_year_y, last_year_y + 1):
             y = Variable(self.y_name, year_y)
 
-            if y.full_name() not in available_columns:
+            if y not in available_variables:
                 warnings.warn(f"{y=} not found in data, skipping regression", stacklevel=2)
                 continue
 
@@ -162,9 +162,9 @@ class ModelDefinitionBuilder:
             )
 
             if (
-                any(variable.full_name() not in available_columns for variable in y_lags)
-                or any(variable.full_name() not in available_columns for variable in x_lags)
-                or any(variable.full_name() not in available_columns for variable in w)
+                any(variable not in available_variables for variable in y_lags)
+                or any(variable not in available_variables for variable in x_lags)
+                or any(variable not in available_variables for variable in w)
             ):
                 warnings.warn(
                     f"For {y=}, one of {y_lags=}, {x_lags=} or {w=} was not in the data, skipping regression",
