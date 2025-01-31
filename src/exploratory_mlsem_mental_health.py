@@ -46,8 +46,8 @@ complete_data = pd.concat([happiness, fitness], join="outer", axis="columns").ap
 )
 model_definition = (
     ModelDefinitionBuilder()
-    .with_y(HAPPINESS, ordinal=True, lag_structure=[1, 2])
-    .with_x(FITNESS, lag_structure=[0, 1, 2])
+    .with_y(HAPPINESS, lag_structure=[1, 2, 3, 4, 5])
+    .with_x(FITNESS, lag_structure=[0, 1, 2, 3, 4])
     .build(complete_data.columns)
 )
 
@@ -56,4 +56,8 @@ print(model_definition)
 model = semopy.Model(model_definition)
 
 # %% fit the model
-result = model.fit(complete_data, obj="FIML")
+optimisation_result = model.fit(complete_data)
+
+print(optimisation_result)
+
+model.inspect().sort_values(["op", "Estimate", "lval"])  # pyright: ignore[reportOptionalMemberAccess, reportAttributeAccessIssue]
