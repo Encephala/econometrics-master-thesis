@@ -1,4 +1,10 @@
 {
-    "editor.defaultFormatter": "charliermarsh.ruff",
-    "editor.formatOnSave": true
+    "editor.formatOnSave": true,
+    "[python]": {
+        "editor.defaultFormatter": "charliermarsh.ruff",
+    },
+    "latex-workshop.formatting.latex": "tex-fmt",
+    "[latex]": {
+        "editor.defaultFormatter": "James-Yu.latex-workshop"
+    }
 }
