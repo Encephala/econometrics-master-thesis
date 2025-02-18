@@ -1,21 +1,20 @@
+% Template from https://www.overleaf.com/latex/templates/msc-thesis-template-erasmus-school-of-economics/fxsvshrthnqc
 \documentclass[a4paper,11pt]{report}
 
-% FILL OUT THE DETAILS BELOW:
-\author{Your name}
-\title{Your title}
+\author{Jonathan Rietveld}
+\title{Proposal Master Thesis}
 % \date{An optional custom date, the default is today}
-\newcommand{\studentnumber}{123456}
-\newcommand{\program}{Name of your program}
-\newcommand{\supervisor}{Name of your supervisor}
-\newcommand{\secondassesor}{Name of your second assessor}
+\newcommand{\studentnumber}{666788}
+\newcommand{\program}{Business Analytics and Quantitative Marketing}
+\newcommand{\supervisor}{Paul Bouman}
+% \newcommand{\secondassesor}{Name of your second assessor}
 
 \usepackage[british]{babel} % Use British English
 \usepackage[onehalfspacing]{setspace} % Increase line spacing
 \usepackage[margin=2.5cm]{geometry} % Modify margins
 \usepackage{graphicx,booktabs,apacite} % Packages for images, tables, and APA citations
 
-% ADD YOUR OWN PACKAGES HERE
-% Hint: \usepackage{amsmath,amsfonts,hyperref} imports some frequently used packages
+\usepackage{amsmath,amsfonts,hyperref,cleveref}
 
 \begin{document}
 
@@ -32,36 +31,27 @@
 	\hrule height .08em\normalsize
 
 	\vfill
-	\includegraphics[width=\textwidth,height=0.15\textheight,keepaspectratio]{../eur} % The EUR logo, but this could also be another image
+	\includegraphics[width=\textwidth,height=0.15\textheight,keepaspectratio]{../eur}
 	\vfill
 
 	\begin{tabular}{ll}
 		\toprule
 		Supervisor: & \supervisor\\
-		Second assessor: & \secondassesor\\
+		% Second assessor: & \secondassesor\\
 		Date final version: & \@date\\
 		\bottomrule
 	\end{tabular}
 
 	\vfill
-	The content of this thesis is the sole responsibility of the author and does not reflect the view of the supervisor, second assessor, Erasmus School of Economics or Erasmus University.
+	% The content of this thesis is the sole responsibility of the author and does not reflect the view of the supervisor, second assessor, Erasmus School of Economics or Erasmus University.
 \end{center}
 \makeatother
 \end{titlepage}
-
-\begin{abstract}
-	Your abstract
-\end{abstract}
-
-\tableofcontents
-
-\chapter{Introduction}
 
 
 \bibliographystyle{apacite}
 \bibliography{references}
 
-\appendix
-\chapter{Programming code}
+% \appendix
 
 \end{document}
