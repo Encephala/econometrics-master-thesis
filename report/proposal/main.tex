@@ -50,10 +50,36 @@
 \makeatother
 \end{titlepage}
 
-\textit{Definition of the problem/question. What constitutes the problem? Which aspects are important?}
+The impact of Physical Activity (PA) on mental wellbeing has been studied extensively in recent literature,
+both in empirical studies \cite{noetel2024effect, mahindru2023role}, and through mechanistic arguments \cite{smith2021role}.
+However, while cross-sectional studies consistently find a strong association between the two, \citeA{chekroud2018association}
+note that the causal effect of PA on mental health as studied in randomised control trials has been inconsistent.
+As such, only tentative conclusions have been drawn, claiming PA "is probably [beneficial] for psychiatric diseases"
+\cite{peluso2005physical}, "hold(s) promise in the treatment [...] of mental health conditions" \cite{smith2021role}, et cetera.
 
-The impact of Physical Activity (PA) on mental wellbeing has been studied extensively in recent literature \cite{smith2021role, noetel2024effect, mahindru2023role}.
-However, as \citeA{chekroud2018association} note,
+I posit that longitudinal observational studies to date have not been powered to draw conclusions about the causal effect
+of PA on mental health in part because they have not explicitly modelled the reverse effect, namely that individuals with poor
+mental health are less likely to engage in PA.
+\citeA{azevedo2012bidirectional} and \citeA{jerstad2010prospective} find empirical evidence for this reverse relationship,
+though other work is inconclusive \cite{birkeland2009longitudinal, ku2012physical}. Nevertheless, combined with the
+mechanistic argument that exercise increases self-efficacy \cite{smith2021role}, the assumption that engagement in PA is
+not influenced by mental health seems tenuous at best.
+A violation of this assumption leads to endogeneity when regressing mental health on PA and therethrough to
+inconsistent estimation of the causal effect, a fact that is often neglected in longitudinal research \cite{leszczensky2022deal}.
+
+% for instance chekroud(?)
+% (also mention their numbers? contrast to numbers in RCT?)
+
+% remedy the discrepancy between (cross-sectional) observational studies and RCT
+
+% replicate results of chekroud
+% then, use SEM to model simultaneity in LISS panel
+% to demonstrate failure (better word maybe xdd) of existing longitudinal studies
+% emphasis on within-person variation, to inform treatment decisions
+% and contribute to literature in finding directionality of effect as well as temporal nature
+% but panel so not very good for finding causal effect
+
+\textit{Definition of the problem/question. What constitutes the problem? Which aspects are important?}
 
 \textit{Relevance: Why and for whom is the research interesting and relevant? Is it of scientific relevance, and/or is it of interest for practical applications?}
 
@@ -65,7 +91,9 @@ However, as \citeA{chekroud2018association} note,
 
 \textit{Data: What kind of data are needed and available for the research?}
 
-\textit{Time frame}
+
+\section*{Time frame}
+[TODO]
 
 \bibliographystyle{apacite}
 \bibliography{references}
