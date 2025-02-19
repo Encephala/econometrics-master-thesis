@@ -3,8 +3,8 @@
     "[python]": {
         "editor.defaultFormatter": "charliermarsh.ruff",
     },
-    "latex-workshop.formatting.latex": "tex-fmt",
     "[latex]": {
-        "editor.defaultFormatter": "James-Yu.latex-workshop"
-    }
+        "editor.formatOnSave": false
+    },
+    "latex-workshop.bibtex-format.sort.enabled": true,
 }
