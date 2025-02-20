@@ -170,7 +170,11 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-# Latex build artefacts
+# LATEX
+# I'll manually add the pdf when it's done, git doesn't enjoy binary files
+main.pdf
+
+# BUILD ARTEFACTS
 # https://github.com/github/gitignore/blob/main/TeX.gitignore
 
 ## Core latex/pdflatex auxiliary files:
