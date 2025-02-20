@@ -101,7 +101,11 @@ relies on the correct specification of the lag structure. However, not only is t
 it is also likely in general that the temporal effect of the predictor on the outcome does not align with the sampling
 frequency (i.e. the time interval between panel waves) and the present literature has not established how SEM modelling
 may then be effectively applied \cite{leszczensky2022deal}.
-% MAJOR TODO: Discuss complexities of missing data
+Furthermore, difficulty arises from the fact that the LISS panel is a continuous panel, with individuals joining and
+leaving the panel every year. As such, each individual has responded to the questionnaires of different years,
+effectively leading to a lot of missing data, on top of data missing due to incomplete responses.
+While SEM provides some flexiblity in modelling this, there is no natural solution and part of this work will be to
+develop a procedure that efficiently utilises the available data.
 It is additionally important to appropriately control for individual-specific effects, as for instance physical
 health makes a significant confounder, as it may preclude physical activity while also having a well-established impact
 on mental health \cite{ohrnberger2017relationship}, thus leading to endogeneity. However, as panel regressions naturally
@@ -109,7 +113,7 @@ allow for controlling for individual-specific effects, that problem is readily s
 
 The present study aims to guide further research, both through contributing to a better understanding of the potentially
 complicated interdependence between mental health and PA, as well as by establishing the importance of considering this
-interdependence when studying the topic.
+interdependence when studying the topic and providing an example way to do so.
 
 \pagebreak
 \section*{Time frame}
