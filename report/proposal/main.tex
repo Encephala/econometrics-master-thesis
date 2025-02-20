@@ -56,6 +56,8 @@ However, while cross-sectional studies consistently find a strong association be
 note that the causal effect of PA on mental health as studied in randomised control trials has been inconsistent.
 As such, only tentative conclusions have been drawn, claiming PA "is probably [beneficial] for psychiatric diseases"
 \cite{peluso2005physical}, "hold(s) promise in the treatment [...] of mental health conditions" \cite{smith2021role}, et cetera.
+% TODO: example numbers for the strength of the association to compare correlation vs (potential) causation
+% Also noting effect sizes have been found to be comparable with drugs, if possible
 
 I posit that longitudinal observational studies to date have not been powered to draw conclusions about the causal effect
 of PA on mental health in part because they have not explicitly modelled the reverse effect, namely that individuals with poor
@@ -67,17 +69,33 @@ not influenced by mental health seems tenuous at best.
 A violation of this assumption leads to endogeneity when regressing mental health on PA and therethrough to
 inconsistent estimation of the causal effect, a fact that is often neglected in longitudinal research \cite{leszczensky2022deal}.
 
-% for instance chekroud(?)
-% (also mention their numbers? contrast to numbers in RCT?)
+The aim of this work is then to remedy the discrepancy between the consistent association found in cross-sectional studies
+on the one hand, and the inconsistent findings of trials on the other hand, by applying a statistical model that accomodates
+for the potentially mutual influence (simultaneity) between PA and mental health. Inspired by the excellent statistical
+properties found by \citeA{leszczensky2022deal} of Structural Equation Modelling (SEM) in this context, namely
+unbiasedness with significantly greater efficiency than Arellano-Bond (GMM) estimation, the present study
+follows the procedures outlined by \citeA{allison2017maximum} for modelling reciprocal causation.
+Data from the LISS panel is studied, which is a representative (invite-only) panel of $7500$ dutch individuals
+aged sixteen and above \cite{scherpenzeel2010liss}.
+In order to demonstrate the importance of incorporating reverse causality in modelling, I first aim to roughly reproduce
+the main result of \citeA{chekroud2018association}, namely that exercising decreases incidence of poor mental health by
+$43\%$.
+Next, the same question will be analysed in the SEM-framework to distill which part of this association that is a causal effect.
+However, due to the measurement error in questionnaire responses, this study will not be powered to accurately estimate
+the exact effect size. Nevertheless, the data should be sufficient to find directionality of effects and ballpark
+effect sizes \cite{pereira2014depressive}.
+A major challenge in doing so will be to find the appropriate lag structure. This because the validity of the results heavily
+relies on the correct model specification in that sense, while it is likely in general that the temporal effect
+of the predictor on the outcome does not align with the sampling frequency (i.e. the time interval between panel waves)
+and only limited research is available on this scenario \cite{leszczensky2022deal}.
 
-% remedy the discrepancy between (cross-sectional) observational studies and RCT
+The aim of this study is to best inform the question of whether PA can be employed as a treatment for mental health conditions.
+This guides the emphasis of the analysis in two ways;
+firstly, the "forward" effect of PA on mental health is emphasised, while the reverse effect is considered a nuisance parameter,
+following \citeA{allison2017maximum};
+secondly, through employing panel data, the within-person change in mental health attributable to PA is emphasised,
+as opposed to the between-person association that cross-sectional data studies.
 
-% replicate results of chekroud
-% then, use SEM to model simultaneity in LISS panel
-% to demonstrate failure (better word maybe xdd) of existing longitudinal studies
-% emphasis on within-person variation, to inform treatment decisions
-% and contribute to literature in finding directionality of effect as well as temporal nature
-% but panel so not very good for finding causal effect
 
 \textit{Definition of the problem/question. What constitutes the problem? Which aspects are important?}
 
