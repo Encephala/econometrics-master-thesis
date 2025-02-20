@@ -50,65 +50,60 @@
 \makeatother
 \end{titlepage}
 
-The impact of Physical Activity (PA) on mental wellbeing has been studied extensively in recent literature,
-both in empirical studies \cite{noetel2024effect, mahindru2023role}, and through mechanistic arguments \cite{smith2021role}.
+The impact of Physical Activity (PA) on mental wellbeing has been the topic of much recent literature,
+both in empirical studies \cite{noetel2024effect, mahindru2023role}, and through mechanistic research \cite{smith2021role}.
 However, while cross-sectional studies consistently find a strong association between the two, \citeA{chekroud2018association}
 note that the causal effect of PA on mental health as studied in randomised control trials has been inconsistent.
-As such, only tentative conclusions have been drawn, claiming PA "is probably [beneficial] for psychiatric diseases"
-\cite{peluso2005physical}, "hold(s) promise in the treatment [...] of mental health conditions" \cite{smith2021role}, et cetera.
-% TODO: example numbers for the strength of the association to compare correlation vs (potential) causation
-% Also noting effect sizes have been found to be comparable with drugs, if possible
+\citeA{chalder2012facilitated} for instance find a highly insignificant change in the Beck's depression inventory score
+of $-0.54$ ($p = 0.68$), while \citeA{philippot2022impact} find a signifiacnt decrease in the Hospital Anxiety and
+Depression Scale of $3.8$ ($p = 0.016$).
+Due to this inconsistency, review articles only draw tentative conclusions, f.i. that PA "is probably [beneficial]
+for psychiatric diseases" \cite{peluso2005physical}, "hold(s) promise in the treatment [...] of mental health conditions"
+\cite{smith2021role}, et cetera.
 
 I posit that longitudinal observational studies to date have not been powered to draw conclusions about the causal effect
-of PA on mental health in part because they have not explicitly modelled the reverse effect, namely that individuals with poor
+of PA on mental health, in part because they have not explicitly modelled the reverse effect, namely that individuals with poor
 mental health are less likely to engage in PA.
 \citeA{azevedo2012bidirectional} and \citeA{jerstad2010prospective} find empirical evidence for this reverse relationship,
 though other work is inconclusive \cite{birkeland2009longitudinal, ku2012physical}. Nevertheless, combined with the
 mechanistic argument that exercise increases self-efficacy \cite{smith2021role}, the assumption that engagement in PA is
 not influenced by mental health seems tenuous at best.
 A violation of this assumption leads to endogeneity when regressing mental health on PA and therethrough to
-inconsistent estimation of the causal effect, a fact that is often neglected in longitudinal research \cite{leszczensky2022deal}.
+inconsistent estimation of the causal effect, a fact that \citeA{leszczensky2022deal} note is often neglected in
+longitudinal research.
 
-The aim of this work is then to remedy the discrepancy between the consistent association found in cross-sectional studies
-on the one hand, and the inconsistent findings of trials on the other hand, by applying a statistical model that accomodates
-for the potentially mutual influence (simultaneity) between PA and mental health. Inspired by the excellent statistical
-properties found by \citeA{leszczensky2022deal} of Structural Equation Modelling (SEM) in this context, namely
-unbiasedness with significantly greater efficiency than Arellano-Bond (GMM) estimation, the present study
-follows the procedures outlined by \citeA{allison2017maximum} for modelling reciprocal causation.
-Data from the LISS panel is studied, which is a representative (invite-only) panel of $7500$ dutch individuals
-aged sixteen and above \cite{scherpenzeel2010liss}.
-In order to demonstrate the importance of incorporating reverse causality in modelling, I first aim to roughly reproduce
-the main result of \citeA{chekroud2018association}, namely that exercising decreases incidence of poor mental health by
-$43\%$.
-Next, the same question will be analysed in the SEM-framework to distill which part of this association that is a causal effect.
-However, due to the measurement error in questionnaire responses, this study will not be powered to accurately estimate
-the exact effect size. Nevertheless, the data should be sufficient to find directionality of effects and ballpark
-effect sizes \cite{pereira2014depressive}.
-A major challenge in doing so will be to find the appropriate lag structure. This because the validity of the results heavily
-relies on the correct model specification in that sense, while it is likely in general that the temporal effect
-of the predictor on the outcome does not align with the sampling frequency (i.e. the time interval between panel waves)
-and only limited research is available on this scenario \cite{leszczensky2022deal}.
+The aim of this work is then to remedy the discrepancy between on the one hand the consistent association found in
+cross-sectional studies, and the inconsistent findings of trials on the other hand.
+This is done by applying a statistical model that accomodates for the potentially mutual influence (simultaneity)
+between PA and mental health. Inspired by the excellent statistical properties of Structural Equation Modelling (SEM)
+in this context, namely its unbiasedness and significantly greater efficiency than Arellano-Bond (GMM) estimation
+\cite{leszczensky2022deal}, the present study follows the procedures outlined by \citeA{allison2017maximum}
+for modelling reciprocal causation.
+SEM allows for modelling arbitrary (linear) interactions between variables, which makes it possible to flexibly compare
+model specifications through e.g. likelihood ratio tests, lending itself well to a statistical study of the relationships
+between variables.
+Data from the LISS panel is studied, which is a representative (invite-only) panel of $7500$ Dutch individuals aged
+sixteen and above \cite{scherpenzeel2010liss}. The panel comprises a broad range of questions on the topics of PA and
+mental wellbeing, but also manifold other variables that can therefore be controlled for in the analysis.
+Because the panel follows individuals for multiple years, it provides insight into the temporal nature of interactions
+between PA and mental health.
+In order to demonstrate the importance of properly modelling reverse causality, I first aim to closely follow
+the analysis done by \citeA{chekroud2018association} to corroborate their main result that exercising decreases incidence
+of poor mental health by $43\%$.
+Then, the same question will be analysed in the SEM-framework to determine how much of this association can be attributed
+to a causal effect. However, due to the measurement error in questionnaire responses, this study will not be powered
+to accurately estimate the exact effect size \cite{pereira2014depressive}. As such, it is early to draw practical conclusions, but the data should nevertheless
+be sufficient to find significant effects and to study if the potential reverse causality appreciably influences
+parameter estimates.
+A major challenge in doing so will be to find the appropriate lag structure, as the validity of the results heavily
+relies on the correct specification of the lag structure. However, not only is this structure not known a priori,
+it is also likely in general that the temporal effect of the predictor on the outcome does not align with the sampling
+frequency (i.e. the time interval between panel waves) and the present literature has not established how SEM modelling
+may then be effectively applied \cite{leszczensky2022deal}.
 
-The aim of this study is to best inform the question of whether PA can be employed as a treatment for mental health conditions.
-This guides the emphasis of the analysis in two ways;
-firstly, the "forward" effect of PA on mental health is emphasised, while the reverse effect is considered a nuisance parameter,
-following \citeA{allison2017maximum};
-secondly, through employing panel data, the within-person change in mental health attributable to PA is emphasised,
-as opposed to the between-person association that cross-sectional data studies.
-
-
-\textit{Definition of the problem/question. What constitutes the problem? Which aspects are important?}
-
-\textit{Relevance: Why and for whom is the research interesting and relevant? Is it of scientific relevance, and/or is it of interest for practical applications?}
-
-\textit{Literature: What kind of results have been obtained in previous research on this topic? How does the research relate to the existing literature?}
-
-\textit{Motivation: Why is the research necessary? Why is the existing knowledge on this topic insufficient? How will the research address these issues?}
-
-\textit{Methods: Which (econometric) methods and techniques will be applied in your research? Why are the methods appropriate here?}
-
-\textit{Data: What kind of data are needed and available for the research?}
-
+The present study aims to guide further research, both through contributing to a better understanding of the potentially
+complicated interdependence between mental health and PA, as well as by establishing the importance of considering this
+interdependence when studying the topic.
 
 \section*{Time frame}
 [TODO]
