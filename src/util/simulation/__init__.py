@@ -23,6 +23,7 @@ class DataGenerator:
         """Pass the lag coefficients, implicitly defining the lag structure by the nonzero coefficients.
 
         I.e. not [1, 0, 1] but [0.5, 0, 0.8]."""
+        # TODO: Also include AR lags for x?
         self.AR_lags = AR_lags
         self.lags_x_for_y = lags_x_for_y
         self.lags_y_for_x = lags_y_for_x
