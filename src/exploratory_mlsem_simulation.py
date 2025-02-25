@@ -25,6 +25,8 @@ epsilon = rng.normal(0, SIGMA, size=(N, T))
 
 x = rng.normal(5, 3, size=(N, T))
 # Correlate x with previous epsilon
+# np.roll moves the previous values of epsilon to align with current values of x.
+# afterwards only apply the correlation for available data, i.e. don't apply 4th lag to t=0.
 x[:, 1:] += GAMMA1 * np.roll(epsilon, 1, axis=1)[:, 1:]
 x[:, 2:] += GAMMA2 * np.roll(epsilon, 2, axis=1)[:, 2:]
 x[:, 4:] += GAMMA4 * np.roll(epsilon, 4, axis=1)[:, 4:]
