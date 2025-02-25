@@ -11,8 +11,6 @@ def take_lagged_subset(values: np.ndarray, current_t: int, num_lags: int) -> np.
     # Lil sanity check
     assert len(values.shape) == 2
 
-    print(f"{current_t=}, {num_lags=}")
-
     return values[:, max(0, current_t - num_lags) : current_t + 1]
 
 
@@ -60,27 +58,28 @@ class DataGenerator:
         # This formula works for both the initial values (when fewer than max_lag historic values are available)
         # and the general case (when there is sufficient history for the full lag structure)
         for t in range(T):
-            print(f"Generating for {t=}")
-
             # AR
-
-            # TODO
-            # y[:, : t + 1] += np.array(AR_lags) * roll_and_take_subset(
-            #     y, min(t, max_AR_lag), max(0, t - )
-            # )
-
-            # Mutual influence
-
-            lagged_x_subset = take_lagged_subset(
-                x,
+            lagged_y_subset = take_lagged_subset(
+                y,
                 t,
-                min(t, len(x_for_y) - 1),  # -1 because the zeroth lag is included, so furthest lag is length - 1
+                min(t, len(AR_lags) - 1),  # -1 because the zeroth lag is included, so furthest lag is length - 1
             )
             # This broadcasts the coefficients across the first axis (the cohort/the variable i),
             # so that at each timepoint each observation gets the right coefficient
+            y[:, t] += np.sum(
+                np.flip(AR_lags[: t + 1]) * lagged_y_subset,
+                axis=1,
+            )
+
+            # Mutual influence
+            # Same logic as for AR
+            lagged_x_subset = take_lagged_subset(
+                x,
+                t,
+                min(t, len(x_for_y) - 1),
+            )
             y[:, t] += np.sum(np.flip(x_for_y[: t + 1]) * lagged_x_subset, axis=1)
 
-            # Same as logic for x influencing y
             lagged_y_subset = take_lagged_subset(
                 y,
                 t,
