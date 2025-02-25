@@ -105,7 +105,7 @@ class ModelDefinitionBuilder:
             assert all(i >= 0 for i in lag_structure), "Invalid lags provided for x"
             self.x_lag_structure = lag_structure
         else:
-            self.x_lag_structure = [1]
+            self.x_lag_structure = [0]
         return self
 
     def with_w(self, names: list[str], ordinal: list[bool] | None = None) -> Self:
