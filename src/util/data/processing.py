@@ -79,6 +79,9 @@ def calc_mhi5(df: pd.DataFrame) -> pd.DataFrame:
     result = pd.DataFrame()
 
     for year in available_years:
+        # TODO: Check for partial missingness
+        # If present, don't have mhi=NA but scale partial calculation(?)
+
         # These contain the responses of all individuals for this `year`
         anxious = map_mhi5_categories(df[f"ch{ANXIOUS}_{year}"])
         cheer_up = map_mhi5_categories(df[f"ch{CHEER_UP}_{year}"])
