@@ -5,7 +5,13 @@ import semopy
 import pandas as pd
 
 from util.model import ModelDefinitionBuilder
-from util.data import load_wide_panel_cached, standardise_wide_column_name, select_question_wide
+from util.data import (
+    load_wide_panel_cached,
+    standardise_wide_column_name,
+    select_question_wide,
+    fix_column_categories,
+)
+
 
 # %% consts
 HAPPINESS = "ch15"
@@ -17,15 +23,6 @@ health_panel = load_wide_panel_cached("ch").rename(columns=standardise_wide_colu
 
 
 # %% selecting columns
-# Actually have to do this because the data sometimes (but not consistently, smile) has prefixed spaces,
-# and sometimes has capitalisation
-def fix_column_categories(column: pd.Series) -> pd.Series:
-    old_categories: "pd.Index[str]" = column.cat.categories  # To help the LSP
-
-    new_categories = pd.Index([category.lower().strip() for category in old_categories])
-
-    return column.cat.rename_categories(new_categories)
-
 
 happiness = select_question_wide(health_panel, HAPPINESS)
 happiness = happiness.apply(
