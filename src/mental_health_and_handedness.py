@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.stats as sps
 
-from util import load_df
+from util.data import load_df
 
 LEFT_HANDED = 1.0
 RIGHT_HANDED = 2.0

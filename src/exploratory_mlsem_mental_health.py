@@ -4,7 +4,8 @@
 import semopy
 import pandas as pd
 
-from util import ModelDefinitionBuilder, load_wide_panel_cached, standardise_wide_column_name, select_question_wide
+from util.model import ModelDefinitionBuilder
+from util.data import load_wide_panel_cached, standardise_wide_column_name, select_question_wide
 
 # %% consts
 HAPPINESS = "ch15"

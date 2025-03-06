@@ -4,7 +4,7 @@ import numpy as np
 
 import semopy
 
-from util import ModelDefinitionBuilder
+from util.model import ModelDefinitionBuilder
 
 # %% data generation
 N = 500
