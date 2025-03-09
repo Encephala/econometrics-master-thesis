@@ -9,7 +9,7 @@ def take_lagged_subset(values: np.ndarray, current_t: int, num_lags: int) -> np.
     Does not reorder, i.e. maintains chronological order in the resulting array.
     """
     # Lil sanity check
-    assert len(values.shape) == 2
+    assert len(values.shape) == 2  # noqa: PLR2004
 
     return values[:, max(0, current_t - num_lags) : current_t + 1]
 
@@ -48,7 +48,7 @@ class DataGenerator:
 
         y_for_x = self.lags_y_for_x
         x_for_y = self.lags_x_for_y
-        AR_lags = [0] + self.AR_lags
+        AR_lags = [0, *self.AR_lags]
 
         # Draw baseline values for y and x
         # Baseline as in without the mutual influences

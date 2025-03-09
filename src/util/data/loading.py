@@ -30,6 +30,9 @@ def assemble_wide_panel(prefix: str) -> pd.DataFrame:
         new_df = load_df(file)
 
         # To avoid duplicating columns (mainly 'nohouse_encr')
+        # TODO: This wrongly assumes there's no new data with same column name,
+        # but that's wrong for background variables which always have the same name
+        # Unlucky decision by LISS there 🙃
         new_columns = new_df.columns.difference(result.columns)
 
         result = result.merge(
