@@ -3,13 +3,14 @@
 import pandas as pd
 import semopy
 
-from util import simulation, ModelDefinitionBuilder
+from util.simulation import DataGenerator
+from util.model import ModelDefinitionBuilder
 
 # %%
 N = 50000
 T = 7
 
-generator = simulation.DataGenerator([0.5, 0.3], [1, 0.9, 0.8, 0.7], [0, -0.1, -0.2])
+generator = DataGenerator([0.5, 0.3], [1, 0.9, 0.8, 0.7], [0, -0.1, -0.2])
 
 # %%
 x, y = generator.generate((N, T))
