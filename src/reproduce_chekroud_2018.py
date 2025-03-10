@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
 # %% imports
 import pandas as pd
-import numpy as np
 
 from util.data import (
     load_wide_panel_cached,
     standardise_wide_column_name,
     select_question_wide,
     available_years,
-    fix_column_categories,
 )
 
 
 # %% data loading
-background_vars = load_wide_panel_cached("avars").rename(columns=standardise_wide_column_name)
+background_vars = load_wide_panel_cached("avars")
 leisure_panel = load_wide_panel_cached("cs").rename(columns=standardise_wide_column_name)
 health_panel = load_wide_panel_cached("ch").rename(columns=standardise_wide_column_name)
 
@@ -23,7 +21,7 @@ SPORTS = "cs104"
 
 AGE = "leeftijd"  # TODO: How is this included in Chekroud's model? stratified?
 RACE = "herkomstgroep"  # TODO: This one requires some pre-processing, dummies?
-GENDER = "geslacht"  # TODO: Why is this only availabel for 13k out of 31k people?
+GENDER = "geslacht"
 MARITAL_STATUS = "burgstat"  # TODO: dummies - perhaps "partner" is better, compare to Chekroud
 INCOME = "nettohh_f"  # TODO: is Chekroud bruto? And household or individiual?
 EDUCATION_LEVEL = "oplcat"  # TODO: What exactly in Chekroud?

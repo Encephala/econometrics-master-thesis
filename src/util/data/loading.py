@@ -48,18 +48,42 @@ def assemble_wide_panel(prefix: str) -> pd.DataFrame:
     return result
 
 
+def assemble_background_panel() -> pd.DataFrame:
+    result = pd.DataFrame()
+
+    for file in Path("../data").glob("avars*"):
+        new_df = load_df(file)
+
+        year = file.stem[len("avars_20") :][:2]
+        assert year.isnumeric(), f"{year} is not numeric, wrong indices"
+
+        new_df.columns = [f"{column}_{year}" for column in new_df.columns]
+
+        result = result.merge(
+            new_df,
+            how="outer",
+            left_index=True,
+            right_index=True,
+        )
+
+    if len(result) == 0:
+        warnings.warn("No data loaded for avars", stacklevel=2)
+
+    return result
+
+
 def load_wide_panel_cached(prefix: str) -> pd.DataFrame:
     """`assemble_wide_panel`, but checks for a cached version on file first,
     and creates this cache if it doesn't exist.
 
     Note to self: no cache invalidation happens :^)."""
 
-    path = f"../data/{prefix}_wide.pkl"
+    path = Path(f"../data/{prefix}_wide.pkl")
 
-    if Path(path).exists():
+    if path.exists():
         return pd.read_pickle(path)  # noqa: S301
 
-    assembled = assemble_wide_panel(prefix)
+    assembled = assemble_background_panel() if prefix == "avars" else assemble_wide_panel(prefix)
 
     if len(assembled) != 0:
         assembled.to_pickle(path)
