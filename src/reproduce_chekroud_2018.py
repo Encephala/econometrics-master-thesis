@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # %% imports
 import pandas as pd
+import numpy as np
 
 from util.data import (
     load_wide_panel_cached,
@@ -50,51 +51,26 @@ depression = select_question_wide(health_panel, DEPRESSION_MEDICATION)
 years_depression = sorted(available_years(depression))
 names_depression = [f"{DEPRESSION_MEDICATION}_{year}" for year in sorted(available_years(depression))]
 
-previous_depression = pd.DataFrame(index=health_panel.index, columns=[f"prev_depr_{year}" for year in years_depression])
+previous_depression = pd.DataFrame(index=health_panel.index)
 
-# for person in previous_depression.index:
-#     medication_status: "pd.Series[bool]" = depression.loc[person, names_depression].squeeze()
+for person in previous_depression.index:
+    medication_status: "pd.Series[bool]" = depression.loc[person, names_depression].squeeze()
 
-#     medication_status = medication_status.map(lambda x: x == "yes", na_action="ignore")
+    medication_status = medication_status.map(lambda x: x == "yes", na_action="ignore")
 
-#     cumulative_medication_status = pd.NA
-#     for year in years_depression[1:]:
-#         previous_year_name = f"{DEPRESSION_MEDICATION}_{year - 1}"
+    cumulative_medication_status = pd.NA
+    for year in years_depression[1:]:
+        previous_year_name = f"{DEPRESSION_MEDICATION}_{year - 1}"
 
-#         is_previous_year_available = pd.isna(medication_status.get(previous_year_name))
+        is_previous_year_available = pd.isna(medication_status.get(previous_year_name))
 
-#         if not is_previous_year_available:
-#             if pd.isna(cumulative_medication_status):
-#                 cumulative_medication_status = medication_status[previous_year_name]
-#             else:
-#                 cumulative_medication_status = cumulative_medication_status or medication_status[previous_year_name]
+        if not is_previous_year_available:
+            if pd.isna(cumulative_medication_status):
+                cumulative_medication_status = medication_status[previous_year_name]
+            else:
+                cumulative_medication_status = cumulative_medication_status or medication_status[previous_year_name]
 
-#         previous_depression.loc[person, f"prev_depr_{year}"] = cumulative_medication_status
-
-# First year, previous_depression is NA
-raise NotImplementedError("Still working on the optimisation")
-for year in years_depression[1:]:
-    is_previous_year_available = ~depression.loc[:, f"{DEPRESSION_MEDICATION}_{year - 1}"].isna()
-
-    cumulative_medication_status = previous_depression.loc[:, f"prev_depr_{year - 1}"]
-    current_medication_status = fix_column_categories(depression.loc[:, f"{DEPRESSION_MEDICATION}_{year}"])
-
-    # Explicitly compare to true to map NA -> False
-    cumulative_status_already_true = cumulative_medication_status[is_previous_year_available] == True  # noqa: E712
-
-    cumulative_medication_status[is_previous_year_available] = (
-        cumulative_status_already_true or current_medication_status == "yes"
-    )
-
-    print(cumulative_medication_status)
-    break
-    # if not is_previous_year_available:
-    #     if pd.isna(cumulative_medication_status):
-    #         cumulative_medication_status = medication_status[previous_year_name]
-    #     else:
-    #         cumulative_medication_status = cumulative_medication_status or medication_status[previous_year_name]
-
-    previous_depression.loc[:, previous_year_name] = cumulative_medication_status
+        previous_depression.loc[person, f"prev_depr_{year}"] = cumulative_medication_status
 
 # %% the big merge
 all_relevant_data = pd.DataFrame(index=background_vars.index).join(
