@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # %% imports
 import pandas as pd
+import numpy as np
 
 from util.data import (
     load_wide_panel_cached,
@@ -19,7 +20,7 @@ health_panel = load_wide_panel_cached("ch").rename(columns=standardise_wide_colu
 UNHAPPY = "ch14"
 SPORTS = "cs104"
 
-AGE = "leeftijd"  # TODO: How is this included in Chekroud's model? stratified?
+AGE = "leeftijd"
 RACE = "herkomstgroep"  # TODO: This one requires some pre-processing, dummies?
 GENDER = "geslacht"
 MARITAL_STATUS = "burgstat"  # TODO: dummies - perhaps "partner" is better, compare to Chekroud
@@ -27,10 +28,41 @@ INCOME = "nettohh_f"  # TODO: is Chekroud bruto? And household or individiual?
 EDUCATION_LEVEL = "oplcat"  # TODO: What exactly in Chekroud?
 PHYSICAL_HEALTH = "ch4"  # TODO: dummies
 # For BMI
-# TODO: Derive BMI
 HEIGHT = "ch16"
 WEIGHT = "ch17"
-DEPRESSION_MEDICATION = "ch178"  # TODO: convert to previous diagnosis (taking medication implies diagnosis) (wack, that won't be easy with wide panel)
+DEPRESSION_MEDICATION = "ch178"
+
+# %% simple preprocessing
+# From Chekroud 2018
+age_cutoffs = pd.IntervalIndex.from_breaks(
+    [-np.inf, 18, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, np.inf],
+    closed="left",
+)
+
+age_labels = [
+    "18-",
+    "18-24 years",
+    "25-29 years",
+    "30-34 years",
+    "35-39 years",
+    "40-44 years",
+    "45-49 years",
+    "50-54 years",
+    "55-59 years",
+    "60-64 years",
+    "65-69 years",
+    "70-74 years",
+    "75-79 years",
+    "80+",
+]
+
+age = select_question_wide(background_vars, AGE)
+
+for column in age:
+    new_column = pd.cut(age[column], bins=age_cutoffs)
+    new_column = new_column.cat.rename_categories(age_labels)
+
+    age[column] = new_column
 
 # %% calculate BMI
 weight = select_question_wide(health_panel, WEIGHT)
@@ -52,7 +84,7 @@ names_depression = [f"{DEPRESSION_MEDICATION}_{year}" for year in sorted(availab
 previous_depression = pd.DataFrame(index=health_panel.index)
 
 for person in previous_depression.index:
-    medication_status: "pd.Series[bool]" = depression.loc[person, names_depression].squeeze()
+    medication_status: pd.Series = depression.loc[person, names_depression].squeeze()
 
     medication_status = medication_status.map(lambda x: x == "yes", na_action="ignore")
 
