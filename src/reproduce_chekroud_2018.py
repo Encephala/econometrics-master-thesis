@@ -21,18 +21,19 @@ UNHAPPY = "ch14"
 SPORTS = "cs104"
 
 AGE = "leeftijd"
-RACE = "herkomstgroep"  # TODO: This one requires some pre-processing, dummies?
+RACE = "herkomstgroep"
 GENDER = "geslacht"
-MARITAL_STATUS = "burgstat"  # TODO: dummies - perhaps "partner" is better, compare to Chekroud
-INCOME = "nettohh_f"  # TODO: is Chekroud bruto? And household or individiual?
+MARITAL_STATUS = "burgstat"
+INCOME = "nettohh_f"
 EDUCATION_LEVEL = "oplcat"  # TODO: What exactly in Chekroud?
+EMPLOYMENT_STATUS = ...  # TODO
 PHYSICAL_HEALTH = "ch4"  # TODO: dummies
 # For BMI
 HEIGHT = "ch16"
 WEIGHT = "ch17"
 DEPRESSION_MEDICATION = "ch178"
 
-# %% simple preprocessing
+# %% age preprocessing
 # From Chekroud 2018
 age_cutoffs = pd.IntervalIndex.from_breaks(
     [-np.inf, 18, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, np.inf],
@@ -62,7 +63,31 @@ for column in age:
     new_column = pd.cut(age[column], bins=age_cutoffs)
     new_column = new_column.cat.rename_categories(age_labels)
 
-    age[column] = new_column
+    age = age.assign(**{column: new_column})  # pyright: ignore[reportCallIssue]
+
+# %% Income preprocessing
+# From Chekroud 2018
+income_cutoffs = pd.IntervalIndex.from_breaks(
+    [-np.inf, 15000, 25000, 35000, 50000, np.inf],
+    closed="left",
+)
+
+income_labels = [
+    "< € 15.000",
+    "€ 15-25.000",
+    "€ 25-35.000",
+    "€ 35-50.000",
+    "> € 50.000",
+]
+
+income = select_question_wide(background_vars, INCOME)
+
+for column in income:
+    new_column = pd.cut(income[column], bins=income_cutoffs)
+    new_column = new_column.cat.rename_categories(income_labels)
+
+    income = income.assign(**{column: new_column})  # pyright: ignore[reportCallIssue]
+
 
 # %% calculate BMI
 weight = select_question_wide(health_panel, WEIGHT)
@@ -74,6 +99,7 @@ for year in available_years(weight):  # Can choose either weight or height, if o
     bmi[f"bmi_{year}"] = weight[f"{WEIGHT}_{year}"] / (height[f"{HEIGHT}_{year}"] / 100) ** 2
 
 # TODO: There's some excessive BMI values, need to filter
+# Also need to then stratify (pd.cut)
 
 # %% determine previous depression status
 depression = select_question_wide(health_panel, DEPRESSION_MEDICATION)
@@ -105,11 +131,11 @@ for person in previous_depression.index:
 # %% the big merge
 all_relevant_data = pd.DataFrame(index=background_vars.index).join(
     [
-        select_question_wide(background_vars, AGE),
+        age,
         select_question_wide(background_vars, RACE),
         select_question_wide(background_vars, GENDER),
         select_question_wide(background_vars, MARITAL_STATUS),
-        select_question_wide(background_vars, INCOME),
+        income,
         select_question_wide(background_vars, EDUCATION_LEVEL),
         select_question_wide(health_panel, PHYSICAL_HEALTH),
         select_question_wide(health_panel, UNHAPPY),
