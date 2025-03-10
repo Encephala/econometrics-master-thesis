@@ -4,7 +4,7 @@ import pandas as pd
 
 
 def select_question_wide(df: pd.DataFrame, question_id: str) -> pd.DataFrame:
-    selected_columns = list(filter(lambda name: name[: name.find("_")] == question_id, df.columns))
+    selected_columns = list(filter(lambda name: name[: name.rfind("_")] == question_id, df.columns))
 
     if len(selected_columns) == 0:
         warnings.warn("No columns selected", stacklevel=2)
