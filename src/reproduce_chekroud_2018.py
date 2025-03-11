@@ -88,16 +88,21 @@ for column in income:
 
 # %% derive employment from primary occupation
 occupation = select_question_wide(background_vars, PRINCIPAL_OCCUPATION)
-EMPLOYED = "Employed"
-SELF_EMPLOYED = "Self-employed"
-OUT_OF_WORK = "Out of work"
-HOMEMAKER = "Homemaker"
-STUDENT = "Student"
-RETIRED = "Retired"
-UNABLE = "Unable to work"
 
-occupation = occupation.replace(
-    {
+
+def merge_and_map_categories(column: pd.Series) -> pd.Series:
+    EMPLOYED = "Employed"
+    SELF_EMPLOYED = "Self-employed"
+    OUT_OF_WORK = "Out of work"
+    HOMEMAKER = "Homemaker"
+    STUDENT = "Student"
+    RETIRED = "Retired"
+    UNABLE = "Unable to work"
+
+    year = column.name[column.name.rfind("_") + 1 :]  # pyright: ignore # noqa: PGH003
+
+    # Map to new codes
+    old_category_to_new_category = {
         "Paid employment": EMPLOYED,
         "Works or assists in family business": EMPLOYED,
         "Autonomous professional, freelancer, or self-employed": SELF_EMPLOYED,
@@ -113,7 +118,17 @@ occupation = occupation.replace(
         "Performs voluntary work": EMPLOYED,
         "Does something else": EMPLOYED,
         "Is too young to have an occupation": STUDENT,
-    },
+    }
+
+    result = pd.Categorical(column.map(old_category_to_new_category))
+
+    return pd.Series(result, name=f"employment_{year}")
+
+
+# Apply column-wise to have cohesive datatype
+occupation = occupation.apply(
+    merge_and_map_categories,
+    axis=0,
 )
 
 # %% calculate BMI
