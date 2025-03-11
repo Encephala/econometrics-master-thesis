@@ -15,7 +15,7 @@ def load_df(path: Path) -> pd.DataFrame:
         result = pd.read_stata(full_path)
 
     else:
-        raise NotImplementedError
+        raise NotImplementedError(f"Invalid suffix {path.suffix}")
 
     return result.set_index("nomem_encr")
 
@@ -27,12 +27,13 @@ def assemble_wide_panel(prefix: str) -> pd.DataFrame:
     result = pd.DataFrame()
 
     for file in Path("../data").glob(prefix + "*"):
+        if file.suffix == ".pkl":
+            warnings.warn(f"Assembling panel for {prefix=} but pickle file already exists ({file})", stacklevel=2)
+            continue
+
         new_df = load_df(file)
 
         # To avoid duplicating columns (mainly 'nohouse_encr')
-        # TODO: This wrongly assumes there's no new data with same column name,
-        # but that's wrong for background variables which always have the same name
-        # Unlucky decision by LISS there 🙃
         new_columns = new_df.columns.difference(result.columns)
 
         result = result.merge(
@@ -52,6 +53,10 @@ def assemble_background_panel() -> pd.DataFrame:
     result = pd.DataFrame()
 
     for file in Path("../data").glob("avars*"):
+        if file.suffix == ".pkl":
+            warnings.warn(f"Assembling panel for avars but pickle file already exists ({file})", stacklevel=2)
+            continue
+
         new_df = load_df(file)
 
         year = file.stem[len("avars_20") :][:2]
@@ -72,7 +77,7 @@ def assemble_background_panel() -> pd.DataFrame:
     return result
 
 
-def load_wide_panel_cached(prefix: str) -> pd.DataFrame:
+def load_wide_panel_cached(prefix: str, *, respect_cache: bool = True) -> pd.DataFrame:
     """`assemble_wide_panel`, but checks for a cached version on file first,
     and creates this cache if it doesn't exist.
 
@@ -80,7 +85,7 @@ def load_wide_panel_cached(prefix: str) -> pd.DataFrame:
 
     path = Path(f"../data/{prefix}_wide.pkl")
 
-    if path.exists():
+    if respect_cache and path.exists():
         return pd.read_pickle(path)  # noqa: S301
 
     assembled = assemble_background_panel() if prefix == "avars" else assemble_wide_panel(prefix)
