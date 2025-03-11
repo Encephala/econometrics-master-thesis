@@ -57,7 +57,7 @@ def assemble_background_panel() -> pd.DataFrame:
         year = file.stem[len("avars_20") :][:2]
         assert year.isnumeric(), f"{year} is not numeric, wrong indices"
 
-        new_df.columns = [f"{column}_{year}" for column in new_df.columns]
+        new_df.columns = [f"{column}_{int(year)}" for column in new_df.columns]
 
         result = result.merge(
             new_df,
