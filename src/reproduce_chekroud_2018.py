@@ -25,12 +25,10 @@ RACE = "herkomstgroep"
 GENDER = "geslacht"
 MARITAL_STATUS = "burgstat"
 INCOME = "nettohh_f"
-EDUCATION_LEVEL = "oplcat"  # TODO: What exactly in Chekroud?
-EMPLOYMENT_STATUS = ...  # TODO
-PHYSICAL_HEALTH = "ch4"  # TODO: dummies
-# For BMI
-HEIGHT = "ch16"
-WEIGHT = "ch17"
+EDUCATION_LEVEL = "oplcat"
+PRINCIPAL_OCCUPATION = "belbezig"  # To derive employment status
+PHYSICAL_HEALTH = "ch4"  # TODO: Chekroud has it as a continuous variable, LISS has ordinal - dummies or bastardly use as interval scale?
+HEIGHT, WEIGHT = "ch16", "ch17"  # For BMI
 DEPRESSION_MEDICATION = "ch178"
 
 # %% age preprocessing
@@ -88,6 +86,35 @@ for column in income:
 
     income = income.assign(**{column: new_column})  # pyright: ignore[reportCallIssue]
 
+# %% derive employment from primary occupation
+occupation = select_question_wide(background_vars, PRINCIPAL_OCCUPATION)
+EMPLOYED = "Employed"
+SELF_EMPLOYED = "Self-employed"
+OUT_OF_WORK = "Out of work"
+HOMEMAKER = "Homemaker"
+STUDENT = "Student"
+RETIRED = "Retired"
+UNABLE = "Unable to work"
+
+occupation = occupation.replace(
+    {
+        "Paid employment": EMPLOYED,
+        "Works or assists in family business": EMPLOYED,
+        "Autonomous professional, freelancer, or self-employed": SELF_EMPLOYED,
+        "Job seeker following job loss": OUT_OF_WORK,
+        "First-time job seeker": OUT_OF_WORK,
+        "Exempted from job seeking following job loss": UNABLE,
+        "Attends school or is studying": STUDENT,
+        "Takes care of the housekeeping": HOMEMAKER,
+        "Is pensioner ([voluntary] early retirement, old age pension scheme)": RETIRED,
+        "Has (partial) work disability": UNABLE,
+        # Not sure about all the ones below, think they're the best?
+        "Performs unpaid work while retaining unemployment benefit": EMPLOYED,
+        "Performs voluntary work": EMPLOYED,
+        "Does something else": EMPLOYED,
+        "Is too young to have an occupation": STUDENT,
+    },
+)
 
 # %% calculate BMI
 weight = select_question_wide(health_panel, WEIGHT)
@@ -131,15 +158,16 @@ for person in previous_depression.index:
 # %% the big merge
 all_relevant_data = pd.DataFrame(index=background_vars.index).join(
     [
+        select_question_wide(health_panel, UNHAPPY),
+        select_question_wide(leisure_panel, SPORTS),
         age,
         select_question_wide(background_vars, RACE),
         select_question_wide(background_vars, GENDER),
         select_question_wide(background_vars, MARITAL_STATUS),
         income,
         select_question_wide(background_vars, EDUCATION_LEVEL),
+        occupation,
         select_question_wide(health_panel, PHYSICAL_HEALTH),
-        select_question_wide(health_panel, UNHAPPY),
-        select_question_wide(leisure_panel, SPORTS),
         bmi,
         previous_depression,
     ]
