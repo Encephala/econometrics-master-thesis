@@ -1,4 +1,4 @@
-from typing import Self, Tuple
+from typing import Self, Sequence, Tuple
 from dataclasses import dataclass, field
 import warnings
 
@@ -6,25 +6,64 @@ import pandas as pd
 
 
 @dataclass(frozen=True)
-class Variable:
-    name: str
-    wave: int
-    named_parameter: str | None = field(default=None, compare=False)
+class VariableDefinition:
+    "A variable in the model."
 
-    def full_name(self) -> str:
-        return f"{self.name}_{self.wave}"
+    name: str
+    is_ordinal: bool = field(default=False, kw_only=True)
+    is_dummy: bool = field(default=False, kw_only=True)
 
     def __str__(self) -> str:
-        if self.named_parameter is not None:
-            return f"{self.named_parameter}*{self.full_name()}"
+        return self.name
 
-        return self.full_name()
+
+@dataclass(frozen=True)
+class VariableInWave:
+    "A variable in the dataset, that is, a specific variable in a specific wave."
+
+    variable: VariableDefinition
+    wave: int
+
+    def __str__(self):
+        return f"{self.variable}_{self.wave}"
+
+
+@dataclass(frozen=True)
+class VariableWithNamedParameter(VariableInWave):
+    "A variable in the dataset that has an associated named parameter."
+
+    parameter: str
+
+    def __str__(self) -> str:
+        return f"{self.parameter}*{super().__str__()}"
+
+
+@dataclass(frozen=True)
+class AvailableVariable:
+    "A variable as available in the data, effectively a parsed column name."
+
+    name: str
+    wave: int
+    dummy_level: str | None = field(default=None)
+
+    @classmethod
+    def from_column_name(cls, column: str) -> Self:
+        name = column[: column.rfind("_")]
+
+        dummy_level = column[: column.rfind("|") + 1 :] if name.find("|") != -1 else None
+
+        if dummy_level is None:
+            wave = int(column[column.rfind("_") + 1 :])
+        else:
+            wave = int(column[column.rfind("_") + 1 : column.find("|")])
+
+        return cls(name, wave, dummy_level)
 
 
 @dataclass(frozen=True)
 class Regression:
-    lval: Variable
-    rvals: list[Variable]
+    lval: VariableInWave
+    rvals: Sequence[VariableInWave]
     wave: int
 
     def __str__(self) -> str:
@@ -36,8 +75,8 @@ class Regression:
 
 @dataclass(frozen=True)
 class Measurement:
-    lval: Variable
-    rvals: list[Variable]
+    lval: VariableInWave
+    rvals: Sequence[VariableInWave]
 
     def __str__(self) -> str:
         return f"{self.lval} =~ {' + '.join(map(str, self.rvals))}"
@@ -48,8 +87,8 @@ class Measurement:
 
 @dataclass(frozen=True)
 class Covariance:
-    lval: Variable
-    rvals: list[Variable]
+    lval: VariableInWave
+    rvals: Sequence[VariableInWave]
 
     def __str__(self) -> str:
         return f"{self.lval} ~~ {' + '.join(map(str, self.rvals))}"
@@ -58,25 +97,22 @@ class Covariance:
         return self.lval.__hash__() + sum((i + 1) * val.__hash__() for i, val in enumerate(self.rvals))
 
 
-class OrdinalVariableSet(set[Variable]):
+class OrdinalVariableSet(set[VariableInWave]):
     def build(self) -> str:
         if len(self) == 0:
             return ""
 
-        return f"DEFINE(ordinal) {' '.join(sorted(variable.full_name() for variable in self))}"
+        return f"DEFINE(ordinal) {' '.join(sorted(str(variable) for variable in self))}"
 
 
 class ModelDefinitionBuilder:
-    y_name: str
-    y_ordinal: bool
+    y: VariableDefinition
     y_lag_structure: list[int]
 
-    x_name: str
-    x_ordinal: bool
+    x: VariableDefinition
     x_lag_structure: list[int]
 
-    w_names: list[str] | None = None
-    w_ordinal: list[bool] | None = None
+    w: list[VariableDefinition] | None = None
 
     def __init__(self):
         self._regressions: list[Regression] = []
@@ -84,11 +120,14 @@ class ModelDefinitionBuilder:
         self._covariances: list[Covariance] = []
         self._ordinals = OrdinalVariableSet()
 
-        self.w_names = []
+        self.w = []
 
-    def with_y(self, name: str, *, lag_structure: list[int] | None = None, ordinal: bool = False) -> Self:
-        self.y_name = name
-        self.y_ordinal = ordinal
+    def with_y(self, y: VariableDefinition, *, lag_structure: list[int] | None = None) -> Self:
+        if y.is_dummy:
+            raise NotImplementedError("Cannot have dependent variable be a dummy variable, must be interval scale.")
+
+        self.y = y
+
         if lag_structure is not None:
             # Zero lag breaks the regression, negative lags break the logic for when the first/last regressions are
             assert all(i > 0 for i in lag_structure) and len(lag_structure) == len(set(lag_structure)), (
@@ -97,11 +136,12 @@ class ModelDefinitionBuilder:
             self.y_lag_structure = lag_structure
         else:
             self.y_lag_structure = []
+
         return self
 
-    def with_x(self, name: str, *, lag_structure: list[int] | None = None, ordinal: bool = False) -> Self:
-        self.x_name = name
-        self.x_ordinal = ordinal
+    def with_x(self, x: VariableDefinition, *, lag_structure: list[int] | None = None) -> Self:
+        self.x = x
+
         if lag_structure is not None:
             # Negative lags break the logic for when the first/last regressions are
             assert all(i >= 0 for i in lag_structure) and len(lag_structure) == len(set(lag_structure)), (
@@ -110,17 +150,17 @@ class ModelDefinitionBuilder:
             self.x_lag_structure = lag_structure
         else:
             self.x_lag_structure = [0]
+
         return self
 
-    def with_w(self, names: list[str], ordinal: list[bool] | None = None) -> Self:
-        self.w_names = names
-        self.w_ordinal = ordinal if ordinal is not None else [False] * len(names)
+    def with_w(self, variables: list[VariableDefinition], ordinal: list[bool] | None = None) -> Self:
+        self.w = variables
+        self.w_ordinal = ordinal if ordinal is not None else [False] * len(variables)
         return self
 
     def build(self, available_columns: "pd.Index[str]") -> str:
-        available_variables = [
-            Variable(column[: column.rfind("_")], int(column[column.rfind("_") + 1 :])) for column in available_columns
-        ]
+        # (name, wave) pairs in the data
+        available_variables = [AvailableVariable.from_column_name(column) for column in available_columns]
 
         first_year_y, last_year_y = self._determine_start_and_end_years(available_variables)
 
@@ -138,12 +178,12 @@ class ModelDefinitionBuilder:
 {self._ordinals.build()}
 """
 
-    def _determine_start_and_end_years(self, available_variables: "list[Variable]") -> Tuple[int, int]:
-        y_years = [variable.wave for variable in available_variables if variable.name == self.y_name]
+    def _determine_start_and_end_years(self, available_variables: list[AvailableVariable]) -> Tuple[int, int]:
+        y_years = [variable.wave for variable in available_variables if variable.name == self.y.name]
         y_start = min(y_years)
         y_end = max(y_years)
 
-        x_years = [variable.wave for variable in available_variables if variable.name == self.x_name]
+        x_years = [variable.wave for variable in available_variables if variable.name == self.x.name]
         x_start = min(x_years)
         x_end = max(x_years)
 
@@ -159,27 +199,29 @@ class ModelDefinitionBuilder:
 
         return first_year_y, last_year_y
 
-    def _build_regressions(self, available_variables: "list[Variable]", first_year_y: int, last_year_y: int):
+    def _build_regressions(self, available_variables: list[AvailableVariable], first_year_y: int, last_year_y: int):
         for year_y in range(first_year_y, last_year_y + 1):
-            y = Variable(self.y_name, year_y)
+            y = VariableInWave(self.y, year_y)
 
-            if y not in available_variables:
+            available_variable_names = [variable.name for variable in available_variables]
+
+            if y.variable.name not in available_variable_names:
                 warnings.warn(f"{y=} not found in data, skipping regression", stacklevel=2)
                 continue
 
-            y_lags = [Variable(self.y_name, year_y - lag, f"rho{lag}") for lag in self.y_lag_structure]
-            x_lags = [Variable(self.x_name, year_y - lag, f"beta{lag}") for lag in self.x_lag_structure]
+            y_lags = [VariableWithNamedParameter(self.y, year_y - lag, f"rho{lag}") for lag in self.y_lag_structure]
+            x_lags = [VariableWithNamedParameter(self.x, year_y - lag, f"beta{lag}") for lag in self.x_lag_structure]
 
             w = (
-                [Variable(name, year_y, f"delta0_{j}") for j, name in enumerate(self.w_names)]
-                if self.w_names is not None
+                [VariableWithNamedParameter(name, year_y, f"delta0_{j}") for j, name in enumerate(self.w)]
+                if self.w is not None
                 else []
             )
 
             if (
-                any(variable not in available_variables for variable in y_lags)
-                or any(variable not in available_variables for variable in x_lags)
-                or any(variable not in available_variables for variable in w)
+                any(variable.variable.name not in available_variable_names for variable in y_lags)
+                or any(variable.variable.name not in available_variable_names for variable in x_lags)
+                or any(variable.variable.name not in available_variable_names for variable in w)
             ):
                 warnings.warn(
                     f"For {y=}, one of {y_lags=}, {x_lags=} or {w=} was not in the data, skipping regression",
@@ -193,10 +235,10 @@ class ModelDefinitionBuilder:
 
             # All y_lags and x_lags are included as regressors,
             # so don't have to check with self._regressions_contain here
-            if self.y_ordinal:
+            if self.y.is_ordinal:
                 self._ordinals.update(y_lags)
 
-            if self.x_ordinal:
+            if self.x.is_ordinal:
                 self._ordinals.update(x_lags)
 
             w_ordinal = self.w_ordinal if self.w_ordinal is not None else []
@@ -205,23 +247,23 @@ class ModelDefinitionBuilder:
                     self._ordinals.add(variable)
 
             # Fix variance for y to be constant in time
-            self._covariances.append(Covariance(y, [Variable(y.name, y.wave, "sigma")]))
+            self._covariances.append(Covariance(y, [VariableWithNamedParameter(y.variable, y.wave, "sigma")]))
 
     # Allow for pre-determined variables, i.e. arbitrary correlation between x and previous values of y
     # NOTE: The very first value of y in the data is considered exogenous and thus it can't be correlated with future x
     def _make_x_predetermined(self):
         # Establish list of used regressors, as defining covariances between y and unused x is meaningless
         # (and causes the model to crash)
-        all_regressors = []
+        all_regressors: list[VariableInWave] = []
         for regression in self._regressions:
             all_regressors.extend(rval for rval in regression.rvals if rval not in all_regressors)
 
         for regression in self._regressions:
             y_current = regression.lval
             x_future = [
-                Variable(variable.name, variable.wave, f"gamma{variable.wave - regression.wave}")
+                VariableWithNamedParameter(variable.variable, variable.wave, f"gamma{variable.wave - regression.wave}")
                 for variable in all_regressors
-                if variable.name == self.x_name and variable.wave > regression.wave
+                if variable.variable == self.x and variable.wave > regression.wave
             ]
 
             if len(x_future) != 0:

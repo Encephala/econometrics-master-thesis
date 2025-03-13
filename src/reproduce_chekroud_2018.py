@@ -10,9 +10,8 @@ from util.data import (
     standardise_wide_column_name,
     select_question_wide,
     available_years,
-    fix_column_categories,
 )
-from util.model import ModelDefinitionBuilder
+from util.model import ModelDefinitionBuilder, VariableDefinition
 
 
 # %% data loading
@@ -31,7 +30,7 @@ MARITAL_STATUS = "burgstat"
 INCOME = "nettohh_f"
 EDUCATION_LEVEL = "oplcat"
 PRINCIPAL_OCCUPATION = "belbezig"  # To derive employment status
-PHYSICAL_HEALTH = "ch4"  # TODO: Chekroud has it as a continuous variable, LISS has ordinal - dummies or bastardly use as interval scale?
+PHYSICAL_HEALTH = "ch4"
 HEIGHT, WEIGHT = "ch16", "ch17"  # For BMI
 DEPRESSION_MEDICATION = "ch178"
 
@@ -129,11 +128,16 @@ def merge_and_map_categories(column: pd.Series) -> pd.Series:
     return pd.Series(result, name=f"employment_{year}")
 
 
+EMPLOYMENT = "employment"
+
 # Apply column-wise to have cohesive datatype
-employment = occupation.apply(
-    merge_and_map_categories,
-    axis=0,
-)
+employment = occupation.apply(merge_and_map_categories)
+new_column_names = []
+for column in employment.columns:
+    year = column[column.rfind("_") + 1 :]
+
+    new_column_names.append(f"{EMPLOYMENT}_{year}")
+employment.columns = new_column_names
 
 # %% calculate BMI
 weight = select_question_wide(health_panel, WEIGHT)
@@ -141,8 +145,10 @@ height = select_question_wide(health_panel, HEIGHT)
 
 bmi = pd.DataFrame(index=health_panel.index)
 
+BMI = "bmi"
+
 for year in available_years(weight):  # Can choose either weight or height, if one is missing answer is NA anyways
-    bmi[f"bmi_{year}"] = weight[f"{WEIGHT}_{year}"] / (height[f"{HEIGHT}_{year}"] / 100) ** 2
+    bmi[f"{BMI}_{year}"] = weight[f"{WEIGHT}_{year}"] / (height[f"{HEIGHT}_{year}"] / 100) ** 2
 
 # TODO: There's some excessive BMI values, need to filter
 # Also need to then stratify (pd.cut)
@@ -154,6 +160,7 @@ years_depression = sorted(available_years(depression))
 names_depression = [f"{DEPRESSION_MEDICATION}_{year}" for year in sorted(available_years(depression))]
 
 previous_depression = pd.DataFrame(index=health_panel.index)
+PREVIOUS_DEPRESSION = "prev_depr"
 
 for person in previous_depression.index:
     medication_status: pd.Series = depression.loc[person, names_depression].squeeze()
@@ -172,12 +179,15 @@ for person in previous_depression.index:
             else:
                 cumulative_medication_status = cumulative_medication_status or medication_status[previous_year_name]
 
-        previous_depression.loc[person, f"prev_depr_{year}"] = cumulative_medication_status
+        previous_depression.loc[person, f"{PREVIOUS_DEPRESSION}_{year}"] = cumulative_medication_status
 
 # Fix dtype, pandas doesn't automatically recognise a combination of NA and bool is just nullable boolean
 previous_depression = previous_depression.astype("boolean")
 
 # %% the big merge
+# TODO: Make dummies out of variables where appropriate
+# TODO: Add constant
+# NOTE: Use | as dummy separator, drop first for identification
 all_relevant_data = pd.DataFrame(index=background_vars.index).join(
     [
         select_question_wide(health_panel, UNHAPPY),
@@ -201,19 +211,30 @@ all_relevant_data = all_relevant_data[sorted(all_relevant_data.columns)]
 # %% naive model definition
 model_definition = (
     ModelDefinitionBuilder()
-    .with_y(UNHAPPY, lag_structure=[])
-    .with_x(SPORTS)
+    .with_y(VariableDefinition(UNHAPPY))
+    .with_x(VariableDefinition(SPORTS))
     .with_w(
-        [AGE, RACE, GENDER, MARITAL_STATUS, INCOME, EDUCATION_LEVEL, "belbezig", PHYSICAL_HEALTH, "bmi", "prev_depr"]
+        [
+            VariableDefinition(AGE, is_dummy=True),
+            VariableDefinition(RACE, is_dummy=True),
+            VariableDefinition(GENDER, is_dummy=True),
+            VariableDefinition(MARITAL_STATUS, is_dummy=True),
+            VariableDefinition(INCOME, is_dummy=True),
+            VariableDefinition(EDUCATION_LEVEL, is_dummy=True),
+            VariableDefinition(EMPLOYMENT, is_dummy=True),
+            VariableDefinition(PHYSICAL_HEALTH, is_dummy=True),
+            VariableDefinition(BMI, is_dummy=True),
+            VariableDefinition(PREVIOUS_DEPRESSION, is_dummy=True),
+        ]
     )
     .build(all_relevant_data.columns)
 )
 
 print(model_definition)
 
-# %% naive model
-model = semopy.Model(model_definition)
+model = semopy.Model(model_definition)  # %% naive model
 
+# %% naive model
 optimisation_result = model.fit(all_relevant_data)
 
 print(optimisation_result)

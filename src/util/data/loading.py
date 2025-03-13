@@ -81,7 +81,7 @@ def load_wide_panel_cached(prefix: str, *, respect_cache: bool = True) -> pd.Dat
     """`assemble_wide_panel`, but checks for a cached version on file first,
     and creates this cache if it doesn't exist.
 
-    Note to self: no cache invalidation happens :^)."""
+    Note to self: no automatic cache invalidation happens :^)."""
 
     path = Path(f"../data/{prefix}_wide.pkl")
 
