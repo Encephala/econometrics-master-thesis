@@ -69,9 +69,6 @@ class Regression:
     def __str__(self) -> str:
         return f"{self.lval} ~ {' + '.join(map(str, self.rvals))}"
 
-    def __hash__(self) -> int:
-        return self.lval.__hash__() + sum((i + 1) * val.__hash__() for i, val in enumerate(self.rvals))
-
 
 @dataclass(frozen=True)
 class Measurement:
@@ -81,9 +78,6 @@ class Measurement:
     def __str__(self) -> str:
         return f"{self.lval} =~ {' + '.join(map(str, self.rvals))}"
 
-    def __hash__(self) -> int:
-        return self.lval.__hash__() + sum((i + 1) * val.__hash__() for i, val in enumerate(self.rvals))
-
 
 @dataclass(frozen=True)
 class Covariance:
@@ -92,9 +86,6 @@ class Covariance:
 
     def __str__(self) -> str:
         return f"{self.lval} ~~ {' + '.join(map(str, self.rvals))}"
-
-    def __hash__(self) -> int:
-        return self.lval.__hash__() + sum((i + 1) * val.__hash__() for i, val in enumerate(self.rvals))
 
 
 class OrdinalVariableSet(set[VariableInWave]):
