@@ -54,7 +54,10 @@ def assemble_background_panel() -> pd.DataFrame:
 
     for file in Path("../data").glob("avars*"):
         if file.suffix == ".pkl":
-            warnings.warn(f"Assembling panel for avars but pickle file already exists ({file})", stacklevel=2)
+            warnings.warn(
+                f"Assembling panel for avars but pickle file already exists ({file}), overwriting pickle",
+                stacklevel=2,
+            )
             continue
 
         new_df = load_df(file)
