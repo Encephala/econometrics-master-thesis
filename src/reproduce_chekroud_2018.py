@@ -3,12 +3,16 @@
 import pandas as pd
 import numpy as np
 
+import semopy
+
 from util.data import (
     load_wide_panel_cached,
     standardise_wide_column_name,
     select_question_wide,
     available_years,
+    fix_column_categories,
 )
+from util.model import ModelDefinitionBuilder
 
 
 # %% data loading
@@ -126,7 +130,7 @@ def merge_and_map_categories(column: pd.Series) -> pd.Series:
 
 
 # Apply column-wise to have cohesive datatype
-occupation = occupation.apply(
+employment = occupation.apply(
     merge_and_map_categories,
     axis=0,
 )
@@ -170,6 +174,9 @@ for person in previous_depression.index:
 
         previous_depression.loc[person, f"prev_depr_{year}"] = cumulative_medication_status
 
+# Fix dtype, pandas doesn't automatically recognise a combination of NA and bool is just nullable boolean
+previous_depression = previous_depression.astype("boolean")
+
 # %% the big merge
 all_relevant_data = pd.DataFrame(index=background_vars.index).join(
     [
@@ -181,9 +188,34 @@ all_relevant_data = pd.DataFrame(index=background_vars.index).join(
         select_question_wide(background_vars, MARITAL_STATUS),
         income,
         select_question_wide(background_vars, EDUCATION_LEVEL),
-        occupation,
+        employment,
         select_question_wide(health_panel, PHYSICAL_HEALTH),
         bmi,
         previous_depression,
     ]
 )
+
+# Sort columns
+all_relevant_data = all_relevant_data[sorted(all_relevant_data.columns)]
+
+# %% naive model definition
+model_definition = (
+    ModelDefinitionBuilder()
+    .with_y(UNHAPPY, lag_structure=[])
+    .with_x(SPORTS)
+    .with_w(
+        [AGE, RACE, GENDER, MARITAL_STATUS, INCOME, EDUCATION_LEVEL, "belbezig", PHYSICAL_HEALTH, "bmi", "prev_depr"]
+    )
+    .build(all_relevant_data.columns)
+)
+
+print(model_definition)
+
+# %% naive model
+model = semopy.Model(model_definition)
+
+optimisation_result = model.fit(all_relevant_data)
+
+print(optimisation_result)
+
+model.inspect().sort_values(["op", "Estimate", "lval"])  # pyright: ignore[reportOptionalMemberAccess, reportAttributeAccessIssue]
