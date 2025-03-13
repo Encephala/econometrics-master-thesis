@@ -91,7 +91,9 @@ class ModelDefinitionBuilder:
         self.y_ordinal = ordinal
         if lag_structure is not None:
             # Zero lag breaks the regression, negative lags break the logic for when the first/last regressions are
-            assert all(i > 0 for i in lag_structure), "Invalid lags provided for y"
+            assert all(i > 0 for i in lag_structure) and len(lag_structure) == len(set(lag_structure)), (
+                "Invalid lags provided for y"
+            )
             self.y_lag_structure = lag_structure
         else:
             self.y_lag_structure = [1]
@@ -102,7 +104,9 @@ class ModelDefinitionBuilder:
         self.x_ordinal = ordinal
         if lag_structure is not None:
             # Negative lags break the logic for when the first/last regressions are
-            assert all(i >= 0 for i in lag_structure), "Invalid lags provided for x"
+            assert all(i >= 0 for i in lag_structure) and len(lag_structure) == len(set(lag_structure)), (
+                "Invalid lags provided for x"
+            )
             self.x_lag_structure = lag_structure
         else:
             self.x_lag_structure = [0]
@@ -147,7 +151,8 @@ class ModelDefinitionBuilder:
         # but then we have to also add those columns to the df to prevent index errors.
         # If x goes far enough back, the first regression is when y starts
         # else, start as soon as we can due to x
-        first_year_y = max(y_start + max(self.y_lag_structure), x_start + max(self.x_lag_structure))
+        max_y_lag = max(self.y_lag_structure) if len(self.y_lag_structure) > 0 else 0
+        first_year_y = max(y_start + max_y_lag, x_start + max(self.x_lag_structure))
         # If x does not go far enough forward, stop when x_stops
         # else, stop when y stops
         last_year_y = min(x_end + min(self.x_lag_structure), y_end)
