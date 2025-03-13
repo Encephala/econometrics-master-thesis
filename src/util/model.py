@@ -96,7 +96,7 @@ class ModelDefinitionBuilder:
             )
             self.y_lag_structure = lag_structure
         else:
-            self.y_lag_structure = [1]
+            self.y_lag_structure = []
         return self
 
     def with_x(self, name: str, *, lag_structure: list[int] | None = None, ordinal: bool = False) -> Self:
