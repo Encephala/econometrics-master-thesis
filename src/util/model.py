@@ -1,3 +1,4 @@
+from itertools import chain
 from typing import Self, Sequence, Tuple
 from dataclasses import dataclass, field
 import warnings
@@ -24,8 +25,14 @@ class VariableInWave:
     variable: VariableDefinition
     wave: int
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"{self.variable}_{self.wave}"
+
+    # For the name without any potential named parameter as in the subclass below.
+    def full_name(self) -> str:
+        # Hardcoded class rather than self because self.__str__ dynamically dispatches
+        # to potentially overridden versions of dunder str
+        return VariableInWave.__str__(self)
 
 
 @dataclass(frozen=True)
@@ -58,6 +65,14 @@ class AvailableVariable:
             wave = int(column[column.rfind("_") + 1 : column.find("|")])
 
         return cls(name, wave, dummy_level)
+
+    def __str__(self) -> str:
+        result = f"{self.name}_{self.wave}"
+
+        if self.dummy_level is not None:
+            result += f"|{self.dummy_level}"
+
+        return result
 
 
 @dataclass(frozen=True)
@@ -194,9 +209,9 @@ class ModelDefinitionBuilder:
         for year_y in range(first_year_y, last_year_y + 1):
             y = VariableInWave(self.y, year_y)
 
-            available_variable_names = [variable.name for variable in available_variables]
+            available_variable_names = [str(variable) for variable in available_variables]
 
-            if y.variable.name not in available_variable_names:
+            if y.full_name() not in available_variable_names:
                 warnings.warn(f"{y=} not found in data, skipping regression", stacklevel=2)
                 continue
 
@@ -209,13 +224,9 @@ class ModelDefinitionBuilder:
                 else []
             )
 
-            if (
-                any(variable.variable.name not in available_variable_names for variable in y_lags)
-                or any(variable.variable.name not in available_variable_names for variable in x_lags)
-                or any(variable.variable.name not in available_variable_names for variable in w)
-            ):
+            if (missing_var := self._find_missing_variables(available_variable_names, y_lags, x_lags, w)) is not None:
                 warnings.warn(
-                    f"For {y=}, one of {y_lags=}, {x_lags=} or {w=} was not in the data, skipping regression",
+                    f"For {y=}, {missing_var.full_name()} was not in the data, skipping regression",
                     stacklevel=2,
                 )
                 # TODO: Is there a better option than ditching the whole regression because one of the vars is missing?
@@ -239,6 +250,23 @@ class ModelDefinitionBuilder:
 
             # Fix variance for y to be constant in time
             self._covariances.append(Covariance(y, [VariableWithNamedParameter(y.variable, y.wave, "sigma")]))
+
+    def _find_missing_variables(
+        self,
+        available_variables_names: list[str],
+        y_lags: Sequence[VariableInWave],
+        x_lags: Sequence[VariableInWave],
+        w: Sequence[VariableInWave],
+    ) -> VariableInWave | None:
+        """Checks if all the regressors are in the data.
+
+        If one is missing, returns it.
+        Returns `None` if all variables are found."""
+        for variable in chain(y_lags, x_lags, w):
+            if variable.full_name() not in available_variables_names:
+                return variable
+
+        return None
 
     # Allow for pre-determined variables, i.e. arbitrary correlation between x and previous values of y
     # NOTE: The very first value of y in the data is considered exogenous and thus it can't be correlated with future x
