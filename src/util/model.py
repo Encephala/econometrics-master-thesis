@@ -51,38 +51,41 @@ class AvailableVariable:
 
     name: str
     wave: int
-    dummy_level: str | None = field(default=None)
 
     @classmethod
     def from_column_name(cls, column: str) -> Self:
+        index_underscore = column.rfind("_")
+        if index_underscore == -1:
+            raise ValueError(f'Column "{column}" is not in wide format (<variable>_<year>).')  # noqa: TRY003
+
         name = column[: column.rfind("_")]
 
-        dummy_level = column[: column.rfind("|") + 1 :] if name.find("|") != -1 else None
+        has_dummy_level = column.find("|") != -1
 
-        if dummy_level is None:
-            wave = int(column[column.rfind("_") + 1 :])
-        else:
+        if has_dummy_level:
             wave = int(column[column.rfind("_") + 1 : column.find("|")])
+        else:
+            wave = int(column[column.rfind("_") + 1 :])
 
-        return cls(name, wave, dummy_level)
+        return cls(name, wave)
 
-    def __str__(self) -> str:
-        result = f"{self.name}_{self.wave}"
-
-        if self.dummy_level is not None:
-            result += f"|{self.dummy_level}"
-
-        return result
+    def full_name(self) -> str:
+        return f"{self.name}_{self.wave}"
 
 
 @dataclass(frozen=True)
 class Regression:
     lval: VariableInWave
     rvals: Sequence[VariableInWave]
-    wave: int
+    constant_name: str | None = field(default=None)
 
     def __str__(self) -> str:
-        return f"{self.lval} ~ {' + '.join(map(str, self.rvals))}"
+        return (
+            f"{self.lval}"
+            " ~ "
+            f"{f'alpha*{self.constant_name} + ' if self.constant_name is not None else ''}"
+            f"{' + '.join(map(str, self.rvals))}"
+        )
 
 
 @dataclass(frozen=True)
@@ -119,10 +122,11 @@ class ModelDefinitionBuilder:
     x_lag_structure: list[int]
 
     w: list[VariableDefinition] | None = None
+    constant: str | None = None
 
     def __init__(self):
         self._regressions: list[Regression] = []
-        self._measurements: list[Measurement] = []
+        self._measurements: list[Measurement] = []  # Unused (for now)
         self._covariances: list[Covariance] = []
         self._ordinals = OrdinalVariableSet()
 
@@ -164,9 +168,18 @@ class ModelDefinitionBuilder:
         self.w_ordinal = ordinal if ordinal is not None else [False] * len(variables)
         return self
 
+    def with_constant(self, constant_name: str) -> Self:
+        self.constant = constant_name
+        return self
+
     def build(self, available_columns: "pd.Index[str]") -> str:
         # (name, wave) pairs in the data
-        available_variables = [AvailableVariable.from_column_name(column) for column in available_columns]
+        # Ignoring the constant, as it is included in the regressions directly,
+        # and does not have an associated wave.
+        available_variables = [
+            AvailableVariable.from_column_name(column)
+            for column in available_columns.drop(self.constant, errors="ignore")
+        ]
 
         first_year_y, last_year_y = self._determine_start_and_end_years(available_variables)
 
@@ -209,7 +222,7 @@ class ModelDefinitionBuilder:
         for year_y in range(first_year_y, last_year_y + 1):
             y = VariableInWave(self.y, year_y)
 
-            available_variable_names = [str(variable) for variable in available_variables]
+            available_variable_names = [variable.full_name() for variable in available_variables]
 
             if y.full_name() not in available_variable_names:
                 warnings.warn(f"{y=} not found in data, skipping regression", stacklevel=2)
@@ -233,7 +246,7 @@ class ModelDefinitionBuilder:
                 continue
 
             rvals = [*y_lags, *x_lags, *w]
-            self._regressions.append(Regression(y, rvals, year_y))
+            self._regressions.append(Regression(y, rvals, constant_name=self.constant))
 
             # All y_lags and x_lags are included as regressors,
             # so don't have to check with self._regressions_contain here
@@ -280,9 +293,11 @@ class ModelDefinitionBuilder:
         for regression in self._regressions:
             y_current = regression.lval
             x_future = [
-                VariableWithNamedParameter(variable.variable, variable.wave, f"gamma{variable.wave - regression.wave}")
+                VariableWithNamedParameter(
+                    variable.variable, variable.wave, f"gamma{variable.wave - regression.lval.wave}"
+                )
                 for variable in all_regressors
-                if variable.variable == self.x and variable.wave > regression.wave
+                if variable.variable == self.x and variable.wave > regression.lval.wave
             ]
 
             if len(x_future) != 0:
