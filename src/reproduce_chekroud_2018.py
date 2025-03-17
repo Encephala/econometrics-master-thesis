@@ -185,48 +185,57 @@ for person in previous_depression.index:
 previous_depression = previous_depression.astype("boolean")
 
 # %% the big merge
-# TODO: Make dummies out of variables where appropriate
-# TODO: Add constant
-# NOTE: Use | as dummy separator, drop first for identification
+CONSTANT = "const"
+
+# TODO: Remove all prefixes from category names somewhere in the code (probably loading, not here?) ( :^) )
+# NOTE: Use | as dummy separator to not conflict with <question>_<year>, drop first for identification
 all_relevant_data = pd.DataFrame(index=background_vars.index).join(
     [
+        pd.Series(1, index=background_vars.index, name=CONSTANT),
         select_question_wide(health_panel, UNHAPPY),
         select_question_wide(leisure_panel, SPORTS),
-        age,
-        select_question_wide(background_vars, RACE),
-        select_question_wide(background_vars, GENDER),
-        select_question_wide(background_vars, MARITAL_STATUS),
-        income,
-        select_question_wide(background_vars, EDUCATION_LEVEL),
-        employment,
-        select_question_wide(health_panel, PHYSICAL_HEALTH),
-        bmi,
-        previous_depression,
+        pd.get_dummies(age, prefix_sep="|", dummy_na=True, drop_first=True),
+        pd.get_dummies(select_question_wide(background_vars, RACE), prefix_sep="|", dummy_na=True, drop_first=True),
+        pd.get_dummies(select_question_wide(background_vars, GENDER), prefix_sep="|", dummy_na=True, drop_first=True),
+        pd.get_dummies(
+            select_question_wide(background_vars, MARITAL_STATUS), prefix_sep="|", dummy_na=True, drop_first=True
+        ),
+        pd.get_dummies(income, prefix_sep="|", dummy_na=True, drop_first=True),
+        pd.get_dummies(
+            select_question_wide(background_vars, EDUCATION_LEVEL), prefix_sep="|", dummy_na=True, drop_first=True
+        ),
+        pd.get_dummies(employment, prefix_sep="|", dummy_na=True, drop_first=True),
+        pd.get_dummies(
+            select_question_wide(health_panel, PHYSICAL_HEALTH), prefix_sep="|", dummy_na=True, drop_first=True
+        ),
+        pd.get_dummies(bmi, prefix_sep="|", dummy_na=True, drop_first=True),
+        pd.get_dummies(previous_depression, prefix_sep="|", dummy_na=True, drop_first=True),
     ]
 )
 
 # Sort columns
 all_relevant_data = all_relevant_data[sorted(all_relevant_data.columns)]
 
+all_controls = [
+    AGE,
+    RACE,
+    GENDER,
+    MARITAL_STATUS,
+    INCOME,
+    EDUCATION_LEVEL,
+    EMPLOYMENT,
+    PHYSICAL_HEALTH,
+    BMI,
+    PREVIOUS_DEPRESSION,
+]
+
 # %% naive model definition
 model_definition = (
     ModelDefinitionBuilder()
     .with_y(VariableDefinition(UNHAPPY))
     .with_x(VariableDefinition(SPORTS))
-    .with_w(
-        [
-            VariableDefinition(AGE, is_dummy=True),
-            VariableDefinition(RACE, is_dummy=True),
-            VariableDefinition(GENDER, is_dummy=True),
-            VariableDefinition(MARITAL_STATUS, is_dummy=True),
-            VariableDefinition(INCOME, is_dummy=True),
-            VariableDefinition(EDUCATION_LEVEL, is_dummy=True),
-            VariableDefinition(EMPLOYMENT, is_dummy=True),
-            VariableDefinition(PHYSICAL_HEALTH, is_dummy=True),
-            VariableDefinition(BMI, is_dummy=True),
-            VariableDefinition(PREVIOUS_DEPRESSION, is_dummy=True),
-        ]
-    )
+    .with_constant(CONSTANT)
+    .with_w([VariableDefinition(variable, is_dummy=True) for variable in all_controls])  # All are dummies for now
     .build(all_relevant_data.columns)
 )
 
