@@ -14,7 +14,7 @@ class VariableDefinition:
     is_ordinal: bool = field(default=False, kw_only=True)
     is_dummy: bool = field(default=False, kw_only=True)
 
-    def __str__(self) -> str:
+    def build(self) -> str:
         return self.name
 
 
@@ -25,14 +25,14 @@ class VariableInWave:
     variable: VariableDefinition
     wave: int
 
-    def __str__(self) -> str:
-        return f"{self.variable}_{self.wave}"
+    def build(self) -> str:
+        return f"{self.variable.build()}_{self.wave}"
 
     # For the name without any potential named parameter as in the subclass below.
     def full_name(self) -> str:
-        # Hardcoded class rather than self because self.__str__ dynamically dispatches
+        # Hardcoded class rather than self because self.build dynamically dispatches
         # to potentially overridden versions of dunder str
-        return VariableInWave.__str__(self)
+        return VariableInWave.build(self)
 
 
 @dataclass(frozen=True)
@@ -41,8 +41,8 @@ class VariableWithNamedParameter(VariableInWave):
 
     parameter: str
 
-    def __str__(self) -> str:
-        return f"{self.parameter}*{super().__str__()}"
+    def build(self) -> str:
+        return f"{self.parameter}*{super().build()}"
 
 
 @dataclass(frozen=True)
@@ -79,12 +79,12 @@ class Regression:
     rvals: Sequence[VariableInWave]
     constant_name: str | None = field(default=None)
 
-    def __str__(self) -> str:
+    def build(self) -> str:
         return (
-            f"{self.lval}"
+            f"{self.lval.build()}"
             " ~ "
             f"{f'alpha*{self.constant_name} + ' if self.constant_name is not None else ''}"
-            f"{' + '.join(map(str, self.rvals))}"
+            f"{' + '.join(rval.build() for rval in self.rvals)}"
         )
 
 
@@ -93,8 +93,8 @@ class Measurement:
     lval: VariableInWave
     rvals: Sequence[VariableInWave]
 
-    def __str__(self) -> str:
-        return f"{self.lval} =~ {' + '.join(map(str, self.rvals))}"
+    def build(self) -> str:
+        return f"{self.lval.build()} =~ {' + '.join(rval.build() for rval in self.rvals)}"
 
 
 @dataclass(frozen=True)
@@ -102,8 +102,8 @@ class Covariance:
     lval: VariableInWave
     rvals: Sequence[VariableInWave]
 
-    def __str__(self) -> str:
-        return f"{self.lval} ~~ {' + '.join(map(str, self.rvals))}"
+    def build(self) -> str:
+        return f"{self.lval.build()} ~~ {' + '.join(rval.build() for rval in self.rvals)}"
 
 
 class OrdinalVariableSet(set[VariableInWave]):
@@ -111,7 +111,7 @@ class OrdinalVariableSet(set[VariableInWave]):
         if len(self) == 0:
             return ""
 
-        return f"DEFINE(ordinal) {' '.join(sorted(str(variable) for variable in self))}"
+        return f"DEFINE(ordinal) {' '.join(sorted(variable.build() for variable in self))}"
 
 
 class ModelDefinitionBuilder:
@@ -188,11 +188,11 @@ class ModelDefinitionBuilder:
         self._make_x_predetermined()
 
         return f"""# Regressions (structural part)
-{"\n".join([*map(str, self._regressions), ""])}
+{"\n".join([*map(Regression.build, self._regressions), ""])}
 # Measurement part
-{"\n".join([*map(str, self._measurements), ""])}
+{"\n".join([*map(Measurement.build, self._measurements), ""])}
 # Additional covariances
-{"\n".join([*map(str, self._covariances), ""])}
+{"\n".join([*map(Covariance.build, self._covariances), ""])}
 # Operations/constraints
 {self._ordinals.build()}
 """
