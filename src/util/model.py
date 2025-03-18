@@ -257,13 +257,23 @@ class ModelDefinitionBuilder:
 
             w = self._compile_w(year_y)
 
-            if (missing_var := self._find_missing_variables(available_variables, y_lags, x_lags, w)) is not None:
+            if (missing_info := self._find_missing_variables(available_variables, y_lags, x_lags, w)) is not None:
+                missing_variables, is_dummy = missing_info
+
+                if not is_dummy:
+                    # There's only one VariableInWave in missing_variables if it's not a dummy
+                    warnings.warn(
+                        f"For {y=}, {missing_variables[0]} was not in the data, skipping regression",
+                        stacklevel=2,
+                    )
+                    # TODO: Is there a better option than ditching the whole regression
+                    # because one of the vars is missing?
+                    continue
+
                 warnings.warn(
-                    f"For {y=}, {missing_var} was not in the data, skipping regression",
+                    f"For {y=}, the dummy levels {missing_variables} were not in the data, still including regression",
                     stacklevel=2,
                 )
-                # TODO: Is there a better option than ditching the whole regression because one of the vars is missing?
-                continue
 
             rvals = [*y_lags, *x_lags, *w]
             self._regressions.append(Regression(y, rvals, constant=self.constant))
@@ -308,14 +318,23 @@ class ModelDefinitionBuilder:
         y_lags: Collection[VariableInWave],
         x_lags: Collection[VariableInWave],
         w: Collection[VariableInWave],
-    ) -> VariableInWave | None:
+    ) -> Tuple[list[VariableInWave], bool] | None:
         """Checks if all the regressors are in the data.
 
-        If one is missing, returns it.
+        If a variable is missing, returns ([variable], False).
+        If just a dummy level of a variable is missing, returns ([levels], True)
         Returns `None` if all variables are found."""
+        missing_dummies = []
+
         for variable in chain(y_lags, x_lags, w):
             if not variable.is_in(available_variables):
-                return variable
+                if variable.dummy_level is None:
+                    return [variable], False
+
+                missing_dummies.append(variable)
+
+        if len(missing_dummies) != 0:
+            return missing_dummies, True
 
         return None
 
