@@ -8,8 +8,9 @@ import semopy
 from util.data import (
     load_wide_panel_cached,
     standardise_wide_column_name,
-    select_question_wide,
+    select_variable_wide,
     available_years,
+    available_dummy_levels,
 )
 from util.model import ModelDefinitionBuilder, VariableDefinition
 
@@ -58,7 +59,7 @@ age_labels = [
     "80+",
 ]
 
-age = select_question_wide(background_vars, AGE)
+age = select_variable_wide(background_vars, AGE)
 
 for column in age:
     new_column = pd.cut(age[column], bins=age_cutoffs)
@@ -81,7 +82,7 @@ income_labels = [
     "> € 50.000",
 ]
 
-income = select_question_wide(background_vars, INCOME)
+income = select_variable_wide(background_vars, INCOME)
 
 for column in income:
     new_column = pd.cut(income[column], bins=income_cutoffs)
@@ -90,7 +91,7 @@ for column in income:
     income = income.assign(**{column: new_column})  # pyright: ignore[reportCallIssue]
 
 # %% derive employment from primary occupation
-occupation = select_question_wide(background_vars, PRINCIPAL_OCCUPATION)
+occupation = select_variable_wide(background_vars, PRINCIPAL_OCCUPATION)
 
 
 def merge_and_map_categories(column: pd.Series) -> pd.Series:
@@ -140,8 +141,8 @@ for column in employment.columns:
 employment.columns = new_column_names
 
 # %% calculate BMI
-weight = select_question_wide(health_panel, WEIGHT)
-height = select_question_wide(health_panel, HEIGHT)
+weight = select_variable_wide(health_panel, WEIGHT)
+height = select_variable_wide(health_panel, HEIGHT)
 
 bmi = pd.DataFrame(index=health_panel.index)
 
@@ -154,7 +155,7 @@ for year in available_years(weight):  # Can choose either weight or height, if o
 # Also need to then stratify (pd.cut)
 
 # %% determine previous depression status
-depression = select_question_wide(health_panel, DEPRESSION_MEDICATION)
+depression = select_variable_wide(health_panel, DEPRESSION_MEDICATION)
 
 years_depression = sorted(available_years(depression))
 names_depression = [f"{DEPRESSION_MEDICATION}_{year}" for year in sorted(available_years(depression))]
@@ -192,24 +193,24 @@ CONSTANT = "const"
 all_relevant_data = pd.DataFrame(index=background_vars.index).join(
     [
         pd.Series(1, index=background_vars.index, name=CONSTANT),
-        select_question_wide(health_panel, UNHAPPY),
-        select_question_wide(leisure_panel, SPORTS),
+        select_variable_wide(health_panel, UNHAPPY),
+        select_variable_wide(leisure_panel, SPORTS),
         pd.get_dummies(age, prefix_sep="|", dummy_na=True, drop_first=True),
-        pd.get_dummies(select_question_wide(background_vars, RACE), prefix_sep="|", dummy_na=True, drop_first=True),
-        pd.get_dummies(select_question_wide(background_vars, GENDER), prefix_sep="|", dummy_na=True, drop_first=True),
+        pd.get_dummies(select_variable_wide(background_vars, RACE), prefix_sep="|", dummy_na=True, drop_first=True),
+        pd.get_dummies(select_variable_wide(background_vars, GENDER), prefix_sep="|", dummy_na=True, drop_first=True),
         pd.get_dummies(
-            select_question_wide(background_vars, MARITAL_STATUS), prefix_sep="|", dummy_na=True, drop_first=True
+            select_variable_wide(background_vars, MARITAL_STATUS), prefix_sep="|", dummy_na=True, drop_first=True
         ),
         pd.get_dummies(income, prefix_sep="|", dummy_na=True, drop_first=True),
         pd.get_dummies(
-            select_question_wide(background_vars, EDUCATION_LEVEL), prefix_sep="|", dummy_na=True, drop_first=True
+            select_variable_wide(background_vars, EDUCATION_LEVEL), prefix_sep="|", dummy_na=True, drop_first=True
         ),
         pd.get_dummies(employment, prefix_sep="|", dummy_na=True, drop_first=True),
         pd.get_dummies(
-            select_question_wide(health_panel, PHYSICAL_HEALTH), prefix_sep="|", dummy_na=True, drop_first=True
+            select_variable_wide(health_panel, PHYSICAL_HEALTH), prefix_sep="|", dummy_na=True, drop_first=True
         ),
-        pd.get_dummies(bmi, prefix_sep="|", dummy_na=True, drop_first=True),
-        pd.get_dummies(previous_depression, prefix_sep="|", dummy_na=True, drop_first=True),
+        bmi,
+        previous_depression,
     ]
 )
 
@@ -235,7 +236,13 @@ model_definition = (
     .with_y(VariableDefinition(UNHAPPY))
     .with_x(VariableDefinition(SPORTS))
     .with_constant(CONSTANT)
-    .with_w([VariableDefinition(variable, is_dummy=True) for variable in all_controls])  # All are dummies for now
+    .with_w(
+        [
+            VariableDefinition(variable, dummy_levels=available_dummy_levels(all_relevant_data, variable))
+            for variable in [AGE, RACE, GENDER, MARITAL_STATUS, INCOME, EDUCATION_LEVEL, EMPLOYMENT, PHYSICAL_HEALTH]
+        ]
+        + [VariableDefinition(variable) for variable in [BMI, PREVIOUS_DEPRESSION]]
+    )  # All are dummies for now
     .build(all_relevant_data.columns)
 )
 

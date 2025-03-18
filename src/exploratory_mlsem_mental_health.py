@@ -8,7 +8,7 @@ from util.model import ModelDefinitionBuilder
 from util.data import (
     load_wide_panel_cached,
     standardise_wide_column_name,
-    select_question_wide,
+    select_variable_wide,
     fix_column_categories,
 )
 
@@ -24,7 +24,7 @@ health_panel = load_wide_panel_cached("ch").rename(columns=standardise_wide_colu
 
 # %% selecting columns
 
-happiness = select_question_wide(health_panel, HAPPINESS)
+happiness = select_variable_wide(health_panel, HAPPINESS)
 happiness = happiness.apply(
     lambda column: pd.Categorical(
         fix_column_categories(column),
@@ -33,7 +33,7 @@ happiness = happiness.apply(
     ),  # pyright: ignore[reportCallIssue, reportArgumentType]
 )
 
-fitness = select_question_wide(leisure_panel, FITNESS)
+fitness = select_variable_wide(leisure_panel, FITNESS)
 fitness = fitness.apply(
     lambda column: pd.Categorical(fix_column_categories(column), categories=["no", "yes"], ordered=True)  # pyright: ignore[reportCallIssue, reportArgumentType]
 )

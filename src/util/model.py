@@ -1,5 +1,5 @@
 from itertools import chain
-from typing import Self, Sequence, Tuple
+from typing import Self, Tuple, Collection
 from dataclasses import dataclass, field
 import warnings
 
@@ -12,10 +12,7 @@ class VariableDefinition:
 
     name: str
     is_ordinal: bool = field(default=False, kw_only=True)
-    is_dummy: bool = field(default=False, kw_only=True)
-
-    def build(self) -> str:
-        return self.name
+    dummy_levels: Collection[str] | None = field(default=None, kw_only=True)
 
 
 @dataclass(frozen=True)
@@ -26,13 +23,24 @@ class VariableInWave:
     wave: int
 
     def build(self) -> str:
-        return f"{self.variable.build()}_{self.wave}"
+        if self.variable.dummy_levels is not None:
+            return self._expand_dummy()
+
+        return f"{self.variable.name}_{self.wave}"
+
+    def _expand_dummy(self) -> str:
+        assert self.variable.dummy_levels is not None and len(self.variable.dummy_levels) > 0, (
+            f"Empty dummy levels specified for {self.variable}"
+        )
+
+        return " + ".join(f"{self.variable.name}_{self.wave}|{level}" for level in self.variable.dummy_levels)
 
     # For the name without any potential named parameter as in the subclass below.
-    def full_name(self) -> str:
-        # Hardcoded class rather than self because self.build dynamically dispatches
-        # to potentially overridden versions of dunder str
-        return VariableInWave.build(self)
+    def full_names(self) -> list[str]:
+        if self.variable.dummy_levels is None:
+            return [f"{self.variable.name}_{self.wave}"]
+
+        return [f"{self.variable.name}_{self.wave}|{level}" for level in self.variable.dummy_levels]
 
 
 @dataclass(frozen=True)
@@ -44,6 +52,15 @@ class VariableWithNamedParameter(VariableInWave):
     def build(self) -> str:
         return f"{self.parameter}*{super().build()}"
 
+    def _expand_dummy(self) -> str:
+        assert self.variable.dummy_levels is not None and len(self.variable.dummy_levels) > 0, (
+            f"No dummy levels specified for {self}"
+        )
+
+        return " + ".join(
+            f"{self.parameter}_{level}*{self.variable.name}_{self.wave}|{level}" for level in self.variable.dummy_levels
+        )
+
 
 @dataclass(frozen=True)
 class AvailableVariable:
@@ -51,6 +68,7 @@ class AvailableVariable:
 
     name: str
     wave: int
+    dummy_level: str | None = field(default=None)
 
     @classmethod
     def from_column_name(cls, column: str) -> Self:
@@ -64,19 +82,24 @@ class AvailableVariable:
 
         if has_dummy_level:
             wave = int(column[column.rfind("_") + 1 : column.find("|")])
+            dummy_level = column[column.find("|") + 1 :]
         else:
             wave = int(column[column.rfind("_") + 1 :])
+            dummy_level = None
 
-        return cls(name, wave)
+        return cls(name, wave, dummy_level)
 
     def full_name(self) -> str:
+        if self.dummy_level is not None:
+            return f"{self.name}_{self.wave}|{self.dummy_level}"
+
         return f"{self.name}_{self.wave}"
 
 
 @dataclass(frozen=True)
 class Regression:
     lval: VariableInWave
-    rvals: Sequence[VariableInWave]
+    rvals: Collection[VariableInWave]
     constant_name: str | None = field(default=None)
 
     def build(self) -> str:
@@ -91,7 +114,7 @@ class Regression:
 @dataclass(frozen=True)
 class Measurement:
     lval: VariableInWave
-    rvals: Sequence[VariableInWave]
+    rvals: Collection[VariableInWave]
 
     def build(self) -> str:
         return f"{self.lval.build()} =~ {' + '.join(rval.build() for rval in self.rvals)}"
@@ -100,7 +123,7 @@ class Measurement:
 @dataclass(frozen=True)
 class Covariance:
     lval: VariableInWave
-    rvals: Sequence[VariableInWave]
+    rvals: Collection[VariableInWave]
 
     def build(self) -> str:
         return f"{self.lval.build()} ~~ {' + '.join(rval.build() for rval in self.rvals)}"
@@ -133,7 +156,7 @@ class ModelDefinitionBuilder:
         self.w = []
 
     def with_y(self, y: VariableDefinition, *, lag_structure: list[int] | None = None) -> Self:
-        if y.is_dummy:
+        if y.dummy_levels:
             raise NotImplementedError("Cannot have dependent variable be a dummy variable, must be interval scale.")
 
         self.y = y
@@ -224,7 +247,11 @@ class ModelDefinitionBuilder:
 
             available_variable_names = [variable.full_name() for variable in available_variables]
 
-            if y.full_name() not in available_variable_names:
+            assert (
+                len(y.full_names()) == 1
+            )  # This is always the case, because we assert y is not dummy variable in ModelDefinitionBuilder.with_y
+
+            if y.full_names()[0] not in available_variable_names:
                 warnings.warn(f"{y=} not found in data, skipping regression", stacklevel=2)
                 continue
 
@@ -232,14 +259,14 @@ class ModelDefinitionBuilder:
             x_lags = [VariableWithNamedParameter(self.x, year_y - lag, f"beta{lag}") for lag in self.x_lag_structure]
 
             w = (
-                [VariableWithNamedParameter(name, year_y, f"delta0_{j}") for j, name in enumerate(self.w)]
+                [VariableWithNamedParameter(variable, year_y, f"delta0_{variable.name}") for variable in self.w]
                 if self.w is not None
                 else []
             )
 
             if (missing_var := self._find_missing_variables(available_variable_names, y_lags, x_lags, w)) is not None:
                 warnings.warn(
-                    f"For {y=}, {missing_var.full_name()} was not in the data, skipping regression",
+                    f"For {y=}, {missing_var} was not in the data, skipping regression",
                     stacklevel=2,
                 )
                 # TODO: Is there a better option than ditching the whole regression because one of the vars is missing?
@@ -267,17 +294,18 @@ class ModelDefinitionBuilder:
     def _find_missing_variables(
         self,
         available_variables_names: list[str],
-        y_lags: Sequence[VariableInWave],
-        x_lags: Sequence[VariableInWave],
-        w: Sequence[VariableInWave],
-    ) -> VariableInWave | None:
+        y_lags: Collection[VariableInWave],
+        x_lags: Collection[VariableInWave],
+        w: Collection[VariableInWave],
+    ) -> str | None:
         """Checks if all the regressors are in the data.
 
         If one is missing, returns it.
         Returns `None` if all variables are found."""
         for variable in chain(y_lags, x_lags, w):
-            if variable.full_name() not in available_variables_names:
-                return variable
+            for name in variable.full_names():
+                if name not in available_variables_names:
+                    return name
 
         return None
 

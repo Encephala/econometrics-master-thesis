@@ -3,8 +3,8 @@ import warnings
 import pandas as pd
 
 
-def select_question_wide(df: pd.DataFrame, question_id: str) -> pd.DataFrame:
-    selected_columns = list(filter(lambda name: name[: name.rfind("_")] == question_id, df.columns))
+def select_variable_wide(df: pd.DataFrame, variable: str) -> pd.DataFrame:
+    selected_columns = list(filter(lambda name: name[: name.rfind("_")] == variable, df.columns))
 
     if len(selected_columns) == 0:
         warnings.warn("No columns selected", stacklevel=2)
@@ -36,6 +36,17 @@ def available_years(df: pd.DataFrame) -> set[int]:
 
         if column[index_underscore + 1 :].isnumeric():
             result.add(int(column[index_underscore + 1 :]))
+
+    return result
+
+
+def available_dummy_levels(df: pd.DataFrame, variable: str) -> set[str]:
+    subset = select_variable_wide(df, variable)
+
+    result = {column[column.find("|") + 1 :] for column in subset.columns if column.find("|") != -1}
+
+    if len(result) == 0:
+        warnings.warn(f"No dummy levels found for {variable}", stacklevel=2)
 
     return result
 
