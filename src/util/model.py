@@ -8,7 +8,7 @@ import pandas as pd
 
 @dataclass(frozen=True)
 class VariableDefinition:
-    "A variable in the model."
+    "A conceptual variable in the model."
 
     name: str
     is_ordinal: bool = field(default=False, kw_only=True)
@@ -17,30 +17,30 @@ class VariableDefinition:
 
 @dataclass(frozen=True)
 class VariableInWave:
-    "A variable in the dataset, that is, a specific variable in a specific wave."
+    "A variable in the dataset, that is, a specific (level of a) variable in a specific wave."
 
-    variable: VariableDefinition
+    name: str
     wave: int
+    dummy_level: str | None = field(default=None, kw_only=True)
 
     def build(self) -> str:
-        if self.variable.dummy_levels is not None:
-            return self._expand_dummy()
+        if self.dummy_level is not None:
+            return f"{self.name}_{self.wave}|{self.dummy_level}"
 
-        return f"{self.variable.name}_{self.wave}"
+        return f"{self.name}_{self.wave}"
 
-    def _expand_dummy(self) -> str:
-        assert self.variable.dummy_levels is not None and len(self.variable.dummy_levels) > 0, (
-            f"Empty dummy levels specified for {self.variable}"
+    def _equals(self, available_variable: "AvailableVariable") -> bool:
+        if self.dummy_level is None:
+            return self.name == available_variable.name and self.wave == available_variable.wave
+
+        return (
+            self.name == available_variable.name
+            and self.wave == available_variable.wave
+            and self.dummy_level == available_variable.dummy_level
         )
 
-        return " + ".join(f"{self.variable.name}_{self.wave}|{level}" for level in self.variable.dummy_levels)
-
-    # For the name without any potential named parameter as in the subclass below.
-    def full_names(self) -> list[str]:
-        if self.variable.dummy_levels is None:
-            return [f"{self.variable.name}_{self.wave}"]
-
-        return [f"{self.variable.name}_{self.wave}|{level}" for level in self.variable.dummy_levels]
+    def is_in(self, available_variables: list["AvailableVariable"]) -> bool:
+        return any(self._equals(variable) for variable in available_variables)
 
 
 @dataclass(frozen=True)
@@ -51,15 +51,6 @@ class VariableWithNamedParameter(VariableInWave):
 
     def build(self) -> str:
         return f"{self.parameter}*{super().build()}"
-
-    def _expand_dummy(self) -> str:
-        assert self.variable.dummy_levels is not None and len(self.variable.dummy_levels) > 0, (
-            f"No dummy levels specified for {self}"
-        )
-
-        return " + ".join(
-            f"{self.parameter}_{level}*{self.variable.name}_{self.wave}|{level}" for level in self.variable.dummy_levels
-        )
 
 
 @dataclass(frozen=True)
@@ -88,12 +79,6 @@ class AvailableVariable:
             dummy_level = None
 
         return cls(name, wave, dummy_level)
-
-    def full_name(self) -> str:
-        if self.dummy_level is not None:
-            return f"{self.name}_{self.wave}|{self.dummy_level}"
-
-        return f"{self.name}_{self.wave}"
 
 
 @dataclass(frozen=True)
@@ -156,8 +141,8 @@ class ModelDefinitionBuilder:
         self.w = []
 
     def with_y(self, y: VariableDefinition, *, lag_structure: list[int] | None = None) -> Self:
-        if y.dummy_levels:
-            raise NotImplementedError("Cannot have dependent variable be a dummy variable, must be interval scale.")
+        if y.dummy_levels is not None:
+            raise ValueError("Cannot have dependent variable be a dummy variable, must be interval scale.")  # noqa: TRY003
 
         self.y = y
 
@@ -173,6 +158,9 @@ class ModelDefinitionBuilder:
         return self
 
     def with_x(self, x: VariableDefinition, *, lag_structure: list[int] | None = None) -> Self:
+        if x.dummy_levels is not None:
+            raise NotImplementedError("Dummy x-variables are not implemented yet")
+
         self.x = x
 
         if lag_structure is not None:
@@ -186,9 +174,8 @@ class ModelDefinitionBuilder:
 
         return self
 
-    def with_w(self, variables: list[VariableDefinition], ordinal: list[bool] | None = None) -> Self:
+    def with_w(self, variables: list[VariableDefinition]) -> Self:
         self.w = variables
-        self.w_ordinal = ordinal if ordinal is not None else [False] * len(variables)
         return self
 
     def with_constant(self, constant_name: str) -> Self:
@@ -207,6 +194,8 @@ class ModelDefinitionBuilder:
         first_year_y, last_year_y = self._determine_start_and_end_years(available_variables)
 
         self._build_regressions(available_variables, first_year_y, last_year_y)
+
+        self._fix_y_variance()
 
         self._make_x_predetermined()
 
@@ -243,28 +232,22 @@ class ModelDefinitionBuilder:
 
     def _build_regressions(self, available_variables: list[AvailableVariable], first_year_y: int, last_year_y: int):
         for year_y in range(first_year_y, last_year_y + 1):
-            y = VariableInWave(self.y, year_y)
+            y = VariableInWave(self.y.name, year_y)
 
-            available_variable_names = [variable.full_name() for variable in available_variables]
-
-            assert (
-                len(y.full_names()) == 1
-            )  # This is always the case, because we assert y is not dummy variable in ModelDefinitionBuilder.with_y
-
-            if y.full_names()[0] not in available_variable_names:
+            if not y.is_in(available_variables):
                 warnings.warn(f"{y=} not found in data, skipping regression", stacklevel=2)
                 continue
 
-            y_lags = [VariableWithNamedParameter(self.y, year_y - lag, f"rho{lag}") for lag in self.y_lag_structure]
-            x_lags = [VariableWithNamedParameter(self.x, year_y - lag, f"beta{lag}") for lag in self.x_lag_structure]
+            y_lags = [
+                VariableWithNamedParameter(self.y.name, year_y - lag, f"rho{lag}") for lag in self.y_lag_structure
+            ]
+            x_lags = [
+                VariableWithNamedParameter(self.x.name, year_y - lag, f"beta{lag}") for lag in self.x_lag_structure
+            ]
 
-            w = (
-                [VariableWithNamedParameter(variable, year_y, f"delta0_{variable.name}") for variable in self.w]
-                if self.w is not None
-                else []
-            )
+            w = self._compile_w(year_y)
 
-            if (missing_var := self._find_missing_variables(available_variable_names, y_lags, x_lags, w)) is not None:
+            if (missing_var := self._find_missing_variables(available_variables, y_lags, x_lags, w)) is not None:
                 warnings.warn(
                     f"For {y=}, {missing_var} was not in the data, skipping regression",
                     stacklevel=2,
@@ -275,39 +258,65 @@ class ModelDefinitionBuilder:
             rvals = [*y_lags, *x_lags, *w]
             self._regressions.append(Regression(y, rvals, constant_name=self.constant))
 
-            # All y_lags and x_lags are included as regressors,
-            # so don't have to check with self._regressions_contain here
+            # TODO: Might be nicer to have this in a separate function,
+            # but since it so heavily relies on local variables, leaving it here for now.
             if self.y.is_ordinal:
                 self._ordinals.update(y_lags)
 
             if self.x.is_ordinal:
                 self._ordinals.update(x_lags)
 
-            w_ordinal = self.w_ordinal if self.w_ordinal is not None else []
-            for variable, is_ordinal in zip(w, w_ordinal, strict=True):
-                if is_ordinal:
-                    self._ordinals.add(variable)
+            ordinal_w = [] if self.w is None else [definition for definition in self.w if definition.is_ordinal]
 
-            # Fix variance for y to be constant in time
-            self._covariances.append(Covariance(y, [VariableWithNamedParameter(y.variable, y.wave, "sigma")]))
+            for definition in ordinal_w:
+                variables = [variable for variable in w if variable.name == definition.name]
+                self._ordinals.update(variables)
+
+    def _compile_w(self, year_y: int) -> list[VariableWithNamedParameter]:
+        if self.w is None:
+            return []
+
+        result = []
+
+        for variable in self.w:
+            if variable.dummy_levels is None:
+                result.append(VariableWithNamedParameter(variable.name, year_y, f"delta0_{variable.name}"))
+                continue
+
+            result.extend(
+                [
+                    VariableWithNamedParameter(variable.name, year_y, f"delta0_{variable.name}", dummy_level=level)
+                    for level in variable.dummy_levels
+                ]
+            )
+
+        return result
 
     def _find_missing_variables(
         self,
-        available_variables_names: list[str],
+        available_variables: list[AvailableVariable],
         y_lags: Collection[VariableInWave],
         x_lags: Collection[VariableInWave],
         w: Collection[VariableInWave],
-    ) -> str | None:
+    ) -> VariableInWave | None:
         """Checks if all the regressors are in the data.
 
         If one is missing, returns it.
         Returns `None` if all variables are found."""
         for variable in chain(y_lags, x_lags, w):
-            for name in variable.full_names():
-                if name not in available_variables_names:
-                    return name
+            if not variable.is_in(available_variables):
+                return variable
 
         return None
+
+    def _fix_y_variance(self):
+        for regression in self._regressions:
+            # Fix variance for y to be constant in time
+            self._covariances.append(
+                Covariance(
+                    regression.lval, [VariableWithNamedParameter(regression.lval.name, regression.lval.wave, "sigma")]
+                )
+            )
 
     # Allow for pre-determined variables, i.e. arbitrary correlation between x and previous values of y
     # NOTE: The very first value of y in the data is considered exogenous and thus it can't be correlated with future x
@@ -321,11 +330,9 @@ class ModelDefinitionBuilder:
         for regression in self._regressions:
             y_current = regression.lval
             x_future = [
-                VariableWithNamedParameter(
-                    variable.variable, variable.wave, f"gamma{variable.wave - regression.lval.wave}"
-                )
+                VariableWithNamedParameter(variable.name, variable.wave, f"gamma{variable.wave - regression.lval.wave}")
                 for variable in all_regressors
-                if variable.variable == self.x and variable.wave > regression.lval.wave
+                if variable.name == self.x.name and variable.wave > regression.lval.wave
             ]
 
             if len(x_future) != 0:
