@@ -9,7 +9,6 @@ from util.data import (
     load_wide_panel_cached,
     standardise_wide_column_name,
     select_variable_wide,
-    fix_column_categories,
 )
 
 
@@ -27,7 +26,7 @@ health_panel = load_wide_panel_cached("ch").rename(columns=standardise_wide_colu
 happiness = select_variable_wide(health_panel, HAPPINESS)
 happiness = happiness.apply(
     lambda column: pd.Categorical(
-        fix_column_categories(column),
+        column,
         categories=["never", "seldom", "sometimes", "often", "mostly", "continuously"],
         ordered=True,
     ),  # pyright: ignore[reportCallIssue, reportArgumentType]
@@ -35,7 +34,7 @@ happiness = happiness.apply(
 
 fitness = select_variable_wide(leisure_panel, FITNESS)
 fitness = fitness.apply(
-    lambda column: pd.Categorical(fix_column_categories(column), categories=["no", "yes"], ordered=True)  # pyright: ignore[reportCallIssue, reportArgumentType]
+    lambda column: pd.Categorical(column, categories=["no", "yes"], ordered=True)  # pyright: ignore[reportCallIssue, reportArgumentType]
 )
 
 # %% build simple semopy model

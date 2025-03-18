@@ -4,6 +4,25 @@ import warnings
 import pandas as pd
 
 
+def fix_category_names(column: pd.Series) -> pd.Series:
+    """Actually have to do this because the data sometimes (but not consistently, smile) has prefixed spaces,
+    and sometimes has capitalisation.
+
+    I think 2013 and before there was a prefix space in answers, after there wasn't."""
+
+    old_categories: "pd.Index[str]" = column.cat.categories  # To help the LSP
+    # NOTE: str(category) to prevent raising if some category was f.i. incorrectly given a float as name,
+    # data cleaning happens at a lager stage
+    new_categories = pd.Index([str(category).lower().strip() for category in old_categories])
+
+    # Not just rename_categories because for instance "A" and "a" are the same category after .lower()
+    old_to_new_category = dict(zip(old_categories, new_categories))
+
+    result = pd.Categorical(column.map(old_to_new_category))
+
+    return pd.Series(result, name=column.name)
+
+
 def load_df(path: Path) -> pd.DataFrame:
     """Given the file name, loads it from the data directory."""
     full_path = Path("../data") / path
@@ -16,6 +35,10 @@ def load_df(path: Path) -> pd.DataFrame:
 
     else:
         raise NotImplementedError(f"Invalid suffix {path.suffix}")
+
+    for column in result.columns:
+        if result[column].dtype.name == "category":
+            result[column] = fix_category_names(result[column])
 
     return result.set_index("nomem_encr")
 

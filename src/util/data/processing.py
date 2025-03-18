@@ -7,7 +7,7 @@ def select_variable_wide(df: pd.DataFrame, variable: str) -> pd.DataFrame:
     selected_columns = list(filter(lambda name: name[: name.rfind("_")] == variable, df.columns))
 
     if len(selected_columns) == 0:
-        warnings.warn("No columns selected", stacklevel=2)
+        warnings.warn(f"No columns selected for {variable=}", stacklevel=2)
 
     return df[selected_columns]
 
@@ -51,22 +51,8 @@ def available_dummy_levels(df: pd.DataFrame, variable: str) -> set[str]:
     return result
 
 
-def fix_column_categories(column: pd.Series) -> pd.Series:
-    """Actually have to do this because the data sometimes (but not consistently, smile) has prefixed spaces,
-    and sometimes has capitalisation.
-
-    I think 2013 and before there was a prefix space, after there wasn't."""
-
-    old_categories: "pd.Index[str]" = column.cat.categories  # To help the LSP
-    new_categories = pd.Index([category.lower().strip() for category in old_categories])
-
-    return column.cat.rename_categories(new_categories)
-
-
 def map_mhi5_categories(series: pd.Series, *, is_positive: bool = False) -> pd.Series:
-    """Takes a Categorical series of MHI-5 questionnaire responses and maps the textual responses to int values."""
-    series = fix_column_categories(series)
-
+    "Takes a Categorical series of MHI-5 questionnaire responses and maps the textual responses to int values."
     # https://www.cbs.nl/nl-nl/achtergrond/2015/18/beperkingen-in-dagelijkse-handelingen-bij-ouderen/mhi-5
     # LISS response run from 1-6 for all questions
     # TODO: I'm not 100% this doesn't map NA to -1

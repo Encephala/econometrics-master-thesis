@@ -6,6 +6,5 @@ from .processing import (
     standardise_wide_column_name,
     available_years,
     available_dummy_levels,
-    fix_column_categories,
     calc_mhi5,
 )

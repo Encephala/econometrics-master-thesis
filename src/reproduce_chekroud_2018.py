@@ -93,6 +93,8 @@ for column in income:
 # %% derive employment from primary occupation
 occupation = select_variable_wide(background_vars, PRINCIPAL_OCCUPATION)
 
+EMPLOYMENT = "employment"
+
 
 def merge_and_map_categories(column: pd.Series) -> pd.Series:
     EMPLOYED = "Employed"
@@ -107,29 +109,27 @@ def merge_and_map_categories(column: pd.Series) -> pd.Series:
 
     # Map to new codes
     old_category_to_new_category = {
-        "Paid employment": EMPLOYED,
-        "Works or assists in family business": EMPLOYED,
-        "Autonomous professional, freelancer, or self-employed": SELF_EMPLOYED,
-        "Job seeker following job loss": OUT_OF_WORK,
-        "First-time job seeker": OUT_OF_WORK,
-        "Exempted from job seeking following job loss": UNABLE,
-        "Attends school or is studying": STUDENT,
-        "Takes care of the housekeeping": HOMEMAKER,
-        "Is pensioner ([voluntary] early retirement, old age pension scheme)": RETIRED,
-        "Has (partial) work disability": UNABLE,
+        "paid employment": EMPLOYED,
+        "works or assists in family business": EMPLOYED,
+        "autonomous professional, freelancer, or self-employed": SELF_EMPLOYED,
+        "job seeker following job loss": OUT_OF_WORK,
+        "first-time job seeker": OUT_OF_WORK,
+        "exempted from job seeking following job loss": UNABLE,
+        "attends school or is studying": STUDENT,
+        "takes care of the housekeeping": HOMEMAKER,
+        "is pensioner ([voluntary] early retirement, old age pension scheme)": RETIRED,
+        "has (partial) work disability": UNABLE,
         # Not sure about all the ones below, think they're the best?
-        "Performs unpaid work while retaining unemployment benefit": EMPLOYED,
-        "Performs voluntary work": EMPLOYED,
-        "Does something else": EMPLOYED,
-        "Is too young to have an occupation": STUDENT,
+        "performs unpaid work while retaining unemployment benefit": EMPLOYED,
+        "performs voluntary work": EMPLOYED,
+        "does something else": EMPLOYED,
+        "is too young to have an occupation": STUDENT,
     }
 
     result = pd.Categorical(column.map(old_category_to_new_category))
 
-    return pd.Series(result, name=f"employment_{year}")
+    return pd.Series(result, name=f"{EMPLOYMENT}_{year}")
 
-
-EMPLOYMENT = "employment"
 
 # Apply column-wise to have cohesive datatype
 employment = occupation.apply(merge_and_map_categories)
