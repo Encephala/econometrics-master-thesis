@@ -4,7 +4,7 @@ import pandas as pd
 import semopy
 
 from util.simulation import DataGenerator
-from util.model import ModelDefinitionBuilder
+from util.model import ModelDefinitionBuilder, VariableDefinition
 
 # %%
 N = 50000
@@ -23,8 +23,8 @@ for t in range(T):
 
 model_definition = (
     ModelDefinitionBuilder()
-    .with_x("x", lag_structure=[0, 1, 2, 3])
-    .with_y("y", lag_structure=[1, 2, 3, 4])
+    .with_x(VariableDefinition("x"), lag_structure=[0, 1, 2, 3])
+    .with_y(VariableDefinition("y"), lag_structure=[1, 2, 3, 4])
     .build(complete_data.columns)
 )
 

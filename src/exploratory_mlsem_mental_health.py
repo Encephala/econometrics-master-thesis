@@ -4,7 +4,7 @@
 import semopy
 import pandas as pd
 
-from util.model import ModelDefinitionBuilder
+from util.model import ModelDefinitionBuilder, VariableDefinition
 from util.data import (
     load_wide_panel_cached,
     standardise_wide_column_name,
@@ -43,8 +43,8 @@ complete_data = pd.concat([happiness, fitness], join="outer", axis="columns").ap
 )
 model_definition = (
     ModelDefinitionBuilder()
-    .with_y(HAPPINESS, lag_structure=[1, 2, 3, 4, 5])
-    .with_x(FITNESS, lag_structure=[0, 1, 2, 3, 4])
+    .with_y(VariableDefinition(HAPPINESS), lag_structure=[1, 2, 3, 4, 5])
+    .with_x(VariableDefinition(FITNESS), lag_structure=[0, 1, 2, 3, 4])
     .build(complete_data.columns)
 )
 

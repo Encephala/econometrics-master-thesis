@@ -4,7 +4,7 @@ import numpy as np
 
 import semopy
 
-from util.model import ModelDefinitionBuilder
+from util.model import ModelDefinitionBuilder, VariableDefinition
 
 # %% data generation
 N = 500
@@ -63,9 +63,9 @@ for t in range(T):
 
 model_definition = (
     ModelDefinitionBuilder()
-    .with_x("x")
-    .with_y("y", lag_structure=[1, 2, 3])
-    .with_w(["some_control"])
+    .with_x(VariableDefinition("x"))
+    .with_y(VariableDefinition("y"), lag_structure=[1, 2, 3])
+    .with_w([VariableDefinition("some_control")])
     .build(complete_data.columns)
 )
 

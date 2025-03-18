@@ -1,4 +1,4 @@
-from .loading import load_wide_panel_cached
+from .loading import load_wide_panel_cached, load_df
 
 
 from .processing import (
