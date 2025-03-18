@@ -58,25 +58,26 @@ class AvailableVariable:
     "A variable as available in the data, effectively a parsed column name."
 
     name: str
-    wave: int
+    wave: int | None = field(default=None)  # None for time-invariants
     dummy_level: str | None = field(default=None)
 
     @classmethod
     def from_column_name(cls, column: str) -> Self:
         index_underscore = column.rfind("_")
+
         if index_underscore == -1:
-            raise ValueError(f'Column "{column}" is not in wide format (<variable>_<year>).')  # noqa: TRY003
+            return cls(column)
 
         name = column[: column.rfind("_")]
 
         has_dummy_level = column.find("|") != -1
 
-        if has_dummy_level:
-            wave = int(column[column.rfind("_") + 1 : column.find("|")])
-            dummy_level = column[column.find("|") + 1 :]
-        else:
+        if not has_dummy_level:
             wave = int(column[column.rfind("_") + 1 :])
-            dummy_level = None
+            return cls(name, wave)
+
+        wave = int(column[column.rfind("_") + 1 : column.find("|")])
+        dummy_level = column[column.find("|") + 1 :]
 
         return cls(name, wave, dummy_level)
 
@@ -214,12 +215,18 @@ class ModelDefinitionBuilder:
 
     def _determine_start_and_end_years(self, available_variables: list[AvailableVariable]) -> Tuple[int, int]:
         y_years = [variable.wave for variable in available_variables if variable.name == self.y.name]
-        y_start = min(y_years)
-        y_end = max(y_years)
+
+        assert not any(year is None for year in y_years)  # y is never time-invariant
+
+        y_start = min(y_years)  # pyright: ignore[reportArgumentType]
+        y_end = max(y_years)  # pyright: ignore[reportArgumentType]
 
         x_years = [variable.wave for variable in available_variables if variable.name == self.x.name]
-        x_start = min(x_years)
-        x_end = max(x_years)
+
+        assert not any(year is None for year in x_years)  # x is never time-invariant
+
+        x_start = min(x_years)  # pyright: ignore[reportArgumentType]
+        x_end = max(x_years)  # pyright: ignore[reportArgumentType]
 
         # TODO?: When using FIML/handling missing data, perhaps the `max` and `min` in these two statements should swap,
         # but then we have to also add those columns to the df to prevent index errors.
