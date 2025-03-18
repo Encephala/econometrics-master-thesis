@@ -85,13 +85,13 @@ class AvailableVariable:
 class Regression:
     lval: VariableInWave
     rvals: Collection[VariableInWave]
-    constant_name: str | None = field(default=None)
+    constant: VariableDefinition | None = field(default=None)
 
     def build(self) -> str:
         return (
             f"{self.lval.build()}"
             " ~ "
-            f"{f'alpha*{self.constant_name} + ' if self.constant_name is not None else ''}"
+            f"{f'alpha*{self.constant.name} + ' if self.constant is not None else ''}"
             f"{' + '.join(rval.build() for rval in self.rvals)}"
         )
 
@@ -130,7 +130,7 @@ class ModelDefinitionBuilder:
     x_lag_structure: list[int]
 
     w: list[VariableDefinition] | None = None
-    constant: str | None = None
+    constant: VariableDefinition | None = None
 
     def __init__(self):
         self._regressions: list[Regression] = []
@@ -178,8 +178,11 @@ class ModelDefinitionBuilder:
         self.w = variables
         return self
 
-    def with_constant(self, constant_name: str) -> Self:
-        self.constant = constant_name
+    def with_constant(self, constant: VariableDefinition) -> Self:
+        assert not constant.is_ordinal, "Brother what"
+        assert constant.dummy_levels is None, "Fam a constant can't have dummy levels"
+
+        self.constant = constant
         return self
 
     def build(self, available_columns: "pd.Index[str]") -> str:
@@ -256,7 +259,7 @@ class ModelDefinitionBuilder:
                 continue
 
             rvals = [*y_lags, *x_lags, *w]
-            self._regressions.append(Regression(y, rvals, constant_name=self.constant))
+            self._regressions.append(Regression(y, rvals, constant=self.constant))
 
             # TODO: Might be nicer to have this in a separate function,
             # but since it so heavily relies on local variables, leaving it here for now.

@@ -235,7 +235,7 @@ model_definition = (
     ModelDefinitionBuilder()
     .with_y(VariableDefinition(UNHAPPY))
     .with_x(VariableDefinition(SPORTS))
-    .with_constant(CONSTANT)
+    .with_constant(VariableDefinition(CONSTANT))
     .with_w(
         [
             VariableDefinition(variable, dummy_levels=available_dummy_levels(all_relevant_data, variable))
