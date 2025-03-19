@@ -25,7 +25,7 @@ UNHAPPY = "ch14"
 SPORTS = "cs104"
 
 AGE = "leeftijd"
-RACE = "herkomstgroep"
+ETHNICITY = "herkomstgroep"
 GENDER = "geslacht"
 MARITAL_STATUS = "burgstat"
 INCOME = "nettohh_f"
@@ -43,7 +43,7 @@ age_cutoffs = pd.IntervalIndex.from_breaks(
 )
 
 age_labels = [
-    "18-",
+    "under 18",
     "18-24 years",
     "25-29 years",
     "30-34 years",
@@ -56,7 +56,7 @@ age_labels = [
     "65-69 years",
     "70-74 years",
     "75-79 years",
-    "80+",
+    "over 80",
 ]
 
 age = select_variable_wide(background_vars, AGE)
@@ -75,11 +75,11 @@ income_cutoffs = pd.IntervalIndex.from_breaks(
 )
 
 income_labels = [
-    "< € 15.000",
-    "€ 15-25.000",
-    "€ 25-35.000",
-    "€ 35-50.000",
-    "> € 50.000",
+    "under 15.000",
+    "15-25.000",
+    "25-35.000",
+    "35-50.000",
+    "over 50.000",
 ]
 
 income = select_variable_wide(background_vars, INCOME)
@@ -97,13 +97,13 @@ EMPLOYMENT = "employment"
 
 
 def merge_and_map_categories(column: pd.Series) -> pd.Series:
-    EMPLOYED = "Employed"
-    SELF_EMPLOYED = "Self-employed"
-    OUT_OF_WORK = "Out of work"
-    HOMEMAKER = "Homemaker"
-    STUDENT = "Student"
-    RETIRED = "Retired"
-    UNABLE = "Unable to work"
+    EMPLOYED = "employed"
+    SELF_EMPLOYED = "self-employed"
+    OUT_OF_WORK = "out of work"
+    HOMEMAKER = "homemaker"
+    STUDENT = "student"
+    RETIRED = "retired"
+    UNABLE = "unable to work"
 
     year = column.name[column.name.rfind("_") + 1 :]  # pyright: ignore # noqa: PGH003
 
@@ -185,6 +185,33 @@ for person in previous_depression.index:
 # Fix dtype, pandas doesn't automatically recognise a combination of NA and bool is just nullable boolean
 previous_depression = previous_depression.astype("boolean")
 
+# %% Make education level more sane
+education = select_variable_wide(background_vars, EDUCATION_LEVEL)
+
+category_map = {
+    "havo/vwo (higher secondary education/preparatory university education, us: senior high school)": "havo vwo",
+    "hbo (higher vocational education, us: college)": "hbo",
+    "mbo (intermediate vocational education, us: junior college)": "mbo",
+    "primary school": "primary school",
+    "vmbo (intermediate secondary education, us: junior high school)": "vmbo",
+    "wo (university)": "wo",
+}
+
+education = education.apply(lambda column: column.cat.rename_categories(category_map))
+
+# %% Make ethnicity more sane
+ethnicity = select_variable_wide(background_vars, ETHNICITY)
+
+category_map = {
+    "dutch background": "dutch",
+    "first generation foreign, non-western background": "foreign first nonwestern",
+    "first generation foreign, western background": "foreign first western",
+    "second generation foreign, non-western background": "foreign second nonwestern",
+    "second generation foreign, western background": "foreign second western",
+}
+
+ethnicity = ethnicity.apply(lambda column: column.cat.rename_categories(category_map))
+
 # %% the big merge
 CONSTANT = "const"
 
@@ -196,15 +223,13 @@ all_relevant_data = pd.DataFrame(index=background_vars.index).join(
         select_variable_wide(health_panel, UNHAPPY),
         select_variable_wide(leisure_panel, SPORTS),
         pd.get_dummies(age, prefix_sep="|", dummy_na=True, drop_first=True),
-        pd.get_dummies(select_variable_wide(background_vars, RACE), prefix_sep="|", dummy_na=True, drop_first=True),
+        pd.get_dummies(ethnicity, prefix_sep="|", dummy_na=True, drop_first=True),
         pd.get_dummies(select_variable_wide(background_vars, GENDER), prefix_sep="|", dummy_na=True, drop_first=True),
         pd.get_dummies(
             select_variable_wide(background_vars, MARITAL_STATUS), prefix_sep="|", dummy_na=True, drop_first=True
         ),
         pd.get_dummies(income, prefix_sep="|", dummy_na=True, drop_first=True),
-        pd.get_dummies(
-            select_variable_wide(background_vars, EDUCATION_LEVEL), prefix_sep="|", dummy_na=True, drop_first=True
-        ),
+        pd.get_dummies(education, prefix_sep="|", dummy_na=True, drop_first=True),
         pd.get_dummies(employment, prefix_sep="|", dummy_na=True, drop_first=True),
         pd.get_dummies(
             select_variable_wide(health_panel, PHYSICAL_HEALTH), prefix_sep="|", dummy_na=True, drop_first=True
@@ -219,7 +244,7 @@ all_relevant_data = all_relevant_data[sorted(all_relevant_data.columns)]
 
 all_controls = [
     AGE,
-    RACE,
+    ETHNICITY,
     GENDER,
     MARITAL_STATUS,
     INCOME,
@@ -239,7 +264,16 @@ model_definition = (
     .with_w(
         [
             VariableDefinition(variable, dummy_levels=available_dummy_levels(all_relevant_data, variable))
-            for variable in [AGE, RACE, GENDER, MARITAL_STATUS, INCOME, EDUCATION_LEVEL, EMPLOYMENT, PHYSICAL_HEALTH]
+            for variable in [
+                AGE,
+                ETHNICITY,
+                GENDER,
+                MARITAL_STATUS,
+                INCOME,
+                EDUCATION_LEVEL,
+                EMPLOYMENT,
+                PHYSICAL_HEALTH,
+            ]
         ]
         + [VariableDefinition(variable) for variable in [BMI, PREVIOUS_DEPRESSION]]
     )  # All are dummies for now

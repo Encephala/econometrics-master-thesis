@@ -25,7 +25,7 @@ class VariableInWave:
 
     def build(self) -> str:
         if self.dummy_level is not None:
-            return f"{self.name}_{self.wave}|{self.dummy_level}"
+            return f"{self.name}_{self.wave}_{self.dummy_level.replace(' ', '_').replace('-', '_')}"
 
         return f"{self.name}_{self.wave}"
 
@@ -51,7 +51,7 @@ class VariableWithNamedParameter(VariableInWave):
 
     def build(self) -> str:
         if self.dummy_level is not None:
-            return f"{self.parameter}|{self.dummy_level}*{super().build()}"
+            return f"{self.parameter}_{self.dummy_level.replace(' ', '_').replace('-', '_')}*{super().build()}"
 
         return f"{self.parameter}*{super().build()}"
 
@@ -202,9 +202,9 @@ class ModelDefinitionBuilder:
 
         self._build_regressions(available_variables, first_year_y, last_year_y)
 
-        self._fix_y_variance()
+        # self._fix_y_variance()
 
-        self._make_x_predetermined()
+        # self._make_x_predetermined()
 
         return f"""# Regressions (structural part)
 {"\n".join([*map(Regression.build, self._regressions), ""])}

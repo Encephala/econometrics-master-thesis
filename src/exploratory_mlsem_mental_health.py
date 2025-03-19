@@ -43,7 +43,7 @@ complete_data = pd.concat([happiness, fitness], join="outer", axis="columns").ap
 )
 model_definition = (
     ModelDefinitionBuilder()
-    .with_y(VariableDefinition(HAPPINESS), lag_structure=[1, 2, 3, 4, 5])
+    .with_y(VariableDefinition(HAPPINESS), lag_structure=[])
     .with_x(VariableDefinition(FITNESS), lag_structure=[0, 1, 2, 3, 4])
     .build(complete_data.columns)
 )
