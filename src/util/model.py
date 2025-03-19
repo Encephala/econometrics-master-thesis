@@ -50,6 +50,9 @@ class VariableWithNamedParameter(VariableInWave):
     parameter: str
 
     def build(self) -> str:
+        if self.dummy_level is not None:
+            return f"{self.parameter}|{self.dummy_level}*{super().build()}"
+
         return f"{self.parameter}*{super().build()}"
 
 
