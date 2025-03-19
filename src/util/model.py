@@ -202,9 +202,9 @@ class ModelDefinitionBuilder:
 
         self._build_regressions(available_variables, first_year_y, last_year_y)
 
-        # self._fix_y_variance()
+        self._fix_y_variance()
 
-        # self._make_x_predetermined()
+        self._make_x_predetermined()
 
         return f"""# Regressions (structural part)
 {"\n".join([*map(Regression.build, self._regressions), ""])}
