@@ -47,7 +47,7 @@ class VariableInWave:
 class VariableWithNamedParameter(VariableInWave):
     "A variable in the dataset that has an associated named parameter."
 
-    parameter: str
+    parameter: str = field(repr=False)
 
     def build(self) -> str:
         if self.dummy_level is not None:
