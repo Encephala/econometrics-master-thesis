@@ -48,7 +48,12 @@ mapper = {
     "continuously": 5,
 }
 
-unhappy = unhappy.apply(lambda column: column.map(mapper).astype(np.float64))
+unhappy = unhappy.apply(lambda column: column.map(mapper, na_action="ignore")).astype(np.float64)
+
+# %% Making sports an actual boolean instead of "yes"/"no"
+sports = select_variable_wide(leisure_panel, SPORTS)
+
+sports = sports.apply(lambda column: column.map({"yes": True, "no": False}, na_action="ignore")).astype("boolean")
 
 # %% age preprocessing
 # From Chekroud 2018
@@ -236,7 +241,7 @@ all_relevant_data = pd.DataFrame(index=background_vars.index).join(
     [
         pd.Series(1, index=background_vars.index, name=CONSTANT),
         unhappy,
-        select_variable_wide(leisure_panel, SPORTS),
+        sports,
         pd.get_dummies(age, prefix_sep=".", dummy_na=True, drop_first=True),
         pd.get_dummies(ethnicity, prefix_sep=".", dummy_na=True, drop_first=True),
         pd.get_dummies(select_variable_wide(background_vars, GENDER), prefix_sep=".", dummy_na=True, drop_first=True),
@@ -259,19 +264,6 @@ all_relevant_data = all_relevant_data[sorted(all_relevant_data.columns)]
 
 # Standardise names of dummy levels
 all_relevant_data = all_relevant_data.rename(columns=cleanup_dummy_column)
-
-all_controls = [
-    AGE,
-    ETHNICITY,
-    GENDER,
-    MARITAL_STATUS,
-    INCOME,
-    EDUCATION_LEVEL,
-    EMPLOYMENT,
-    PHYSICAL_HEALTH,
-    BMI,
-    PREVIOUS_DEPRESSION,
-]
 
 # %% naive model definition
 model_definition = (
@@ -306,7 +298,7 @@ print(model_definition)
 model = semopy.Model(model_definition)
 
 # %% naive model
-optimisation_result = model.fit(all_relevant_data)
+optimisation_result = model.fit(all_relevant_data.astype(np.float64), obj="FIML")
 
 print(optimisation_result)
 
