@@ -36,6 +36,20 @@ PHYSICAL_HEALTH = "ch4"
 HEIGHT, WEIGHT = "ch16", "ch17"  # For BMI
 DEPRESSION_MEDICATION = "ch178"
 
+# %% Converting unhappiness categories to numbers
+unhappy = select_variable_wide(health_panel, UNHAPPY)
+
+mapper = {
+    "never": 0,
+    "seldom": 1,
+    "sometimes": 2,
+    "often": 3,
+    "mostly": 4,
+    "continuously": 5,
+}
+
+unhappy = unhappy.apply(lambda column: column.map(mapper).astype(np.float64))
+
 # %% age preprocessing
 # From Chekroud 2018
 age_cutoffs = pd.IntervalIndex.from_breaks(
@@ -221,7 +235,7 @@ CONSTANT = "const"
 all_relevant_data = pd.DataFrame(index=background_vars.index).join(
     [
         pd.Series(1, index=background_vars.index, name=CONSTANT),
-        select_variable_wide(health_panel, UNHAPPY),
+        unhappy,
         select_variable_wide(leisure_panel, SPORTS),
         pd.get_dummies(age, prefix_sep=".", dummy_na=True, drop_first=True),
         pd.get_dummies(ethnicity, prefix_sep=".", dummy_na=True, drop_first=True),
@@ -289,7 +303,7 @@ model_definition = (
 
 print(model_definition)
 
-model = semopy.Model(model_definition)  # %% naive model
+model = semopy.Model(model_definition)
 
 # %% naive model
 optimisation_result = model.fit(all_relevant_data)
