@@ -4,7 +4,16 @@ import pandas as pd
 
 
 def select_variable_wide(df: pd.DataFrame, variable: str) -> pd.DataFrame:
-    selected_columns = list(filter(lambda name: name[: name.rfind("_")] == variable, df.columns))
+    selected_columns = []
+
+    for column in df.columns:
+        if column == variable:
+            selected_columns.append(column)
+            continue
+
+        if (index := column.rfind("_")) != -1 and column[:index] == variable:
+            selected_columns.append(column)
+            continue
 
     if len(selected_columns) == 0:
         warnings.warn(f"No columns selected for {variable=}", stacklevel=2)
