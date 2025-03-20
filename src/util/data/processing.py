@@ -43,12 +43,28 @@ def available_years(df: pd.DataFrame) -> set[int]:
 def available_dummy_levels(df: pd.DataFrame, variable: str) -> set[str]:
     subset = select_variable_wide(df, variable)
 
-    result = {column[column.find("|") + 1 :] for column in subset.columns if column.find("|") != -1}
+    result = {column[column.find(".") + 1 :] for column in subset.columns if column.find(".") != -1}
 
     if len(result) == 0:
         warnings.warn(f"No dummy levels found for {variable}", stacklevel=2)
 
     return result
+
+
+def cleanup_dummy(name: str) -> str:
+    "Takes a dummy level and replaces characters to make semopy accept it."
+    safe_character = "."
+
+    return name.replace(" ", safe_character).replace("-", safe_character)
+
+
+def cleanup_dummy_column(column: str) -> str:
+    index_separator = column.find(".")
+
+    if index_separator == -1:
+        return column
+
+    return f"{column[:index_separator]}.{cleanup_dummy(column[index_separator + 1 :])}"
 
 
 def map_mhi5_categories(series: pd.Series, *, is_positive: bool = False) -> pd.Series:

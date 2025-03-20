@@ -12,6 +12,7 @@ from util.data import (
     available_years,
     available_dummy_levels,
 )
+from util.data.processing import cleanup_dummy, cleanup_dummy_column
 from util.model import ModelDefinitionBuilder, VariableDefinition
 
 
@@ -44,18 +45,18 @@ age_cutoffs = pd.IntervalIndex.from_breaks(
 
 age_labels = [
     "under 18",
-    "18-24 years",
-    "25-29 years",
-    "30-34 years",
-    "35-39 years",
-    "40-44 years",
-    "45-49 years",
-    "50-54 years",
-    "55-59 years",
-    "60-64 years",
-    "65-69 years",
-    "70-74 years",
-    "75-79 years",
+    "18 to 24 years",
+    "25 to 29 years",
+    "30 to 34 years",
+    "35 to 39 years",
+    "40 to 44 years",
+    "45 to 49 years",
+    "50 to 54 years",
+    "55 to 59 years",
+    "60 to 64 years",
+    "65 to 69 years",
+    "70 to 74 years",
+    "75 to 79 years",
     "over 80",
 ]
 
@@ -75,11 +76,11 @@ income_cutoffs = pd.IntervalIndex.from_breaks(
 )
 
 income_labels = [
-    "under 15.000",
-    "15-25.000",
-    "25-35.000",
-    "35-50.000",
-    "over 50.000",
+    "under 15000",
+    "15 to 25000",
+    "25 to 35000",
+    "35 to 50000",
+    "over 50000",
 ]
 
 income = select_variable_wide(background_vars, INCOME)
@@ -222,17 +223,17 @@ all_relevant_data = pd.DataFrame(index=background_vars.index).join(
         pd.Series(1, index=background_vars.index, name=CONSTANT),
         select_variable_wide(health_panel, UNHAPPY),
         select_variable_wide(leisure_panel, SPORTS),
-        pd.get_dummies(age, prefix_sep="|", dummy_na=True, drop_first=True),
-        pd.get_dummies(ethnicity, prefix_sep="|", dummy_na=True, drop_first=True),
-        pd.get_dummies(select_variable_wide(background_vars, GENDER), prefix_sep="|", dummy_na=True, drop_first=True),
+        pd.get_dummies(age, prefix_sep=".", dummy_na=True, drop_first=True),
+        pd.get_dummies(ethnicity, prefix_sep=".", dummy_na=True, drop_first=True),
+        pd.get_dummies(select_variable_wide(background_vars, GENDER), prefix_sep=".", dummy_na=True, drop_first=True),
         pd.get_dummies(
-            select_variable_wide(background_vars, MARITAL_STATUS), prefix_sep="|", dummy_na=True, drop_first=True
+            select_variable_wide(background_vars, MARITAL_STATUS), prefix_sep=".", dummy_na=True, drop_first=True
         ),
-        pd.get_dummies(income, prefix_sep="|", dummy_na=True, drop_first=True),
-        pd.get_dummies(education, prefix_sep="|", dummy_na=True, drop_first=True),
-        pd.get_dummies(employment, prefix_sep="|", dummy_na=True, drop_first=True),
+        pd.get_dummies(income, prefix_sep=".", dummy_na=True, drop_first=True),
+        pd.get_dummies(education, prefix_sep=".", dummy_na=True, drop_first=True),
+        pd.get_dummies(employment, prefix_sep=".", dummy_na=True, drop_first=True),
         pd.get_dummies(
-            select_variable_wide(health_panel, PHYSICAL_HEALTH), prefix_sep="|", dummy_na=True, drop_first=True
+            select_variable_wide(health_panel, PHYSICAL_HEALTH), prefix_sep=".", dummy_na=True, drop_first=True
         ),
         bmi,
         previous_depression,
@@ -241,6 +242,9 @@ all_relevant_data = pd.DataFrame(index=background_vars.index).join(
 
 # Sort columns
 all_relevant_data = all_relevant_data[sorted(all_relevant_data.columns)]
+
+# Standardise names of dummy levels
+all_relevant_data = all_relevant_data.rename(columns=cleanup_dummy_column)
 
 all_controls = [
     AGE,
@@ -263,7 +267,10 @@ model_definition = (
     .with_constant(VariableDefinition(CONSTANT))
     .with_w(
         [
-            VariableDefinition(variable, dummy_levels=available_dummy_levels(all_relevant_data, variable))
+            VariableDefinition(
+                variable,
+                dummy_levels=[cleanup_dummy(level) for level in available_dummy_levels(all_relevant_data, variable)],
+            )
             for variable in [
                 AGE,
                 ETHNICITY,

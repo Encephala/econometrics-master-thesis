@@ -5,6 +5,8 @@ import warnings
 
 import pandas as pd
 
+from .data.processing import cleanup_dummy
+
 
 @dataclass(frozen=True)
 class VariableDefinition:
@@ -25,7 +27,7 @@ class VariableInWave:
 
     def build(self) -> str:
         if self.dummy_level is not None:
-            return f"{self.name}_{self.wave}_{self.dummy_level.replace(' ', '_').replace('-', '_')}"
+            return f"{self.name}_{self.wave}.{cleanup_dummy(self.dummy_level)}"
 
         return f"{self.name}_{self.wave}"
 
@@ -51,7 +53,7 @@ class VariableWithNamedParameter(VariableInWave):
 
     def build(self) -> str:
         if self.dummy_level is not None:
-            return f"{self.parameter}_{self.dummy_level.replace(' ', '_').replace('-', '_')}*{super().build()}"
+            return f"{self.parameter}.{cleanup_dummy(self.dummy_level)}*{super().build()}"
 
         return f"{self.parameter}*{super().build()}"
 
@@ -73,14 +75,14 @@ class AvailableVariable:
 
         name = column[: column.rfind("_")]
 
-        has_dummy_level = column.find("|") != -1
+        has_dummy_level = column.find(".") != -1
 
         if not has_dummy_level:
             wave = int(column[column.rfind("_") + 1 :])
             return cls(name, wave)
 
-        wave = int(column[column.rfind("_") + 1 : column.find("|")])
-        dummy_level = column[column.find("|") + 1 :]
+        wave = int(column[column.rfind("_") + 1 : column.find(".")])
+        dummy_level = column[column.find(".") + 1 :]
 
         return cls(name, wave, dummy_level)
 
@@ -336,6 +338,8 @@ class ModelDefinitionBuilder:
 
                 missing_dummies.append(variable)
 
+        # TODO: If all dummy levels for a variable are missing, this is a missing variable altogether
+        # and should return False to raise an error.
         if len(missing_dummies) != 0:
             return missing_dummies, True
 
