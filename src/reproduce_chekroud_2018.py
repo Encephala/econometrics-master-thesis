@@ -148,7 +148,7 @@ def merge_and_map_categories(column: pd.Series) -> pd.Series:
 
     result = pd.Categorical(column.map(old_category_to_new_category))
 
-    return pd.Series(result, name=f"{EMPLOYMENT}_{year}")
+    return pd.Series(result, name=f"{EMPLOYMENT}_{year}", index=column.index)
 
 
 # Apply column-wise to have cohesive datatype
@@ -224,16 +224,16 @@ ethnicity = select_variable_wide(background_vars, ETHNICITY)
 
 category_map = {
     "dutch background": "dutch",
-    "first generation foreign, non-western background": "foreign first nonwestern",
-    "first generation foreign, western background": "foreign first western",
-    "second generation foreign, non-western background": "foreign second nonwestern",
-    "second generation foreign, western background": "foreign second western",
+    "first generation foreign, non-western background": "first nonw",
+    "first generation foreign, western background": "first w",
+    "second generation foreign, non-western background": "second nonw",
+    "second generation foreign, western background": "second w",
 }
 
 ethnicity = ethnicity.apply(lambda column: column.cat.rename_categories(category_map))
 
 # %% the big merge
-CONSTANT = "const"
+CONSTANT = "constant"
 
 # TODO: Remove all prefixes from category names somewhere in the code (probably loading, not here?) ( :^) )
 # NOTE: Use | as dummy separator to not conflict with <question>_<year>, drop first for identification
@@ -298,8 +298,14 @@ print(model_definition)
 model = semopy.Model(model_definition)
 
 # %% naive model
-optimisation_result = model.fit(all_relevant_data.astype(np.float64), obj="FIML")
+# optimisation_result = model.fit(all_relevant_data.astype(np.float64), obj="FIML")
 
-print(optimisation_result)
+# print(optimisation_result)
 
-model.inspect().sort_values(["op", "Estimate", "lval"])  # pyright: ignore[reportOptionalMemberAccess, reportAttributeAccessIssue]
+# model.inspect().sort_values(["op", "Estimate", "lval"])  # pyright: ignore[reportOptionalMemberAccess, reportAttributeAccessIssue]
+
+# %% model doesn't work in python, saving for R.
+all_relevant_data.astype("float64").to_stata("/tmp/data.dta")  # noqa: S108
+
+print("Model definition in stata/lavaan form:")
+print(model_definition.replace(".", "_"))
