@@ -270,7 +270,6 @@ model_definition = (
     ModelDefinitionBuilder()
     .with_y(VariableDefinition(UNHAPPY))
     .with_x(VariableDefinition(SPORTS))
-    .with_constant()
     .with_w(
         [
             VariableDefinition(
@@ -295,14 +294,14 @@ model_definition = (
 
 print(model_definition)
 
-model = semopy.Model(model_definition)
+model = semopy.ModelMeans(model_definition)
 
 # %% naive model
-# optimisation_result = model.fit(all_relevant_data.astype(np.float64), obj="FIML")
+optimisation_result = model.fit(all_relevant_data.astype(np.float64))
 
-# print(optimisation_result)
+print(optimisation_result)
 
-# model.inspect().sort_values(["op", "Estimate", "lval"])  # pyright: ignore[reportOptionalMemberAccess, reportAttributeAccessIssue]
+model.inspect().sort_values(["op", "Estimate", "lval"])  # pyright: ignore[reportOptionalMemberAccess, reportAttributeAccessIssue]
 
 # %% model doesn't work in python, saving for R.
 all_relevant_data.astype("float64").to_stata("/tmp/data.dta")  # noqa: S108
