@@ -90,13 +90,13 @@ class AvailableVariable:
 class Regression:
     lval: VariableInWave
     rvals: Collection[VariableInWave]
-    constant: VariableDefinition | None = field(default=None)
+    include_constant: bool
 
     def build(self) -> str:
         return (
             f"{self.lval.build()}"
             " ~ "
-            f"{f'alpha*{self.constant.name} + ' if self.constant is not None else ''}"
+            f"{'alpha*1 + ' if self.include_constant is not None and self.include_constant else ''}"
             f"{' + '.join(rval.build() for rval in self.rvals)}"
         )
 
@@ -135,7 +135,7 @@ class ModelDefinitionBuilder:
     x_lag_structure: list[int]
 
     w: list[VariableDefinition] | None = None
-    constant: VariableDefinition | None = None
+    include_constant: bool = False
 
     def __init__(self):
         self._regressions: list[Regression] = []
@@ -183,11 +183,8 @@ class ModelDefinitionBuilder:
         self.w = variables
         return self
 
-    def with_constant(self, constant: VariableDefinition) -> Self:
-        assert not constant.is_ordinal, "Brother what"
-        assert constant.dummy_levels is None, "Fam a constant can't have dummy levels"
-
-        self.constant = constant
+    def with_constant(self) -> Self:
+        self.include_constant = True
         return self
 
     def build(self, available_columns: "pd.Index[str]") -> str:
@@ -196,7 +193,7 @@ class ModelDefinitionBuilder:
         # and does not have an associated wave.
         available_variables = [
             AvailableVariable.from_column_name(column)
-            for column in available_columns.drop(self.constant, errors="ignore")
+            for column in available_columns.drop(self.include_constant, errors="ignore")
         ]
 
         first_year_y, last_year_y = self._determine_start_and_end_years(available_variables)
@@ -284,7 +281,7 @@ class ModelDefinitionBuilder:
                     stacklevel=2,
                 )
 
-            self._regressions.append(Regression(y, rvals, constant=self.constant))
+            self._regressions.append(Regression(y, rvals, self.include_constant))
 
             # TODO: Might be nicer to have this in a separate function,
             # but since it so heavily relies on local variables, leaving it here for now.

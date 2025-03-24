@@ -270,7 +270,7 @@ model_definition = (
     ModelDefinitionBuilder()
     .with_y(VariableDefinition(UNHAPPY))
     .with_x(VariableDefinition(SPORTS))
-    .with_constant(VariableDefinition(CONSTANT))
+    .with_constant()
     .with_w(
         [
             VariableDefinition(
