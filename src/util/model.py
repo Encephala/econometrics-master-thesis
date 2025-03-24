@@ -43,6 +43,15 @@ class VariableInWave:
     def is_in(self, available_variables: list["AvailableVariable"]) -> bool:
         return any(self._equals(variable) for variable in available_variables)
 
+    def _to_column_name(self) -> str:
+        if self.dummy_level is not None:
+            return f"{self.name}_{self.wave}.{self.dummy_level}"
+
+        return f"{self.name}_{self.wave}"
+
+    def has_zero_variance_in(self, data: pd.DataFrame) -> bool:
+        return data[self._to_column_name()].var() == 0
+
 
 @dataclass(frozen=True)
 class VariableWithNamedParameter(VariableInWave):
@@ -187,18 +196,15 @@ class ModelDefinitionBuilder:
         self.include_constant = True
         return self
 
-    def build(self, available_columns: "pd.Index[str]") -> str:
+    def build(self, data: pd.DataFrame) -> str:
         # (name, wave) pairs in the data
         # Ignoring the constant, as it is included in the regressions directly,
         # and does not have an associated wave.
-        available_variables = [
-            AvailableVariable.from_column_name(column)
-            for column in available_columns.drop(self.include_constant, errors="ignore")
-        ]
+        available_variables = [AvailableVariable.from_column_name(column) for column in data.columns]
 
         first_year_y, last_year_y = self._determine_start_and_end_years(available_variables)
 
-        self._build_regressions(available_variables, first_year_y, last_year_y)
+        self._build_regressions(data, available_variables, first_year_y, last_year_y)
 
         self._fix_y_variance()
 
@@ -241,7 +247,13 @@ class ModelDefinitionBuilder:
 
         return first_year_y, last_year_y
 
-    def _build_regressions(self, available_variables: list[AvailableVariable], first_year_y: int, last_year_y: int):
+    def _build_regressions(
+        self,
+        data: pd.DataFrame,
+        available_variables: list[AvailableVariable],
+        first_year_y: int,
+        last_year_y: int,
+    ):
         for year_y in range(first_year_y, last_year_y + 1):
             y = VariableInWave(self.y.name, year_y)
 
@@ -259,7 +271,8 @@ class ModelDefinitionBuilder:
             w = self._compile_w(year_y)
             rvals: list[VariableInWave] = [*y_lags, *x_lags, *w]
 
-            if (missing_info := self._find_missing_variables(available_variables, rvals)) is not None:
+            # Check for missing variables
+            if (missing_info := self._find_missing_variables(rvals, available_variables)) is not None:
                 missing_variables, is_dummy = missing_info
 
                 if not is_dummy:
@@ -272,14 +285,24 @@ class ModelDefinitionBuilder:
                     # because one of the vars is missing?
                     continue
 
-                # Exclude the dummy level from the regression, as it isn't in the data.
-                for variable in missing_variables:
-                    rvals.remove(variable)
-
                 warnings.warn(
                     f"For {y=}, the dummy levels {missing_variables} were not in the data, excluding from regression",
                     stacklevel=2,
                 )
+
+                # Exclude the dummy level from the regression, as it isn't in the data.
+                for variable in missing_variables:
+                    rvals.remove(variable)
+
+            # Check for variables with zero variance
+            if (zero_variance_variables := self._find_zero_variance_variables(rvals, data)) is not None:
+                warnings.warn(
+                    f"For {y=}, the variables {zero_variance_variables} had zero variance, excluding from regression",
+                    stacklevel=2,
+                )
+
+                for variable in zero_variance_variables:
+                    rvals.remove(variable)
 
             self._regressions.append(Regression(y, rvals, self.include_constant))
 
@@ -319,8 +342,8 @@ class ModelDefinitionBuilder:
 
     def _find_missing_variables(
         self,
-        available_variables: list[AvailableVariable],
         variables: Collection[VariableInWave],
+        available_variables: list[AvailableVariable],
     ) -> Tuple[list[VariableInWave], bool] | None:
         """Checks if all the regressors are in the data.
 
@@ -343,6 +366,23 @@ class ModelDefinitionBuilder:
 
         return None
 
+    def _find_zero_variance_variables(
+        self,
+        variables: Collection[VariableInWave],
+        data: pd.DataFrame,
+    ) -> list[VariableInWave] | None:
+        """Checks if all the regressors are in the data.
+
+        If a variable is missing, returns ([variable], False).
+        If just a dummy level of a variable is missing, returns ([levels], True)
+        Returns `None` if all variables are found."""
+        zero_variance = [variable for variable in variables if variable.has_zero_variance_in(data)]
+
+        if len(zero_variance) != 0:
+            return zero_variance
+
+        return None
+
     def _fix_y_variance(self):
         for regression in self._regressions:
             # Fix variance for y to be constant in time
@@ -357,9 +397,7 @@ class ModelDefinitionBuilder:
     def _make_x_predetermined(self):
         # Establish list of used regressors, as defining covariances between y and unused x is meaningless
         # (and causes the model to crash)
-        all_regressors: list[VariableInWave] = []
-        for regression in self._regressions:
-            all_regressors.extend(rval for rval in regression.rvals if rval not in all_regressors)
+        all_regressors = self._all_regressors()
 
         for regression in self._regressions:
             y_current = regression.lval
@@ -371,3 +409,11 @@ class ModelDefinitionBuilder:
 
             if len(x_future) != 0:
                 self._covariances.append(Covariance(y_current, x_future))
+
+    def _all_regressors(self) -> list[VariableInWave]:
+        all_regressors: list[VariableInWave] = []
+
+        for regression in self._regressions:
+            all_regressors.extend(rval for rval in regression.rvals if rval not in all_regressors)
+
+        return all_regressors

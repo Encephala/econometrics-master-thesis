@@ -290,7 +290,7 @@ model_definition = (
         ]
         + [VariableDefinition(variable) for variable in [BMI, PREVIOUS_DEPRESSION]]
     )  # All are dummies for now
-    .build(all_relevant_data.columns)
+    .build(all_relevant_data)
 )
 
 print(model_definition)
