@@ -166,14 +166,14 @@ height = select_variable_wide(health_panel, HEIGHT)
 
 # Broad sanity check
 TALLEST_HEIGHT_EVER = 270  # According to google idk
-SHORT_TEEN = 120
+VERY_SHORT_TEEN = 100
 height = height.mask(height > TALLEST_HEIGHT_EVER, pd.NA)
-height = height.mask(height < SHORT_TEEN, pd.NA)
+height = height.mask(height < VERY_SHORT_TEEN, pd.NA)
 
 HEAVIEST_PERSON_EVER = 635  # According to google
-LIGHT_TEEN = 40
+VERY_LIGHT_TEEN = 30
 weight = weight.mask(weight > HEAVIEST_PERSON_EVER, pd.NA)
-weight = weight.mask(weight < LIGHT_TEEN, pd.NA)
+weight = weight.mask(weight < VERY_LIGHT_TEEN, pd.NA)
 
 bmi = pd.DataFrame(index=health_panel.index)
 
@@ -256,8 +256,8 @@ CONSTANT = "constant"
 DUMMY_NA = True
 DROP_FIRST = True
 
-# TODO: Remove all prefixes from category names somewhere in the code (probably loading, not here?) ( :^) )
-# NOTE: Use | as dummy separator to not conflict with <question>_<year>, drop first for identification
+# NOTE: Use . as dummy separator to not conflict with <question>_<year>,
+# drop first for identification or use NA level for identification
 all_relevant_data = pd.DataFrame(index=background_vars.index).join(
     [
         pd.Series(1, index=background_vars.index, name=CONSTANT),
