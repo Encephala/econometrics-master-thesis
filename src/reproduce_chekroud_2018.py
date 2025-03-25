@@ -277,6 +277,12 @@ all_relevant_data = pd.DataFrame(index=background_vars.index).join(
     ]
 )
 
+# Drop rows for which the dependent variable is always NA, as these will never be included in a regression.
+missing_dependent_variable = select_variable_wide(all_relevant_data, UNHAPPY)
+missing_dependent_variable = missing_dependent_variable.isna().sum(axis=1) == missing_dependent_variable.shape[1]
+missing_dependent_variable_index = missing_dependent_variable[missing_dependent_variable].index
+all_relevant_data = all_relevant_data.drop(missing_dependent_variable_index)
+
 # Sort columns
 all_relevant_data = all_relevant_data[sorted(all_relevant_data.columns)]
 
