@@ -253,6 +253,9 @@ ethnicity = ethnicity.apply(lambda column: column.cat.rename_categories(category
 # %% the big merge
 CONSTANT = "constant"
 
+DUMMY_NA = True
+DROP_FIRST = True
+
 # TODO: Remove all prefixes from category names somewhere in the code (probably loading, not here?) ( :^) )
 # NOTE: Use | as dummy separator to not conflict with <question>_<year>, drop first for identification
 all_relevant_data = pd.DataFrame(index=background_vars.index).join(
@@ -260,19 +263,27 @@ all_relevant_data = pd.DataFrame(index=background_vars.index).join(
         pd.Series(1, index=background_vars.index, name=CONSTANT),
         unhappy,
         sports,
-        pd.get_dummies(age, prefix_sep=".", dummy_na=True, drop_first=True),
-        pd.get_dummies(ethnicity, prefix_sep=".", dummy_na=True, drop_first=True),
-        pd.get_dummies(select_variable_wide(background_vars, GENDER), prefix_sep=".", dummy_na=True, drop_first=True),
+        pd.get_dummies(age, prefix_sep=".", dummy_na=DUMMY_NA, drop_first=DROP_FIRST),
+        pd.get_dummies(ethnicity, prefix_sep=".", dummy_na=DUMMY_NA, drop_first=DROP_FIRST),
         pd.get_dummies(
-            select_variable_wide(background_vars, MARITAL_STATUS), prefix_sep=".", dummy_na=True, drop_first=True
+            select_variable_wide(background_vars, GENDER), prefix_sep=".", dummy_na=DUMMY_NA, drop_first=DROP_FIRST
         ),
-        pd.get_dummies(income, prefix_sep=".", dummy_na=True, drop_first=True),
-        pd.get_dummies(education, prefix_sep=".", dummy_na=True, drop_first=True),
-        pd.get_dummies(employment, prefix_sep=".", dummy_na=True, drop_first=True),
         pd.get_dummies(
-            select_variable_wide(health_panel, PHYSICAL_HEALTH), prefix_sep=".", dummy_na=True, drop_first=True
+            select_variable_wide(background_vars, MARITAL_STATUS),
+            prefix_sep=".",
+            dummy_na=DUMMY_NA,
+            drop_first=DROP_FIRST,
         ),
-        pd.get_dummies(bmi, prefix_sep=".", dummy_na=True, drop_first=True),
+        pd.get_dummies(income, prefix_sep=".", dummy_na=DUMMY_NA, drop_first=DROP_FIRST),
+        pd.get_dummies(education, prefix_sep=".", dummy_na=DUMMY_NA, drop_first=DROP_FIRST),
+        pd.get_dummies(employment, prefix_sep=".", dummy_na=DUMMY_NA, drop_first=DROP_FIRST),
+        pd.get_dummies(
+            select_variable_wide(health_panel, PHYSICAL_HEALTH),
+            prefix_sep=".",
+            dummy_na=DUMMY_NA,
+            drop_first=DROP_FIRST,
+        ),
+        pd.get_dummies(bmi, prefix_sep=".", dummy_na=DUMMY_NA, drop_first=DROP_FIRST),
         previous_depression,
     ]
 )
