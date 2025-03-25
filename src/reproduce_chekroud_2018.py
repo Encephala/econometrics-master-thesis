@@ -164,6 +164,17 @@ employment.columns = new_column_names
 weight = select_variable_wide(health_panel, WEIGHT)
 height = select_variable_wide(health_panel, HEIGHT)
 
+# Broad sanity check
+TALLEST_HEIGHT_EVER = 270  # According to google idk
+SHORT_TEEN = 120
+height = height.mask(height > TALLEST_HEIGHT_EVER, pd.NA)
+height = height.mask(height < SHORT_TEEN, pd.NA)
+
+HEAVIEST_PERSON_EVER = 635  # According to google
+LIGHT_TEEN = 40
+weight = weight.mask(weight > HEAVIEST_PERSON_EVER, pd.NA)
+weight = weight.mask(weight < LIGHT_TEEN, pd.NA)
+
 bmi = pd.DataFrame(index=health_panel.index)
 
 BMI = "bmi"
@@ -171,8 +182,15 @@ BMI = "bmi"
 for year in available_years(weight):  # Can choose either weight or height, if one is missing answer is NA anyways
     bmi[f"{BMI}_{year}"] = weight[f"{WEIGHT}_{year}"] / (height[f"{HEIGHT}_{year}"] / 100) ** 2
 
-# TODO: There's some excessive BMI values, need to filter
-# Also need to then stratify (pd.cut)
+# BMI ranges from https://www.nhs.uk/conditions/obesity/
+bmi = bmi.apply(
+    lambda column: pd.cut(
+        column,
+        bins=[-np.inf, 18.5, 25.0, 30, np.inf],
+        labels=["underweight", "normal weight", "overweight", "obese"],
+        right=False,
+    )
+)
 
 # %% determine previous depression status
 depression = select_variable_wide(health_panel, DEPRESSION_MEDICATION)
@@ -254,7 +272,7 @@ all_relevant_data = pd.DataFrame(index=background_vars.index).join(
         pd.get_dummies(
             select_variable_wide(health_panel, PHYSICAL_HEALTH), prefix_sep=".", dummy_na=True, drop_first=True
         ),
-        bmi,
+        pd.get_dummies(bmi, prefix_sep=".", dummy_na=True, drop_first=True),
         previous_depression,
     ]
 )
@@ -285,9 +303,10 @@ model_definition = (
                 EDUCATION_LEVEL,
                 EMPLOYMENT,
                 PHYSICAL_HEALTH,
+                BMI,
             ]
         ]
-        + [VariableDefinition(variable) for variable in [BMI, PREVIOUS_DEPRESSION]]
+        + [VariableDefinition(variable) for variable in [PREVIOUS_DEPRESSION]]
     )  # All are dummies for now
     .build(all_relevant_data)
 )
