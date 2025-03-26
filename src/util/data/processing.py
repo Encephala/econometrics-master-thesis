@@ -7,6 +7,7 @@ def select_variable_wide(df: pd.DataFrame, variable: str) -> pd.DataFrame:
     selected_columns = []
 
     for column in df.columns:
+        # Non-wide form variables (e.g. time-invariants)
         if column == variable:
             selected_columns.append(column)
             continue
@@ -17,6 +18,19 @@ def select_variable_wide(df: pd.DataFrame, variable: str) -> pd.DataFrame:
 
     if len(selected_columns) == 0:
         warnings.warn(f"No columns selected for {variable=}", stacklevel=2)
+
+    return df[selected_columns]
+
+
+def select_year_wide(df: pd.DataFrame, year: int) -> pd.DataFrame:
+    selected_columns = []
+
+    for column in df.columns:
+        if column.find(str(year)) != -1:
+            selected_columns.append(column)  # noqa: PERF401
+
+    if len(selected_columns) == 0:
+        warnings.warn(f"No columns selected for {year=}", stacklevel=2)
 
     return df[selected_columns]
 
