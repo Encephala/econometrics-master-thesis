@@ -261,7 +261,7 @@ def make_dummies(df: pd.DataFrame) -> pd.DataFrame:
         wave = int(column[column.rfind("_") + 1 : column.find(".")])
         dummy_level = column[column.find(".") + 1 :]
 
-        new_columns.append(Column(name, wave, dummy_level))
+        new_columns.append(Column(name, wave, cleanup_dummy(dummy_level)))
 
     result.columns = new_columns
 
@@ -321,10 +321,7 @@ model_definition = (
     .with_x(VariableDefinition(SPORTS))
     .with_w(
         [
-            VariableDefinition(
-                variable,
-                dummy_levels=[cleanup_dummy(level) for level in available_dummy_levels(all_relevant_data, variable)],
-            )
+            VariableDefinition(variable, dummy_levels=available_dummy_levels(all_relevant_data, variable))
             for variable in [
                 AGE,
                 ETHNICITY,
