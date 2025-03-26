@@ -1,26 +1,42 @@
 from pathlib import Path
 import warnings
+from dataclasses import dataclass
 
 import pandas as pd
 
 
-def fix_category_names(column: pd.Series) -> pd.Series:
-    """Actually have to do this because the data sometimes (but not consistently, smile) has prefixed spaces,
-    and sometimes has capitalisation.
+@dataclass(frozen=True, order=True)
+class Column:
+    name: str
+    wave: int | None = None  # None for time-invariants
+    dummy_level: str | None = None
 
-    I think 2013 and before there was a prefix space in answers, after there wasn't."""
+    def __str__(self) -> str:
+        match (self.wave, self.dummy_level):
+            case (None, None):
+                return self.name
+            case (wave, None):
+                return f"{self.name}_{self.wave}"
+            case (wave, dummy_level):
+                return f"{self.name}_{wave}.{dummy_level}"
+            case (None, dummy_level):
+                return f"{self.name}.{dummy_level}"
 
-    old_categories: "pd.Index[str]" = column.cat.categories  # To help the LSP
-    # NOTE: str(category) to prevent raising if some category was f.i. incorrectly given a float as name,
-    # data cleaning happens at a lager stage
-    new_categories = pd.Index([str(category).lower().strip() for category in old_categories])
+    @staticmethod
+    def from_liss_variable_name(variable_name: str) -> "Column":
+        if not variable_name[-3:].isnumeric():
+            # It's not a standard question (e.g. user id)
+            return Column(variable_name)
 
-    # Not just rename_categories because for instance "A" and "a" are the same category after .lower()
-    old_to_new_category = dict(zip(old_categories, new_categories))
+        prefix = variable_name[:2]
+        year = int(variable_name[2:4])
+        question = int(variable_name[-3:])
 
-    result = pd.Categorical(column.map(old_to_new_category))
+        return Column(f"{prefix}{question}", year)
 
-    return pd.Series(result, name=column.name)
+    @staticmethod
+    def from_background_variable(variable_name: str, year: int) -> "Column":
+        return Column(variable_name, year)
 
 
 def load_df(path: Path) -> pd.DataFrame:
@@ -56,6 +72,8 @@ def assemble_wide_panel(prefix: str) -> pd.DataFrame:
 
         new_df = load_df(file)
 
+        new_df.columns = [Column.from_liss_variable_name(column) for column in new_df.columns]
+
         # To avoid duplicating columns (mainly 'nohouse_encr')
         new_columns = new_df.columns.difference(result.columns)
 
@@ -87,8 +105,9 @@ def assemble_background_panel() -> pd.DataFrame:
 
         year = file.stem[len("avars_20") :][:2]
         assert year.isnumeric(), f"{year} is not numeric, wrong indices"
+        year = int(year)
 
-        new_df.columns = [f"{column}_{int(year)}" for column in new_df.columns]
+        new_df.columns = [Column.from_background_variable(column, year) for column in new_df.columns]
 
         result = result.merge(
             new_df,
@@ -122,3 +141,22 @@ def load_wide_panel_cached(prefix: str, *, respect_cache: bool = True) -> pd.Dat
         warnings.warn("Not writing empty cache", stacklevel=2)
 
     return assembled
+
+
+def fix_category_names(column: pd.Series) -> pd.Series:
+    """Actually have to do this because the data sometimes (but not consistently, smile) has prefixed spaces,
+    and sometimes has capitalisation.
+
+    I think 2013 and before there was a prefix space in answers, after there wasn't."""
+
+    old_categories: "pd.Index[str]" = column.cat.categories  # To help the LSP
+    # NOTE: str(category) to prevent raising if some category was f.i. incorrectly given a float as name,
+    # data cleaning happens at a lager stage
+    new_categories = pd.Index([str(category).lower().strip() for category in old_categories])
+
+    # Not just rename_categories because for instance "A" and "a" are the same category after .lower()
+    old_to_new_category = dict(zip(old_categories, new_categories))
+
+    result = pd.Categorical(column.map(old_to_new_category))
+
+    return pd.Series(result, name=column.name)

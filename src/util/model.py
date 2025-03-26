@@ -4,6 +4,7 @@ import warnings
 
 import pandas as pd
 
+from .data import Column
 from .data.processing import cleanup_dummy
 
 
@@ -30,7 +31,7 @@ class VariableInWave:
 
         return f"{self.name}_{self.wave}"
 
-    def _equals(self, available_variable: "AvailableVariable") -> bool:
+    def _equals(self, available_variable: "Column") -> bool:
         if self.dummy_level is None:
             return self.name == available_variable.name and self.wave == available_variable.wave
 
@@ -40,17 +41,11 @@ class VariableInWave:
             and self.dummy_level == available_variable.dummy_level
         )
 
-    def is_in(self, available_variables: list["AvailableVariable"]) -> bool:
+    def is_in(self, available_variables: Collection["Column"]) -> bool:
         return any(self._equals(variable) for variable in available_variables)
 
-    def _to_column_name(self) -> str:
-        if self.dummy_level is not None:
-            return f"{self.name}_{self.wave}.{self.dummy_level}"
-
-        return f"{self.name}_{self.wave}"
-
     def has_zero_variance_in(self, data: pd.DataFrame) -> bool:
-        return data[self._to_column_name()].var() == 0
+        return data[Column(self.name, self.wave, self.dummy_level)].var() == 0
 
 
 @dataclass(frozen=True)
@@ -64,43 +59,6 @@ class VariableWithNamedParameter(VariableInWave):
             return f"{self.parameter}.{cleanup_dummy(self.dummy_level)}*{super().build()}"
 
         return f"{self.parameter}*{super().build()}"
-
-
-@dataclass(frozen=True)
-class AvailableVariable:
-    "A variable as available in the data, effectively a parsed column name."
-
-    name: str
-    wave: int | None = None  # None for time-invariants
-    dummy_level: str | None = None
-
-    @classmethod
-    def from_column_name(cls, column: str) -> Self:
-        index_underscore = column.rfind("_")
-
-        if index_underscore == -1:
-            return cls(column)
-
-        name = column[: column.rfind("_")]
-
-        has_dummy_level = column.find(".") != -1
-
-        if not has_dummy_level:
-            try:
-                wave = int(column[column.rfind("_") + 1 :])
-            except ValueError:  # Couldn't parse an int
-                wave = None
-
-            return cls(name, wave)
-
-        try:
-            wave = int(column[column.rfind("_") + 1 : column.find(".")])
-        except ValueError:  # Couldn't parse an int
-            wave = None
-
-        dummy_level = column[column.find(".") + 1 :]
-
-        return cls(name, wave, dummy_level)
 
 
 @dataclass(frozen=True)
@@ -208,7 +166,7 @@ class ModelDefinitionBuilder:
         # (name, wave) pairs in the data
         # Ignoring the constant, as it is included in the regressions directly,
         # and does not have an associated wave.
-        available_variables = [AvailableVariable.from_column_name(column) for column in data.columns]
+        available_variables: list[Column] = list(data.columns)  # pyright: ignore[reportAssignmentType]
 
         first_year_y, last_year_y = self._determine_start_and_end_years(available_variables)
 
@@ -228,7 +186,7 @@ class ModelDefinitionBuilder:
 {self._ordinals.build()}
 """
 
-    def _determine_start_and_end_years(self, available_variables: list[AvailableVariable]) -> Tuple[int, int]:
+    def _determine_start_and_end_years(self, available_variables: Collection[Column]) -> Tuple[int, int]:  # pyright: ignore[reportInvalidTypeArguments]
         y_years = [variable.wave for variable in available_variables if variable.name == self.y.name]
 
         assert not any(year is None for year in y_years)  # y is never time-invariant
@@ -258,7 +216,7 @@ class ModelDefinitionBuilder:
     def _build_regressions(
         self,
         data: pd.DataFrame,
-        available_variables: list[AvailableVariable],
+        available_variables: Collection[Column],
         first_year_y: int,
         last_year_y: int,
     ):
@@ -351,7 +309,7 @@ class ModelDefinitionBuilder:
     def _find_missing_variables(
         self,
         variables: Collection[VariableInWave],
-        available_variables: list[AvailableVariable],
+        available_variables: Collection[Column],  # pyright: ignore[reportInvalidTypeArguments]
     ) -> Tuple[list[VariableInWave], bool] | None:
         """Checks if all the regressors are in the data.
 

@@ -6,21 +6,21 @@ import numpy as np
 import semopy
 
 from util.data import (
+    Column,
     load_wide_panel_cached,
-    standardise_wide_column_name,
     select_variable_wide,
-    select_year_wide,
+    select_wave_wide,
     available_years,
     available_dummy_levels,
 )
-from util.data.processing import cleanup_dummy, cleanup_dummy_column
+from util.data.processing import cleanup_dummy
 from util.model import ModelDefinitionBuilder, VariableDefinition
 
 
 # %% data loading
 background_vars = load_wide_panel_cached("avars")
-leisure_panel = load_wide_panel_cached("cs").rename(columns=standardise_wide_column_name)
-health_panel = load_wide_panel_cached("ch").rename(columns=standardise_wide_column_name)
+leisure_panel = load_wide_panel_cached("cs")
+health_panel = load_wide_panel_cached("ch")
 
 # %% all variable names
 UNHAPPY = "ch14"
@@ -58,10 +58,8 @@ sports = sports.apply(lambda column: column.map({"yes": True, "no": False}, na_a
 
 # %% age preprocessing
 # From Chekroud 2018
-age_cutoffs = pd.IntervalIndex.from_breaks(
-    [-np.inf, 18, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, np.inf],
-    closed="left",
-)
+age = select_variable_wide(background_vars, AGE)
+
 
 age_labels = [
     "under 18",
@@ -80,20 +78,19 @@ age_labels = [
     "over 80",
 ]
 
-age = select_variable_wide(background_vars, AGE)
-
 for column in age:
-    new_column = pd.cut(age[column], bins=age_cutoffs)
-    new_column = new_column.cat.rename_categories(age_labels)
+    new_column = pd.cut(
+        age[column],
+        bins=[-np.inf, 18, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, np.inf],
+        labels=age_labels,
+    )
 
-    age = age.assign(**{column: new_column})  # pyright: ignore[reportCallIssue]
+    age = age.copy()
+    age[column] = new_column
 
 # %% Income preprocessing
 # From Chekroud 2018
-income_cutoffs = pd.IntervalIndex.from_breaks(
-    [-np.inf, 15000, 25000, 35000, 50000, np.inf],
-    closed="left",
-)
+income = select_variable_wide(background_vars, INCOME)
 
 income_labels = [
     "under 15000",
@@ -103,13 +100,15 @@ income_labels = [
     "over 50000",
 ]
 
-income = select_variable_wide(background_vars, INCOME)
-
 for column in income:
-    new_column = pd.cut(income[column], bins=income_cutoffs)
-    new_column = new_column.cat.rename_categories(income_labels)
+    new_column = pd.cut(
+        income[column],
+        bins=[-np.inf, 15000, 25000, 35000, 50000, np.inf],
+        labels=income_labels,
+    )
 
-    income = income.assign(**{column: new_column})  # pyright: ignore[reportCallIssue]
+    income = income.copy()
+    income[column] = new_column
 
 # %% derive employment from primary occupation
 occupation = select_variable_wide(background_vars, PRINCIPAL_OCCUPATION)
@@ -126,7 +125,7 @@ def merge_and_map_categories(column: pd.Series) -> pd.Series:
     RETIRED = "retired"
     UNABLE = "unable to work"
 
-    year = column.name[column.name.rfind("_") + 1 :]  # pyright: ignore # noqa: PGH003
+    wave = column.name.wave  # pyright: ignore  # noqa: PGH003
 
     # Map to new codes
     old_category_to_new_category = {
@@ -149,17 +148,11 @@ def merge_and_map_categories(column: pd.Series) -> pd.Series:
 
     result = pd.Categorical(column.map(old_category_to_new_category))
 
-    return pd.Series(result, name=f"{EMPLOYMENT}_{year}", index=column.index)
+    return pd.Series(result, name=Column(EMPLOYMENT, wave), index=column.index)
 
 
 # Apply column-wise to have cohesive datatype
 employment = occupation.apply(merge_and_map_categories)
-new_column_names = []
-for column in employment.columns:
-    year = column[column.rfind("_") + 1 :]
-
-    new_column_names.append(f"{EMPLOYMENT}_{year}")
-employment.columns = new_column_names
 
 # %% calculate BMI
 weight = select_variable_wide(health_panel, WEIGHT)
@@ -181,7 +174,7 @@ bmi = pd.DataFrame(index=health_panel.index)
 BMI = "bmi"
 
 for year in available_years(weight):  # Can choose either weight or height, if one is missing answer is NA anyways
-    bmi[f"{BMI}_{year}"] = weight[f"{WEIGHT}_{year}"] / (height[f"{HEIGHT}_{year}"] / 100) ** 2
+    bmi[Column(BMI, year)] = weight[Column(WEIGHT, year)] / (height[Column(HEIGHT, year)] / 100) ** 2
 
 # BMI ranges from https://www.nhs.uk/conditions/obesity/
 bmi = bmi.apply(
@@ -197,7 +190,7 @@ bmi = bmi.apply(
 depression = select_variable_wide(health_panel, DEPRESSION_MEDICATION)
 
 years_depression = sorted(available_years(depression))
-names_depression = [f"{DEPRESSION_MEDICATION}_{year}" for year in sorted(available_years(depression))]
+names_depression = [Column(DEPRESSION_MEDICATION, year) for year in sorted(available_years(depression))]
 
 previous_depression = pd.DataFrame(index=health_panel.index)
 PREVIOUS_DEPRESSION = "prev_depr"
@@ -209,17 +202,17 @@ for person in previous_depression.index:
 
     cumulative_medication_status = pd.NA
     for year in years_depression[1:]:
-        previous_year_name = f"{DEPRESSION_MEDICATION}_{year - 1}"
+        previous_year_name = Column(DEPRESSION_MEDICATION, year - 1)
 
         is_previous_year_available = pd.isna(medication_status.get(previous_year_name))
 
         if not is_previous_year_available:
             if pd.isna(cumulative_medication_status):
-                cumulative_medication_status = medication_status[previous_year_name]
+                cumulative_medication_status = medication_status[previous_year_name]  # pyright: ignore  # noqa: PGH003
             else:
-                cumulative_medication_status = cumulative_medication_status or medication_status[previous_year_name]
+                cumulative_medication_status = cumulative_medication_status or medication_status[previous_year_name]  # pyright: ignore  # noqa: PGH003
 
-        previous_depression.loc[person, f"{PREVIOUS_DEPRESSION}_{year}"] = cumulative_medication_status
+        previous_depression.loc[person, Column(PREVIOUS_DEPRESSION, year)] = cumulative_medication_status
 
 # Fix dtype, pandas doesn't automatically recognise a combination of NA and bool is just nullable boolean
 previous_depression = previous_depression.astype("boolean")
@@ -257,34 +250,38 @@ CONSTANT = "constant"
 DUMMY_NA = True
 DROP_FIRST = True
 
-# NOTE: Use . as dummy separator to not conflict with <question>_<year>,
-# drop first for identification or use NA level for identification
+
+def make_dummies(df: pd.DataFrame) -> pd.DataFrame:
+    # NOTE: Drop first for identification or use NA level for identification
+    result = pd.get_dummies(df, prefix_sep=".", dummy_na=True, drop_first=True)
+
+    new_columns: list[Column] = []
+    for column in result.columns:
+        name = column[: column.rfind("_")]
+        wave = int(column[column.rfind("_") + 1 : column.find(".")])
+        dummy_level = column[column.find(".") + 1 :]
+
+        new_columns.append(Column(name, wave, dummy_level))
+
+    result.columns = new_columns
+
+    return result
+
+
 all_relevant_data = pd.DataFrame(index=background_vars.index).join(
     [
-        pd.Series(1, index=background_vars.index, name=CONSTANT),
+        pd.Series(1, index=background_vars.index, name=Column(CONSTANT)),
         unhappy,
         sports,
-        pd.get_dummies(age, prefix_sep=".", dummy_na=DUMMY_NA, drop_first=DROP_FIRST),
-        pd.get_dummies(ethnicity, prefix_sep=".", dummy_na=DUMMY_NA, drop_first=DROP_FIRST),
-        pd.get_dummies(
-            select_variable_wide(background_vars, GENDER), prefix_sep=".", dummy_na=DUMMY_NA, drop_first=DROP_FIRST
-        ),
-        pd.get_dummies(
-            select_variable_wide(background_vars, MARITAL_STATUS),
-            prefix_sep=".",
-            dummy_na=DUMMY_NA,
-            drop_first=DROP_FIRST,
-        ),
-        pd.get_dummies(income, prefix_sep=".", dummy_na=DUMMY_NA, drop_first=DROP_FIRST),
-        pd.get_dummies(education, prefix_sep=".", dummy_na=DUMMY_NA, drop_first=DROP_FIRST),
-        pd.get_dummies(employment, prefix_sep=".", dummy_na=DUMMY_NA, drop_first=DROP_FIRST),
-        pd.get_dummies(
-            select_variable_wide(health_panel, PHYSICAL_HEALTH),
-            prefix_sep=".",
-            dummy_na=DUMMY_NA,
-            drop_first=DROP_FIRST,
-        ),
-        pd.get_dummies(bmi, prefix_sep=".", dummy_na=DUMMY_NA, drop_first=DROP_FIRST),
+        make_dummies(age),
+        make_dummies(ethnicity),
+        make_dummies(select_variable_wide(background_vars, GENDER)),
+        make_dummies(select_variable_wide(background_vars, MARITAL_STATUS)),
+        make_dummies(income),
+        make_dummies(education),
+        make_dummies(employment),
+        make_dummies(select_variable_wide(health_panel, PHYSICAL_HEALTH)),
+        make_dummies(bmi),
         previous_depression,
     ]
 )
@@ -298,28 +295,20 @@ all_relevant_data = all_relevant_data.drop(missing_dependent_variable_index)
 # Sort columns
 all_relevant_data = all_relevant_data[sorted(all_relevant_data.columns)]
 
-# Standardise names of dummy levels
-all_relevant_data = all_relevant_data.rename(columns=cleanup_dummy_column)
-
 # %% Flatten the data, lumping all years together in one big pile.
 all_data_flattened = pd.DataFrame()
 
 
-def remove_year(colname: str, year: int) -> str:
-    year_str = str(year)
-
-    index = colname.find(year_str)
-
-    if index == -1:
-        return colname
-
-    return colname[: index - 1] + colname[index + len(year_str) :]
+def remove_year(column: Column) -> Column:
+    return Column(column.name, None, column.dummy_level)
 
 
 for year in available_years(all_relevant_data):
-    subset = select_year_wide(all_relevant_data, year)
+    subset = select_wave_wide(all_relevant_data, year)
 
-    subset.columns = [remove_year(column, year) for column in subset.columns]
+    columns: list[Column] = subset.columns  # pyright: ignore[reportAssignmentType]
+
+    subset.columns = [remove_year(column) for column in columns]
 
     subset.index = pd.Index([f"{i}_{year}" for i in subset.index])
 

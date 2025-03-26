@@ -2,19 +2,13 @@ import warnings
 
 import pandas as pd
 
+from util.data import Column
+
 
 def select_variable_wide(df: pd.DataFrame, variable: str) -> pd.DataFrame:
-    selected_columns = []
+    columns: list[Column] = df.columns  # pyright: ignore[reportAssignmentType]
 
-    for column in df.columns:
-        # Non-wide form variables (e.g. time-invariants)
-        if column == variable:
-            selected_columns.append(column)
-            continue
-
-        if (index := column.rfind("_")) != -1 and column[:index] == variable:
-            selected_columns.append(column)
-            continue
+    selected_columns = [column for column in columns if column.name == variable]
 
     if len(selected_columns) == 0:
         warnings.warn(f"No columns selected for {variable=}", stacklevel=2)
@@ -22,12 +16,10 @@ def select_variable_wide(df: pd.DataFrame, variable: str) -> pd.DataFrame:
     return df[selected_columns]
 
 
-def select_year_wide(df: pd.DataFrame, year: int) -> pd.DataFrame:
-    selected_columns = []
+def select_wave_wide(df: pd.DataFrame, year: int) -> pd.DataFrame:
+    columns: list[Column] = df.columns  # pyright: ignore[reportAssignmentType]
 
-    for column in df.columns:
-        if column.find(str(year)) != -1:
-            selected_columns.append(column)  # noqa: PERF401
+    selected_columns = [column for column in columns if column.wave == year]
 
     if len(selected_columns) == 0:
         warnings.warn(f"No columns selected for {year=}", stacklevel=2)
@@ -35,38 +27,19 @@ def select_year_wide(df: pd.DataFrame, year: int) -> pd.DataFrame:
     return df[selected_columns]
 
 
-def standardise_wide_column_name(column_name: str) -> str:
-    """Simple function to standardise column names, e.g. "cs12e005" -> "cs5_12".
-
-    That is, of the form [questionnaire][question]_[year]."""
-    # Skip non-question columns, e.g. cs12e_m
-    if not column_name[-3:].isnumeric():
-        return column_name
-
-    prefix = column_name[:2]
-    year = int(column_name[2:4])
-    question = int(column_name[-3:])
-
-    return f"{prefix}{question}_{year}"
-
-
 # This assumes columns named as in standardise_wide_column_name above
 def available_years(df: pd.DataFrame) -> set[int]:
-    result = set()
+    columns: list[Column] = df.columns  # pyright: ignore[reportAssignmentType]
 
-    for column in df.columns:
-        index_underscore = column.rfind("_")
-
-        if column[index_underscore + 1 :].isnumeric():
-            result.add(int(column[index_underscore + 1 :]))
-
-    return result
+    return {column.wave for column in columns if column.wave is not None}
 
 
 def available_dummy_levels(df: pd.DataFrame, variable: str) -> set[str]:
     subset = select_variable_wide(df, variable)
 
-    result = {column[column.find(".") + 1 :] for column in subset.columns if column.find(".") != -1}
+    columns: list[Column] = subset.columns  # pyright: ignore[reportAssignmentType]
+
+    result = {column.dummy_level for column in columns if column.dummy_level is not None}
 
     if len(result) == 0:
         warnings.warn(f"No dummy levels found for {variable}", stacklevel=2)
@@ -79,15 +52,6 @@ def cleanup_dummy(name: str) -> str:
     safe_character = "."
 
     return name.replace(" ", safe_character).replace("-", safe_character)
-
-
-def cleanup_dummy_column(column: str) -> str:
-    index_separator = column.find(".")
-
-    if index_separator == -1:
-        return column
-
-    return f"{column[:index_separator]}.{cleanup_dummy(column[index_separator + 1 :])}"
 
 
 def map_mhi5_categories(series: pd.Series, *, is_positive: bool = False) -> pd.Series:
