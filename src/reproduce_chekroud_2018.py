@@ -9,6 +9,7 @@ from util.data import (
     load_wide_panel_cached,
     standardise_wide_column_name,
     select_variable_wide,
+    select_year_wide,
     available_years,
     available_dummy_levels,
 )
@@ -300,6 +301,30 @@ all_relevant_data = all_relevant_data[sorted(all_relevant_data.columns)]
 # Standardise names of dummy levels
 all_relevant_data = all_relevant_data.rename(columns=cleanup_dummy_column)
 
+# %% Flatten the data, lumping all years together in one big pile.
+all_data_flattened = pd.DataFrame()
+
+
+def remove_year(colname: str, year: int) -> str:
+    year_str = str(year)
+
+    index = colname.find(year_str)
+
+    if index == -1:
+        return colname
+
+    return colname[: index - 1] + colname[index + len(year_str) :]
+
+
+for year in available_years(all_relevant_data):
+    subset = select_year_wide(all_relevant_data, year)
+
+    subset.columns = [remove_year(column, year) for column in subset.columns]
+
+    subset.index = pd.Index([f"{i}_{year}" for i in subset.index])
+
+    all_data_flattened = pd.concat([all_data_flattened, subset])
+
 # %% naive model definition
 model_definition = (
     ModelDefinitionBuilder()
@@ -325,15 +350,15 @@ model_definition = (
         ]
         + [VariableDefinition(variable) for variable in [PREVIOUS_DEPRESSION]]
     )  # All are dummies for now
-    .build(all_relevant_data)
+    .build(all_data_flattened)
 )
 
 print(model_definition)
 
-model = semopy.ModelMeans(model_definition)
+model = semopy.Model(model_definition)
 
 # %% naive model
-optimisation_result = model.fit(all_relevant_data.astype(np.float64))
+optimisation_result = model.fit(all_relevant_data.astype(np.float64), obj="FIML")
 
 print(optimisation_result)
 
