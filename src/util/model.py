@@ -71,8 +71,8 @@ class AvailableVariable:
     "A variable as available in the data, effectively a parsed column name."
 
     name: str
-    wave: int | None = field(default=None)  # None for time-invariants
-    dummy_level: str | None = field(default=None)
+    wave: int | None = None  # None for time-invariants
+    dummy_level: str | None = None
 
     @classmethod
     def from_column_name(cls, column: str) -> Self:
@@ -86,10 +86,18 @@ class AvailableVariable:
         has_dummy_level = column.find(".") != -1
 
         if not has_dummy_level:
-            wave = int(column[column.rfind("_") + 1 :])
+            try:
+                wave = int(column[column.rfind("_") + 1 :])
+            except ValueError:  # Couldn't parse an int
+                wave = None
+
             return cls(name, wave)
 
-        wave = int(column[column.rfind("_") + 1 : column.find(".")])
+        try:
+            wave = int(column[column.rfind("_") + 1 : column.find(".")])
+        except ValueError:  # Couldn't parse an int
+            wave = None
+
         dummy_level = column[column.find(".") + 1 :]
 
         return cls(name, wave, dummy_level)
