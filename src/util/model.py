@@ -1,11 +1,13 @@
 from typing import Self, Tuple, Collection
 from dataclasses import dataclass, field
-import warnings
+import logging
 
 import pandas as pd
 import numpy as np
 
 from .data import Column, assert_column_type_correct, cleanup_dummy
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -227,7 +229,7 @@ class ModelDefinitionBuilder:
             y = Variable(self.y.name, year_y)
 
             if not y.is_in(available_variables):
-                warnings.warn(f"{y=} not found in data, skipping regression", stacklevel=2)
+                logger.warning(f"{y=} not found in data, skipping regression")
                 continue
 
             y_lags = [
@@ -246,17 +248,13 @@ class ModelDefinitionBuilder:
 
                 if not is_dummy:
                     # There's only one Variable in missing_variables if it's not a dummy
-                    warnings.warn(
-                        f"For {y=}, {missing_variables[0]} was not in the data, skipping regression",
-                        stacklevel=2,
-                    )
+                    logger.warning(f"For {y=}, {missing_variables[0]} was not in the data, skipping regression")
                     # TODO: Is there a better option than ditching the whole regression
                     # because one of the vars is missing?
                     continue
 
-                warnings.warn(
-                    f"For {y=}, the dummy levels {missing_variables} were not in the data, excluding from regression",
-                    stacklevel=2,
+                logger.warning(
+                    f"For {y=}, the dummy levels {missing_variables} were not in the data, excluding from regression"
                 )
 
                 # Exclude the dummy level from the regression, as it isn't in the data.
@@ -265,9 +263,8 @@ class ModelDefinitionBuilder:
 
             # Check for variables with zero variance
             if (zero_variance_variables := self._find_zero_variance_variables(rvals, data)) is not None:
-                warnings.warn(
-                    f"For {y=}, the variables {zero_variance_variables} had zero variance, excluding from regression",
-                    stacklevel=2,
+                logger.warning(
+                    f"For {y=}, the variables {zero_variance_variables} had zero variance, excluding from regression"
                 )
 
                 for variable in zero_variance_variables:
@@ -401,7 +398,7 @@ class ModelDefinitionBuilder:
         eigvals = np.linalg.eigvalsh(Sigma)
 
         if any(np.isclose(eigvals, 0)):
-            warnings.warn("Data covariance matrix is not PD, investigate", stacklevel=2)
+            logger.warning("Data covariance matrix is not PD, investigate")
 
     def _make_result(self) -> str:
         return f"""# Regressions (structural part)
@@ -451,9 +448,8 @@ class ModelDefinitionBuilder:
                 # because one of the vars is missing?
                 raise ValueError(f"For {y=}, {missing_variables[0]} was not in the data, can't build regression")  # noqa: TRY003
 
-            warnings.warn(
-                f"For {y=}, the dummy levels {missing_variables} were not in the data, excluding from regression",
-                stacklevel=2,
+            logger.warning(
+                f"For {y=}, the dummy levels {missing_variables} were not in the data, excluding from regression"
             )
 
             # Exclude the dummy level from the regression, as it isn't in the data.
@@ -461,9 +457,8 @@ class ModelDefinitionBuilder:
                 rvals.remove(variable)
 
         if (zero_variance_variables := self._find_zero_variance_variables(w, data)) is not None:
-            warnings.warn(
-                f"For {y=}, the variables {zero_variance_variables} had zero variance, excluding from regression",
-                stacklevel=2,
+            logger.warning(
+                f"For {y=}, the variables {zero_variance_variables} had zero variance, excluding from regression"
             )
 
             for variable in zero_variance_variables:

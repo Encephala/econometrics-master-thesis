@@ -1,8 +1,10 @@
-import warnings
+import logging
 
 import pandas as pd
 
 from util.data import Column
+
+logger = logging.getLogger(__name__)
 
 
 def assert_column_type_correct(df: pd.DataFrame):
@@ -18,7 +20,7 @@ def select_variable(df: pd.DataFrame, variable: str) -> pd.DataFrame:
     selected_columns = [column for column in columns if column.name == variable]
 
     if len(selected_columns) == 0:
-        warnings.warn(f"No columns selected for {variable=}", stacklevel=2)
+        logger.warning(f"No columns selected for {variable=}")
 
     return df[selected_columns]
 
@@ -31,7 +33,7 @@ def select_wave(df: pd.DataFrame, year: int) -> pd.DataFrame:
     selected_columns = [column for column in columns if column.wave == year]
 
     if len(selected_columns) == 0:
-        warnings.warn(f"No columns selected for {year=}", stacklevel=2)
+        logger.warning(f"No columns selected for {year=}")
 
     return df[selected_columns]
 
@@ -55,7 +57,7 @@ def available_dummy_levels(df: pd.DataFrame, variable: str) -> set[str]:
     result = {column.dummy_level for column in columns if column.dummy_level is not None}
 
     if len(result) == 0:
-        warnings.warn(f"No dummy levels found for {variable}", stacklevel=2)
+        logger.warning(f"No dummy levels found for {variable}")
 
     return result
 

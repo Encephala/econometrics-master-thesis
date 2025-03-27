@@ -1,8 +1,10 @@
 from pathlib import Path
-import warnings
+import logging
 from dataclasses import dataclass
 
 import pandas as pd
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True, order=True)
@@ -67,7 +69,7 @@ def assemble_wide_panel(prefix: str) -> pd.DataFrame:
 
     for file in Path("../data").glob(prefix + "*"):
         if file.suffix == ".pkl":
-            warnings.warn(f"Assembling panel for {prefix=} but pickle file already exists ({file})", stacklevel=2)
+            logger.warning(f"Assembling panel for {prefix=} but pickle file already exists ({file})")
             continue
 
         new_df = load_df(file)
@@ -85,7 +87,7 @@ def assemble_wide_panel(prefix: str) -> pd.DataFrame:
         )
 
     if len(result) == 0:
-        warnings.warn(f"No data loaded for {prefix=}", stacklevel=2)
+        logger.warning(f"No data loaded for {prefix=}")
 
     return result
 
@@ -95,10 +97,7 @@ def assemble_background_panel() -> pd.DataFrame:
 
     for file in Path("../data").glob("avars*"):
         if file.suffix == ".pkl":
-            warnings.warn(
-                f"Assembling panel for avars but pickle file already exists ({file}), overwriting pickle",
-                stacklevel=2,
-            )
+            logger.warning(f"Assembling panel for avars but pickle file already exists ({file}), overwriting pickle")
             continue
 
         new_df = load_df(file)
@@ -117,7 +116,7 @@ def assemble_background_panel() -> pd.DataFrame:
         )
 
     if len(result) == 0:
-        warnings.warn("No data loaded for avars", stacklevel=2)
+        logger.warning("No data loaded for avars")
 
     return result
 
@@ -138,7 +137,7 @@ def load_wide_panel_cached(prefix: str, *, respect_cache: bool = True) -> pd.Dat
     if len(assembled) != 0:
         assembled.to_pickle(path)
     else:
-        warnings.warn("Not writing empty cache", stacklevel=2)
+        logger.warning("Not writing empty cache")
 
     return assembled
 
