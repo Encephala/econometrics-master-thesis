@@ -3,9 +3,9 @@ from dataclasses import dataclass, field
 import warnings
 
 import pandas as pd
+import numpy as np
 
-from .data import Column, assert_column_type_correct
-from .data.processing import cleanup_dummy
+from .data import Column, assert_column_type_correct, cleanup_dummy
 
 
 @dataclass(frozen=True)
@@ -184,6 +184,8 @@ class ModelDefinitionBuilder:
         self._fix_y_variance()
 
         self._make_x_predetermined()
+
+        self._check_covariance_matrix_PD(data)
 
         return self._make_result()
 
@@ -385,6 +387,22 @@ class ModelDefinitionBuilder:
 
         return all_regressors
 
+    def _check_covariance_matrix_PD(self, data: pd.DataFrame):
+        all_regressors = [
+            Column(variable.name, variable.wave, variable.dummy_level) for variable in self._all_regressors()
+        ]
+
+        subset = data[all_regressors]
+
+        Sigma = subset.cov()
+
+        assert all(np.equal(Sigma.T, Sigma)), "Data covariance matrix isn't symmetric? Wut"
+
+        eigvals = np.linalg.eigvalsh(Sigma)
+
+        if any(np.isclose(eigvals, 0)):
+            warnings.warn("Data covariance matrix is not PD, investigate", stacklevel=2)
+
     def _make_result(self) -> str:
         return f"""# Regressions (structural part)
 {"\n".join([*map(Regression.build, self._regressions), ""])}
@@ -402,6 +420,8 @@ class ModelDefinitionBuilder:
         available_variables: list[Column] = list(data.columns)  # pyright: ignore[reportAssignmentType]
 
         self._build_nonpanel_regression(data, available_variables)
+
+        self._check_covariance_matrix_PD(data)
 
         return self._make_result()
 
