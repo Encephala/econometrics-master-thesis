@@ -298,25 +298,6 @@ all_relevant_data = all_relevant_data.drop(missing_dependent_variable_index)
 # Sort columns
 all_relevant_data = all_relevant_data[sorted(all_relevant_data.columns)]
 
-# %% Flatten the data, lumping all years together in one big pile.
-all_data_flattened = pd.DataFrame()
-
-
-def remove_year(column: Column) -> Column:
-    return Column(column.name, None, column.dummy_level)
-
-
-for year in available_years(all_relevant_data):
-    subset = select_wave(all_relevant_data, year)
-
-    columns: list[Column] = subset.columns  # pyright: ignore[reportAssignmentType]
-
-    subset.columns = [remove_year(column) for column in columns]
-
-    subset.index = pd.Index([f"{i}_{year}" for i in subset.index])
-
-    all_data_flattened = pd.concat([all_data_flattened, subset])
-
 # %% naive model definition
 model_definition = (
     ModelDefinitionBuilder()
@@ -353,6 +334,25 @@ optimisation_result = model.fit(all_data, obj="FIML")
 print(optimisation_result)
 
 model.inspect().sort_values(["op", "Estimate", "lval"])  # pyright: ignore[reportOptionalMemberAccess, reportAttributeAccessIssue]
+
+# %% Flatten the data, lumping all years together in one big pile.
+all_data_flattened = pd.DataFrame()
+
+
+def remove_year(column: Column) -> Column:
+    return Column(column.name, None, column.dummy_level)
+
+
+for year in available_years(all_relevant_data):
+    subset = select_wave(all_relevant_data, year)
+
+    columns: list[Column] = subset.columns  # pyright: ignore[reportAssignmentType]
+
+    subset.columns = [remove_year(column) for column in columns]
+
+    subset.index = pd.Index([f"{i}_{year}" for i in subset.index])
+
+    all_data_flattened = pd.concat([all_data_flattened, subset])
 
 # %% model with single regression
 model_single_regression = (
