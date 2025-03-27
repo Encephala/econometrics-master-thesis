@@ -173,7 +173,7 @@ class ModelDefinitionBuilder:
         self.include_constant = True
         return self
 
-    def build(self, data: pd.DataFrame) -> str:
+    def build(self, data: pd.DataFrame, *, check_PD_ness: bool = True) -> str:
         assert_column_type_correct(data)
 
         available_variables: list[Column] = list(data.columns)  # pyright: ignore[reportAssignmentType]
@@ -186,7 +186,8 @@ class ModelDefinitionBuilder:
 
         self._make_x_predetermined()
 
-        self._check_covariance_matrix_PD(data)
+        if check_PD_ness:
+            self._check_covariance_matrix_PD(data)
 
         return self._make_result()
 
@@ -406,14 +407,15 @@ class ModelDefinitionBuilder:
 {self._ordinals.build()}
 """
 
-    def build_nonpanel(self, data: pd.DataFrame) -> str:
+    def build_nonpanel(self, data: pd.DataFrame, *, check_PD_ness: bool = True) -> str:
         assert_column_type_correct(data)
 
         available_variables: list[Column] = list(data.columns)  # pyright: ignore[reportAssignmentType]
 
         self._build_nonpanel_regression(data, available_variables)
 
-        self._check_covariance_matrix_PD(data)
+        if check_PD_ness:
+            self._check_covariance_matrix_PD(data)
 
         return self._make_result()
 
