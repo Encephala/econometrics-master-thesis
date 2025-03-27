@@ -351,12 +351,6 @@ print(optimisation_result)
 
 model.inspect().sort_values(["op", "Estimate", "lval"])  # pyright: ignore[reportOptionalMemberAccess, reportAttributeAccessIssue]
 
-# %% model doesn't work in python, saving for R.
-all_relevant_data.astype("float64").to_stata("/tmp/data.dta")  # noqa: S108
-
-print("Model definition in stata/lavaan form:")
-print(model_definition.replace(".", "_"))
-
 # %% model with single regression
 # NOTE: Dropped `geslacht.nan` as a regressor because it is highly colinear with `leeftijd.nan`.
 model_single_regression = (
