@@ -126,8 +126,6 @@ def merge_and_map_categories(column: pd.Series) -> pd.Series:
     RETIRED = "retired"
     UNABLE = "unable to work"
 
-    wave = column.name.wave  # pyright: ignore  # noqa: PGH003
-
     # Map to new codes
     old_category_to_new_category = {
         "paid employment": EMPLOYED,
@@ -149,11 +147,15 @@ def merge_and_map_categories(column: pd.Series) -> pd.Series:
 
     result = pd.Categorical(column.map(old_category_to_new_category))
 
-    return pd.Series(result, name=Column(EMPLOYMENT, wave), index=column.index)
+    # Apparently if you set name=... here, it gets ignored because of .apply
+    return pd.Series(result, index=column.index)
 
 
 # Apply column-wise to have cohesive datatype
 employment = occupation.apply(merge_and_map_categories)
+
+columns: list[Column] = employment.columns  # pyright: ignore[reportAssignmentType]
+employment.columns = [Column(EMPLOYMENT, column.wave) for column in columns]
 
 # %% calculate BMI
 weight = select_variable_wide(health_panel, WEIGHT)
