@@ -4,7 +4,7 @@ import warnings
 
 import pandas as pd
 
-from .data import Column
+from .data import Column, assert_column_type
 from .data.processing import cleanup_dummy
 
 
@@ -163,9 +163,8 @@ class ModelDefinitionBuilder:
         return self
 
     def build(self, data: pd.DataFrame) -> str:
-        # (name, wave) pairs in the data
-        # Ignoring the constant, as it is included in the regressions directly,
-        # and does not have an associated wave.
+        assert_column_type(data)
+
         available_variables: list[Column] = list(data.columns)  # pyright: ignore[reportAssignmentType]
 
         first_year_y, last_year_y = self._determine_start_and_end_years(available_variables)

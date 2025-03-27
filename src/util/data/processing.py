@@ -5,7 +5,14 @@ import pandas as pd
 from util.data import Column
 
 
+def assert_column_type(df: pd.DataFrame):
+    for column in df.columns:
+        assert isinstance(column, Column), f"{column=} is not of type `util.data.Column`"
+
+
 def select_variable_wide(df: pd.DataFrame, variable: str) -> pd.DataFrame:
+    assert_column_type(df)
+
     columns: list[Column] = df.columns  # pyright: ignore[reportAssignmentType]
 
     selected_columns = [column for column in columns if column.name == variable]
@@ -17,6 +24,8 @@ def select_variable_wide(df: pd.DataFrame, variable: str) -> pd.DataFrame:
 
 
 def select_wave_wide(df: pd.DataFrame, year: int) -> pd.DataFrame:
+    assert_column_type(df)
+
     columns: list[Column] = df.columns  # pyright: ignore[reportAssignmentType]
 
     selected_columns = [column for column in columns if column.wave == year]
@@ -29,12 +38,16 @@ def select_wave_wide(df: pd.DataFrame, year: int) -> pd.DataFrame:
 
 # This assumes columns named as in standardise_wide_column_name above
 def available_years(df: pd.DataFrame) -> set[int]:
+    assert_column_type(df)
+
     columns: list[Column] = df.columns  # pyright: ignore[reportAssignmentType]
 
     return {column.wave for column in columns if column.wave is not None}
 
 
 def available_dummy_levels(df: pd.DataFrame, variable: str) -> set[str]:
+    assert_column_type(df)
+
     subset = select_variable_wide(df, variable)
 
     columns: list[Column] = subset.columns  # pyright: ignore[reportAssignmentType]
