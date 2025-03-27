@@ -32,7 +32,7 @@ class DataGenerator:
             # Because the order in which x influences y or y influences x is hardcoded in self.generate,
             # that might not be what is expected by future me.
             # But not hard-coding is hard so screw this edge case
-            raise ValueError("Undefined behaviour if x and y both instantaneously influence each other")
+            raise ValueError("Undefined behaviour if x and y both instantaneously influence each other")  # noqa: TRY003
 
     def generate(
         self,
