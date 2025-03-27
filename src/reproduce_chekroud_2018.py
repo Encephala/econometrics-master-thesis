@@ -44,13 +44,13 @@ unhappy = select_variable(health_panel, UNHAPPY)
 mapper = {
     "never": 0,
     "seldom": 1,
-    "sometimes": 2,
-    "often": 3,
-    "mostly": 4,
-    "continuously": 5,
+    "sometimes": 3,
+    "often": 10,
+    "mostly": 16,
+    "continuously": 30,
 }
 
-unhappy = unhappy.apply(lambda column: column.map(mapper, na_action="ignore")).astype(np.float64)
+unhappy = unhappy.apply(lambda column: column.map(mapper, na_action="ignore"))
 
 # %% Making sports an actual boolean instead of "yes"/"no"
 sports = select_variable(leisure_panel, SPORTS)
