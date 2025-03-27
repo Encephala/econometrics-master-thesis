@@ -110,41 +110,47 @@ class OrdinalVariableSet(set[Variable]):
 
 
 class ModelDefinitionBuilder:
-    y: VariableDefinition
-    y_lag_structure: list[int]
+    _y: VariableDefinition
+    _y_lag_structure: list[int]
 
-    x: VariableDefinition
-    x_lag_structure: list[int]
+    _x: VariableDefinition
+    _x_lag_structure: list[int]
 
-    w: list[VariableDefinition] | None = None
-    include_constant: bool = False
+    _w: list[VariableDefinition] | None = None
+    _include_constant: bool = False
 
     # To make covariance PD
-    excluded_regressors: list[Column]
+    _excluded_regressors: list[Column]
+
+    # Internals
+    _regressions: list[Regression]
+    _measurements: list[Measurement]  # Unused (for now)
+    _covariances: list[Covariance]
+    _ordinals: OrdinalVariableSet
 
     def __init__(self):
-        self._regressions: list[Regression] = []
-        self._measurements: list[Measurement] = []  # Unused (for now)
-        self._covariances: list[Covariance] = []
+        self._regressions = []
+        self._measurements = []  # Unused (for now)
+        self._covariances = []
         self._ordinals = OrdinalVariableSet()
 
-        self.w = []
-        self.excluded_regressors = []
+        self._w = []
+        self._excluded_regressors = []
 
     def with_y(self, y: VariableDefinition, *, lag_structure: list[int] | None = None) -> Self:
         if y.dummy_levels is not None:
             raise ValueError("Cannot have dependent variable be a dummy variable, must be interval scale.")  # noqa: TRY003
 
-        self.y = y
+        self._y = y
 
         if lag_structure is not None:
             # Zero lag breaks the regression, negative lags break the logic for when the first/last regressions are
             assert all(i > 0 for i in lag_structure) and len(lag_structure) == len(set(lag_structure)), (
                 "Invalid lags provided for y"
             )
-            self.y_lag_structure = lag_structure
+            self._y_lag_structure = lag_structure
         else:
-            self.y_lag_structure = []
+            self._y_lag_structure = []
 
         return self
 
@@ -152,29 +158,29 @@ class ModelDefinitionBuilder:
         if x.dummy_levels is not None:
             raise NotImplementedError("Dummy x-variables are not implemented yet")
 
-        self.x = x
+        self._x = x
 
         if lag_structure is not None:
             # Negative lags break the logic for when the first/last regressions are
             assert all(i >= 0 for i in lag_structure) and len(lag_structure) == len(set(lag_structure)), (
                 "Invalid lags provided for x"
             )
-            self.x_lag_structure = lag_structure
+            self._x_lag_structure = lag_structure
         else:
-            self.x_lag_structure = [0]
+            self._x_lag_structure = [0]
 
         return self
 
     def with_w(self, variables: list[VariableDefinition]) -> Self:
-        self.w = variables
+        self._w = variables
         return self
 
     def with_constant(self) -> Self:
-        self.include_constant = True
+        self._include_constant = True
         return self
 
     def with_excluded_regressors(self, excluded_regressors: list[Column]) -> Self:
-        self.excluded_regressors = excluded_regressors
+        self._excluded_regressors = excluded_regressors
         return self
 
     def build(self, data: pd.DataFrame, *, check_PD_ness: bool = True) -> str:
@@ -196,14 +202,14 @@ class ModelDefinitionBuilder:
         return self._make_result()
 
     def _determine_start_and_end_years(self, available_variables: Collection[Column]) -> Tuple[int, int]:  # pyright: ignore[reportInvalidTypeArguments]
-        y_years = [variable.wave for variable in available_variables if variable.name == self.y.name]
+        y_years = [variable.wave for variable in available_variables if variable.name == self._y.name]
 
         assert not any(year is None for year in y_years)  # y is never time-invariant
 
         y_start = min(y_years)  # pyright: ignore[reportArgumentType]
         y_end = max(y_years)  # pyright: ignore[reportArgumentType]
 
-        x_years = [variable.wave for variable in available_variables if variable.name == self.x.name]
+        x_years = [variable.wave for variable in available_variables if variable.name == self._x.name]
 
         assert not any(year is None for year in x_years)  # x is never time-invariant
 
@@ -214,11 +220,11 @@ class ModelDefinitionBuilder:
         # but then we have to also add those columns to the df to prevent index errors.
         # If x goes far enough back, the first regression is when y starts
         # else, start as soon as we can due to x
-        max_y_lag = max(self.y_lag_structure) if len(self.y_lag_structure) > 0 else 0
-        first_year_y = max(y_start + max_y_lag, x_start + max(self.x_lag_structure))
+        max_y_lag = max(self._y_lag_structure) if len(self._y_lag_structure) > 0 else 0
+        first_year_y = max(y_start + max_y_lag, x_start + max(self._x_lag_structure))
         # If x does not go far enough forward, stop when x_stops
         # else, stop when y stops
-        last_year_y = min(x_end + min(self.x_lag_structure), y_end)
+        last_year_y = min(x_end + min(self._x_lag_structure), y_end)
 
         return first_year_y, last_year_y
 
@@ -230,17 +236,17 @@ class ModelDefinitionBuilder:
         last_year_y: int,
     ):
         for year_y in range(first_year_y, last_year_y + 1):
-            y = Variable(self.y.name, year_y)
+            y = Variable(self._y.name, year_y)
 
             if not y.is_in(available_variables):
                 logger.warning(f"{y=} not found in data, skipping regression")
                 continue
 
             y_lags = [
-                VariableWithNamedParameter(self.y.name, year_y - lag, f"rho{lag}") for lag in self.y_lag_structure
+                VariableWithNamedParameter(self._y.name, year_y - lag, f"rho{lag}") for lag in self._y_lag_structure
             ]
             x_lags = [
-                VariableWithNamedParameter(self.x.name, year_y - lag, f"beta{lag}") for lag in self.x_lag_structure
+                VariableWithNamedParameter(self._x.name, year_y - lag, f"beta{lag}") for lag in self._x_lag_structure
             ]
 
             w = self._compile_w(year_y)
@@ -276,29 +282,29 @@ class ModelDefinitionBuilder:
                 for variable in zero_variance_variables:
                     rvals.remove(variable)
 
-            self._regressions.append(Regression(y, rvals, self.include_constant))
+            self._regressions.append(Regression(y, rvals, self._include_constant))
 
             # TODO: Might be nicer to have this in a separate function,
             # but since it so heavily relies on local variables, leaving it here for now.
-            if self.y.is_ordinal:
+            if self._y.is_ordinal:
                 self._ordinals.update(y_lags)
 
-            if self.x.is_ordinal:
+            if self._x.is_ordinal:
                 self._ordinals.update(x_lags)
 
-            ordinal_w = [] if self.w is None else [definition for definition in self.w if definition.is_ordinal]
+            ordinal_w = [] if self._w is None else [definition for definition in self._w if definition.is_ordinal]
 
             for definition in ordinal_w:
                 variables = [variable for variable in w if variable.name == definition.name]
                 self._ordinals.update(variables)
 
     def _compile_w(self, wave_y: int | None) -> list[VariableWithNamedParameter]:
-        if self.w is None:
+        if self._w is None:
             return []
 
         result = []
 
-        for variable in self.w:
+        for variable in self._w:
             if variable.dummy_levels is None:
                 result.append(VariableWithNamedParameter(variable.name, wave_y, f"delta0_{variable.name}"))
                 continue
@@ -313,7 +319,7 @@ class ModelDefinitionBuilder:
         return result
 
     def _remove_excluded_regressors(self, rvals: list[Variable]) -> list[Variable]:
-        return [rval for rval in rvals if not rval.is_in(self.excluded_regressors)]
+        return [rval for rval in rvals if not rval.is_in(self._excluded_regressors)]
 
     def _find_missing_variables(
         self,
@@ -379,7 +385,7 @@ class ModelDefinitionBuilder:
             x_future = [
                 VariableWithNamedParameter(variable.name, variable.wave, f"gamma{variable.wave - regression.lval.wave}")  # pyright: ignore[reportOperatorIssue]
                 for variable in all_regressors
-                if variable.name == self.x.name and variable.wave > regression.lval.wave  # pyright: ignore[reportOperatorIssue]
+                if variable.name == self._x.name and variable.wave > regression.lval.wave  # pyright: ignore[reportOperatorIssue]
             ]
 
             if len(x_future) != 0:
@@ -431,14 +437,14 @@ class ModelDefinitionBuilder:
     def _build_nonpanel_regression(self, data: pd.DataFrame, available_variables: list[Column]):
         # Majorly copy-pasta'd from self._build_regressions
 
-        y = Variable(self.y.name, None)
-        assert self.y_lag_structure == [], (
-            f"Building nonpanel regression but y had lag structure {self.y_lag_structure}"
+        y = Variable(self._y.name, None)
+        assert self._y_lag_structure == [], (
+            f"Building nonpanel regression but y had lag structure {self._y_lag_structure}"
         )
 
-        x = Variable(self.x.name, None)
-        assert self.x_lag_structure in ([0], []), (
-            f"Building nonpanel regression but x had lag structure {self.x_lag_structure}"
+        x = Variable(self._x.name, None)
+        assert self._x_lag_structure in ([0], []), (
+            f"Building nonpanel regression but x had lag structure {self._x_lag_structure}"
         )
 
         # Apparently [*<values>] typecasts to parent type?
@@ -472,17 +478,17 @@ class ModelDefinitionBuilder:
             for variable in zero_variance_variables:
                 rvals.remove(variable)
 
-        self._regressions.append(Regression(y, rvals, self.include_constant))
+        self._regressions.append(Regression(y, rvals, self._include_constant))
 
         # TODO: Might be nicer to have this in a separate function,
         # but since it so heavily relies on local variables, leaving it here for now.
-        if self.y.is_ordinal:
+        if self._y.is_ordinal:
             self._ordinals.add(y)
 
-        if self.x.is_ordinal:
+        if self._x.is_ordinal:
             self._ordinals.add(x)
 
-        ordinal_w = [] if self.w is None else [definition for definition in self.w if definition.is_ordinal]
+        ordinal_w = [] if self._w is None else [definition for definition in self._w if definition.is_ordinal]
 
         for definition in ordinal_w:
             variables = [variable for variable in w if variable.name == definition.name]
