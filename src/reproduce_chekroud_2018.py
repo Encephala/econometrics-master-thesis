@@ -298,43 +298,6 @@ all_relevant_data = all_relevant_data.drop(missing_dependent_variable_index)
 # Sort columns
 all_relevant_data = all_relevant_data[sorted(all_relevant_data.columns)]
 
-# %% naive model definition
-model_definition = (
-    ModelDefinitionBuilder()
-    .with_y(VariableDefinition(UNHAPPY))
-    .with_x(VariableDefinition(SPORTS))
-    .with_w(
-        [
-            VariableDefinition(variable, dummy_levels=available_dummy_levels(all_relevant_data, variable))
-            for variable in [
-                AGE,
-                ETHNICITY,
-                GENDER,
-                MARITAL_STATUS,
-                INCOME,
-                EDUCATION_LEVEL,
-                EMPLOYMENT,
-                PHYSICAL_HEALTH,
-                BMI,
-            ]
-        ]
-        + [VariableDefinition(variable) for variable in [PREVIOUS_DEPRESSION]]
-    )
-    .build(all_relevant_data)
-)
-
-print(model_definition)
-
-model = semopy.Model(model_definition)
-
-# %% naive model
-all_data = map_columns_to_str(all_relevant_data.astype(np.float64))
-optimisation_result = model.fit(all_data, obj="FIML")
-
-print(optimisation_result)
-
-model.inspect().sort_values(["op", "Estimate", "lval"])  # pyright: ignore[reportOptionalMemberAccess, reportAttributeAccessIssue]
-
 # %% Flatten the data, lumping all years together in one big pile.
 all_data_flattened = pd.DataFrame()
 
@@ -394,3 +357,40 @@ optimisation_result = model.fit(data_flattened)
 print(optimisation_result)
 
 model.inspect().sort_values(["op", "rval"])  # pyright: ignore[reportOptionalMemberAccess, reportAttributeAccessIssue]
+
+# %% naive model definition
+model_definition = (
+    ModelDefinitionBuilder()
+    .with_y(VariableDefinition(UNHAPPY))
+    .with_x(VariableDefinition(SPORTS))
+    .with_w(
+        [
+            VariableDefinition(variable, dummy_levels=available_dummy_levels(all_relevant_data, variable))
+            for variable in [
+                AGE,
+                ETHNICITY,
+                GENDER,
+                MARITAL_STATUS,
+                INCOME,
+                EDUCATION_LEVEL,
+                EMPLOYMENT,
+                PHYSICAL_HEALTH,
+                BMI,
+            ]
+        ]
+        + [VariableDefinition(variable) for variable in [PREVIOUS_DEPRESSION]]
+    )
+    .build(all_relevant_data)
+)
+
+print(model_definition)
+
+model = semopy.Model(model_definition)
+
+# %% naive model
+all_data = map_columns_to_str(all_relevant_data.astype(np.float64))
+optimisation_result = model.fit(all_data, obj="FIML")
+
+print(optimisation_result)
+
+model.inspect().sort_values(["op", "Estimate", "lval"])  # pyright: ignore[reportOptionalMemberAccess, reportAttributeAccessIssue]
