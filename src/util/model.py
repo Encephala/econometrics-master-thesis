@@ -37,20 +37,16 @@ class Variable:
 
         return result
 
-    def _equals(self, available_variable: "Column") -> bool:
+    def _equals(self, other: "Column") -> bool:
         match (self.wave, self.dummy_level):
             case (None, None):
-                return self.name == available_variable.name
+                return self.name == other.name
             case (wave, None):
-                return self.name == available_variable.name and wave == available_variable.wave
+                return self.name == other.name and wave == other.wave
             case (None, dummy_level):
-                return self.name == available_variable.name and dummy_level == available_variable.dummy_level
+                return self.name == other.name and dummy_level == other.dummy_level
             case (wave, dummy_level):
-                return (
-                    self.name == available_variable.name
-                    and wave == available_variable.wave
-                    and dummy_level == available_variable.dummy_level
-                )
+                return self.name == other.name and wave == other.wave and dummy_level == other.dummy_level
 
     def is_in(self, available_variables: Collection["Column"]) -> bool:
         return any(self._equals(variable) for variable in available_variables)
@@ -123,6 +119,9 @@ class ModelDefinitionBuilder:
     w: list[VariableDefinition] | None = None
     include_constant: bool = False
 
+    # To make covariance PD
+    excluded_regressors: list[Column]
+
     def __init__(self):
         self._regressions: list[Regression] = []
         self._measurements: list[Measurement] = []  # Unused (for now)
@@ -130,6 +129,7 @@ class ModelDefinitionBuilder:
         self._ordinals = OrdinalVariableSet()
 
         self.w = []
+        self.excluded_regressors = []
 
     def with_y(self, y: VariableDefinition, *, lag_structure: list[int] | None = None) -> Self:
         if y.dummy_levels is not None:
@@ -171,6 +171,10 @@ class ModelDefinitionBuilder:
 
     def with_constant(self) -> Self:
         self.include_constant = True
+        return self
+
+    def with_excluded_regressors(self, excluded_regressors: list[Column]) -> Self:
+        self.excluded_regressors = excluded_regressors
         return self
 
     def build(self, data: pd.DataFrame, *, check_PD_ness: bool = True) -> str:
@@ -242,6 +246,8 @@ class ModelDefinitionBuilder:
             w = self._compile_w(year_y)
             rvals: list[Variable] = [*y_lags, *x_lags, *w]
 
+            rvals = self._remove_excluded_regressors(rvals)
+
             # Check for missing variables
             if (missing_info := self._find_missing_variables(rvals, available_variables)) is not None:
                 missing_variables, is_dummy = missing_info
@@ -305,6 +311,9 @@ class ModelDefinitionBuilder:
             )
 
         return result
+
+    def _remove_excluded_regressors(self, rvals: list[Variable]) -> list[Variable]:
+        return [rval for rval in rvals if not rval.is_in(self.excluded_regressors)]
 
     def _find_missing_variables(
         self,
@@ -435,6 +444,8 @@ class ModelDefinitionBuilder:
         # Apparently [*<values>] typecasts to parent type?
         w = self._compile_w(None)
         rvals: list[Variable] = [x, *w]
+
+        rvals = self._remove_excluded_regressors(rvals)
 
         if (missing_info := self._find_missing_variables(w, available_variables)) is not None:
             missing_variables, is_dummy = missing_info

@@ -319,7 +319,7 @@ model_definition = (
             ]
         ]
         + [VariableDefinition(variable) for variable in [PREVIOUS_DEPRESSION]]
-    )  # All are dummies for now
+    )
     .build(all_relevant_data)
 )
 
@@ -375,7 +375,8 @@ model_single_regression = (
             ]
         ]
         + [VariableDefinition(variable) for variable in [PREVIOUS_DEPRESSION]]
-    )  # All are dummies for now
+    )
+    .with_excluded_regressors([Column(AGE, None, dummy_level="nan")])
     .build_nonpanel(all_data_flattened)
 )
 
