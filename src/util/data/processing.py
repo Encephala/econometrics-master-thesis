@@ -67,6 +67,12 @@ def cleanup_dummy(name: str) -> str:
     return name.replace(" ", safe_character).replace("-", safe_character)
 
 
+def map_columns_to_str(df: pd.DataFrame) -> pd.DataFrame:
+    df.columns = [str(column) for column in df.columns]
+
+    return df
+
+
 def map_mhi5_categories(series: pd.Series, *, is_positive: bool = False) -> pd.Series:
     "Takes a Categorical series of MHI-5 questionnaire responses and maps the textual responses to int values."
     # https://www.cbs.nl/nl-nl/achtergrond/2015/18/beperkingen-in-dagelijkse-handelingen-bij-ouderen/mhi-5

@@ -12,8 +12,9 @@ from util.data import (
     select_wave_wide,
     available_years,
     available_dummy_levels,
+    cleanup_dummy,
+    map_columns_to_str,
 )
-from util.data.processing import cleanup_dummy
 from util.model import ModelDefinitionBuilder, VariableDefinition
 
 
@@ -336,7 +337,7 @@ model_definition = (
         ]
         + [VariableDefinition(variable) for variable in [PREVIOUS_DEPRESSION]]
     )  # All are dummies for now
-    .build(all_data_flattened)
+    .build(all_relevant_data)
 )
 
 print(model_definition)
@@ -355,3 +356,64 @@ all_relevant_data.astype("float64").to_stata("/tmp/data.dta")  # noqa: S108
 
 print("Model definition in stata/lavaan form:")
 print(model_definition.replace(".", "_"))
+
+# %% model with single regression
+# NOTE: Dropped `geslacht.nan` as a regressor because it is highly colinear with `leeftijd.nan`.
+model_single_regression = (
+    "ch14 ~ beta0*cs104"
+    " + delta0_leeftijd.45.to.49.years*leeftijd.45.to.49.years"
+    " + delta0_leeftijd.nan*leeftijd.nan"
+    " + delta0_leeftijd.55.to.59.years*leeftijd.55.to.59.years"
+    " + delta0_leeftijd.40.to.44.years*leeftijd.40.to.44.years"
+    " + delta0_leeftijd.30.to.34.years*leeftijd.30.to.34.years"
+    " + delta0_leeftijd.60.to.64.years*leeftijd.60.to.64.years"
+    " + delta0_leeftijd.75.to.79.years*leeftijd.75.to.79.years"
+    " + delta0_leeftijd.65.to.69.years*leeftijd.65.to.69.years"
+    " + delta0_leeftijd.18.to.24.years*leeftijd.18.to.24.years"
+    " + delta0_leeftijd.50.to.54.years*leeftijd.50.to.54.years"
+    " + delta0_leeftijd.70.to.74.years*leeftijd.70.to.74.years"
+    " + delta0_leeftijd.over.80*leeftijd.over.80"
+    " + delta0_leeftijd.35.to.39.years*leeftijd.35.to.39.years"
+    " + delta0_leeftijd.25.to.29.years*leeftijd.25.to.29.years"
+    " + delta0_herkomstgroep.nan*herkomstgroep.nan"
+    " + delta0_herkomstgroep.first.nonw*herkomstgroep.first.nonw"
+    " + delta0_herkomstgroep.second.nonw*herkomstgroep.second.nonw"
+    " + delta0_herkomstgroep.second.w*herkomstgroep.second.w"
+    " + delta0_herkomstgroep.first.w*herkomstgroep.first.w"
+    " + delta0_geslacht.male*geslacht.male"
+    " + delta0_burgstat.nan*burgstat.nan"
+    " + delta0_burgstat.separated*burgstat.separated"
+    " + delta0_burgstat.married*burgstat.married"
+    " + delta0_burgstat.never.been.married*burgstat.never.been.married"
+    " + delta0_burgstat.widow.or.widower*burgstat.widow.or.widower"
+    " + delta0_nettohh_f.nan*nettohh_f.nan"
+    " + delta0_nettohh_f.over.50000*nettohh_f.over.50000"
+    " + delta0_oplcat.nan*oplcat.nan"
+    " + delta0_oplcat.primary.school*oplcat.primary.school"
+    " + delta0_oplcat.vmbo*oplcat.vmbo"
+    " + delta0_oplcat.mbo*oplcat.mbo"
+    " + delta0_oplcat.hbo*oplcat.hbo"
+    " + delta0_oplcat.wo*oplcat.wo"
+    " + delta0_ch4.good*ch4.good"
+    " + delta0_ch4.nan*ch4.nan"
+    " + delta0_ch4.poor*ch4.poor"
+    " + delta0_ch4.very.good*ch4.very.good"
+    " + delta0_ch4.moderate*ch4.moderate"
+    " + delta0_bmi.overweight*bmi.overweight"
+    " + delta0_bmi.nan*bmi.nan"
+    " + delta0_bmi.normal.weight*bmi.normal.weight"
+    " + delta0_bmi.obese*bmi.obese"
+    " + delta0_prev_depr*prev_depr"
+)
+
+print(model_single_regression)
+
+model = semopy.Model(model_single_regression)
+
+# %% fit that one
+data = map_columns_to_str(all_data_flattened.astype(np.float64))
+optimisation_result = model.fit(data)
+
+print(optimisation_result)
+
+model.inspect().sort_values(["op", "rval"])  # pyright: ignore[reportOptionalMemberAccess, reportAttributeAccessIssue]
