@@ -17,10 +17,10 @@ class Column:
                 return self.name
             case (wave, None):
                 return f"{self.name}_{self.wave}"
-            case (wave, dummy_level):
-                return f"{self.name}_{wave}.{dummy_level}"
             case (None, dummy_level):
                 return f"{self.name}.{dummy_level}"
+            case (wave, dummy_level):
+                return f"{self.name}_{wave}.{dummy_level}"
 
     @staticmethod
     def from_liss_variable_name(variable_name: str) -> "Column":
