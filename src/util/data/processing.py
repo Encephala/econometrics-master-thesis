@@ -1,6 +1,7 @@
 import logging
 
 import pandas as pd
+import numpy as np
 
 from util.data import Column
 
@@ -94,6 +95,34 @@ def map_mhi5_categories(series: pd.Series, *, is_positive: bool = False) -> pd.S
 
     if is_positive:
         result = 5 - result
+
+    return result
+
+
+def find_non_PD_suspicious_columns(df: pd.DataFrame) -> set[Column]:
+    # https://stats.stackexchange.com/questions/153632/how-to-find-factor-that-is-making-matrix-singular
+    assert_column_type_correct(df)
+
+    result = set()
+
+    columns: list[Column] = df.columns  # pyright: ignore[reportAssignmentType]
+
+    Sigma = df.cov()
+
+    assert np.allclose(Sigma, Sigma.T)
+
+    eigvals, eigvecs = np.linalg.eigh(Sigma)
+
+    for eigval, eigvec in zip(eigvals, eigvecs.T, strict=True):
+        if not np.isclose(eigval, 0):
+            # All good
+            continue
+
+        eigvec = pd.Series(eigvec, index=columns)  # noqa: PLW2901
+
+        suspicious_columns = eigvec[~np.isclose(eigvec, 0)].index
+
+        result.update(suspicious_columns)
 
     return result
 

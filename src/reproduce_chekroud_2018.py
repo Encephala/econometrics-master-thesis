@@ -350,7 +350,7 @@ for year in available_years(all_relevant_data):
 
     subset.columns = [remove_year(column) for column in columns]
 
-    subset.index = pd.Index([f"{i}_{year}" for i in subset.index])
+    subset.index = pd.Index([f"{idx}_{year}" for idx in subset.index])
 
     all_data_flattened = pd.concat([all_data_flattened, subset])
 

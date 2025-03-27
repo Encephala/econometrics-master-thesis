@@ -3,9 +3,8 @@ from dataclasses import dataclass, field
 import logging
 
 import pandas as pd
-import numpy as np
 
-from .data import Column, assert_column_type_correct, cleanup_dummy
+from .data import Column, assert_column_type_correct, cleanup_dummy, find_non_PD_suspicious_columns
 
 logger = logging.getLogger(__name__)
 
@@ -391,14 +390,10 @@ class ModelDefinitionBuilder:
 
         subset = data[all_regressors]
 
-        Sigma = subset.cov()
+        suspicious_columns = find_non_PD_suspicious_columns(subset)
 
-        assert all(np.equal(Sigma.T, Sigma)), "Data covariance matrix isn't symmetric? Wut"
-
-        eigvals = np.linalg.eigvalsh(Sigma)
-
-        if any(np.isclose(eigvals, 0)):
-            logger.warning("Data covariance matrix is not PD, investigate")
+        if len(suspicious_columns) > 0:
+            logger.warning(f"Data covariance matrix is not PD, culprits seem to be {suspicious_columns}")
 
     def _make_result(self) -> str:
         return f"""# Regressions (structural part)
