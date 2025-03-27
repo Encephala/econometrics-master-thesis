@@ -5,13 +5,13 @@ import pandas as pd
 from util.data import Column
 
 
-def assert_column_type(df: pd.DataFrame):
+def assert_column_type_correct(df: pd.DataFrame):
     for column in df.columns:
         assert isinstance(column, Column), f"{column=} is not of type `util.data.Column`"
 
 
-def select_variable_wide(df: pd.DataFrame, variable: str) -> pd.DataFrame:
-    assert_column_type(df)
+def select_variable(df: pd.DataFrame, variable: str) -> pd.DataFrame:
+    assert_column_type_correct(df)
 
     columns: list[Column] = df.columns  # pyright: ignore[reportAssignmentType]
 
@@ -23,8 +23,8 @@ def select_variable_wide(df: pd.DataFrame, variable: str) -> pd.DataFrame:
     return df[selected_columns]
 
 
-def select_wave_wide(df: pd.DataFrame, year: int) -> pd.DataFrame:
-    assert_column_type(df)
+def select_wave(df: pd.DataFrame, year: int) -> pd.DataFrame:
+    assert_column_type_correct(df)
 
     columns: list[Column] = df.columns  # pyright: ignore[reportAssignmentType]
 
@@ -38,7 +38,7 @@ def select_wave_wide(df: pd.DataFrame, year: int) -> pd.DataFrame:
 
 # This assumes columns named as in standardise_wide_column_name above
 def available_years(df: pd.DataFrame) -> set[int]:
-    assert_column_type(df)
+    assert_column_type_correct(df)
 
     columns: list[Column] = df.columns  # pyright: ignore[reportAssignmentType]
 
@@ -46,9 +46,9 @@ def available_years(df: pd.DataFrame) -> set[int]:
 
 
 def available_dummy_levels(df: pd.DataFrame, variable: str) -> set[str]:
-    assert_column_type(df)
+    assert_column_type_correct(df)
 
-    subset = select_variable_wide(df, variable)
+    subset = select_variable(df, variable)
 
     columns: list[Column] = subset.columns  # pyright: ignore[reportAssignmentType]
 

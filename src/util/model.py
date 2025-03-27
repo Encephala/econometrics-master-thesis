@@ -4,7 +4,7 @@ import warnings
 
 import pandas as pd
 
-from .data import Column, assert_column_type
+from .data import Column, assert_column_type_correct
 from .data.processing import cleanup_dummy
 
 
@@ -18,28 +18,38 @@ class VariableDefinition:
 
 
 @dataclass(frozen=True)
-class VariableInWave:
+class Variable:
     "A variable in the dataset, that is, a specific (level of a) variable in a specific wave."
 
     name: str
-    wave: int
+    wave: int | None
     dummy_level: str | None = field(default=None, kw_only=True)
 
     def build(self) -> str:
-        if self.dummy_level is not None:
-            return f"{self.name}_{self.wave}.{cleanup_dummy(self.dummy_level)}"
+        result = f"{self.name}"
 
-        return f"{self.name}_{self.wave}"
+        if self.wave is not None:
+            result += f"_{self.wave}"
+
+        if self.dummy_level is not None:
+            result += f".{self.dummy_level}"
+
+        return result
 
     def _equals(self, available_variable: "Column") -> bool:
-        if self.dummy_level is None:
-            return self.name == available_variable.name and self.wave == available_variable.wave
-
-        return (
-            self.name == available_variable.name
-            and self.wave == available_variable.wave
-            and self.dummy_level == available_variable.dummy_level
-        )
+        match (self.wave, self.dummy_level):
+            case (None, None):
+                return self.name == available_variable.name
+            case (wave, None):
+                return self.name == available_variable.name and wave == available_variable.wave
+            case (None, dummy_level):
+                return self.name == available_variable.name and dummy_level == available_variable.dummy_level
+            case (wave, dummy_level):
+                return (
+                    self.name == available_variable.name
+                    and wave == available_variable.wave
+                    and dummy_level == available_variable.dummy_level
+                )
 
     def is_in(self, available_variables: Collection["Column"]) -> bool:
         return any(self._equals(variable) for variable in available_variables)
@@ -49,7 +59,7 @@ class VariableInWave:
 
 
 @dataclass(frozen=True)
-class VariableWithNamedParameter(VariableInWave):
+class VariableWithNamedParameter(Variable):
     "A variable in the dataset that has an associated named parameter."
 
     parameter: str = field(repr=False)
@@ -63,8 +73,8 @@ class VariableWithNamedParameter(VariableInWave):
 
 @dataclass(frozen=True)
 class Regression:
-    lval: VariableInWave
-    rvals: Collection[VariableInWave]
+    lval: Variable
+    rvals: Collection[Variable]
     include_constant: bool
 
     def build(self) -> str:
@@ -78,8 +88,8 @@ class Regression:
 
 @dataclass(frozen=True)
 class Measurement:
-    lval: VariableInWave
-    rvals: Collection[VariableInWave]
+    lval: Variable
+    rvals: Collection[Variable]
 
     def build(self) -> str:
         return f"{self.lval.build()} =~ {' + '.join(rval.build() for rval in self.rvals)}"
@@ -87,14 +97,14 @@ class Measurement:
 
 @dataclass(frozen=True)
 class Covariance:
-    lval: VariableInWave
-    rvals: Collection[VariableInWave]
+    lval: Variable
+    rvals: Collection[Variable]
 
     def build(self) -> str:
         return f"{self.lval.build()} ~~ {' + '.join(rval.build() for rval in self.rvals)}"
 
 
-class OrdinalVariableSet(set[VariableInWave]):
+class OrdinalVariableSet(set[Variable]):
     def build(self) -> str:
         if len(self) == 0:
             return ""
@@ -163,7 +173,7 @@ class ModelDefinitionBuilder:
         return self
 
     def build(self, data: pd.DataFrame) -> str:
-        assert_column_type(data)
+        assert_column_type_correct(data)
 
         available_variables: list[Column] = list(data.columns)  # pyright: ignore[reportAssignmentType]
 
@@ -175,15 +185,7 @@ class ModelDefinitionBuilder:
 
         self._make_x_predetermined()
 
-        return f"""# Regressions (structural part)
-{"\n".join([*map(Regression.build, self._regressions), ""])}
-# Measurement part
-{"\n".join([*map(Measurement.build, self._measurements), ""])}
-# Additional covariances
-{"\n".join([*map(Covariance.build, self._covariances), ""])}
-# Operations/constraints
-{self._ordinals.build()}
-"""
+        return self._make_result()
 
     def _determine_start_and_end_years(self, available_variables: Collection[Column]) -> Tuple[int, int]:  # pyright: ignore[reportInvalidTypeArguments]
         y_years = [variable.wave for variable in available_variables if variable.name == self.y.name]
@@ -220,7 +222,7 @@ class ModelDefinitionBuilder:
         last_year_y: int,
     ):
         for year_y in range(first_year_y, last_year_y + 1):
-            y = VariableInWave(self.y.name, year_y)
+            y = Variable(self.y.name, year_y)
 
             if not y.is_in(available_variables):
                 warnings.warn(f"{y=} not found in data, skipping regression", stacklevel=2)
@@ -234,14 +236,14 @@ class ModelDefinitionBuilder:
             ]
 
             w = self._compile_w(year_y)
-            rvals: list[VariableInWave] = [*y_lags, *x_lags, *w]
+            rvals: list[Variable] = [*y_lags, *x_lags, *w]
 
             # Check for missing variables
             if (missing_info := self._find_missing_variables(rvals, available_variables)) is not None:
                 missing_variables, is_dummy = missing_info
 
                 if not is_dummy:
-                    # There's only one VariableInWave in missing_variables if it's not a dummy
+                    # There's only one Variable in missing_variables if it's not a dummy
                     warnings.warn(
                         f"For {y=}, {missing_variables[0]} was not in the data, skipping regression",
                         stacklevel=2,
@@ -285,7 +287,7 @@ class ModelDefinitionBuilder:
                 variables = [variable for variable in w if variable.name == definition.name]
                 self._ordinals.update(variables)
 
-    def _compile_w(self, year_y: int) -> list[VariableWithNamedParameter]:
+    def _compile_w(self, wave_y: int | None) -> list[VariableWithNamedParameter]:
         if self.w is None:
             return []
 
@@ -293,12 +295,12 @@ class ModelDefinitionBuilder:
 
         for variable in self.w:
             if variable.dummy_levels is None:
-                result.append(VariableWithNamedParameter(variable.name, year_y, f"delta0_{variable.name}"))
+                result.append(VariableWithNamedParameter(variable.name, wave_y, f"delta0_{variable.name}"))
                 continue
 
             result.extend(
                 [
-                    VariableWithNamedParameter(variable.name, year_y, f"delta0_{variable.name}", dummy_level=level)
+                    VariableWithNamedParameter(variable.name, wave_y, f"delta0_{variable.name}", dummy_level=level)
                     for level in variable.dummy_levels
                 ]
             )
@@ -307,9 +309,9 @@ class ModelDefinitionBuilder:
 
     def _find_missing_variables(
         self,
-        variables: Collection[VariableInWave],
+        variables: Collection[Variable],
         available_variables: Collection[Column],  # pyright: ignore[reportInvalidTypeArguments]
-    ) -> Tuple[list[VariableInWave], bool] | None:
+    ) -> Tuple[list[Variable], bool] | None:
         """Checks if all the regressors are in the data.
 
         If a variable is missing, returns ([variable], False).
@@ -333,9 +335,9 @@ class ModelDefinitionBuilder:
 
     def _find_zero_variance_variables(
         self,
-        variables: Collection[VariableInWave],
+        variables: Collection[Variable],
         data: pd.DataFrame,
-    ) -> list[VariableInWave] | None:
+    ) -> list[Variable] | None:
         """Checks if all the regressors are in the data.
 
         If a variable is missing, returns ([variable], False).
@@ -367,18 +369,98 @@ class ModelDefinitionBuilder:
         for regression in self._regressions:
             y_current = regression.lval
             x_future = [
-                VariableWithNamedParameter(variable.name, variable.wave, f"gamma{variable.wave - regression.lval.wave}")
+                VariableWithNamedParameter(variable.name, variable.wave, f"gamma{variable.wave - regression.lval.wave}")  # pyright: ignore[reportOperatorIssue]
                 for variable in all_regressors
-                if variable.name == self.x.name and variable.wave > regression.lval.wave
+                if variable.name == self.x.name and variable.wave > regression.lval.wave  # pyright: ignore[reportOperatorIssue]
             ]
 
             if len(x_future) != 0:
                 self._covariances.append(Covariance(y_current, x_future))
 
-    def _all_regressors(self) -> list[VariableInWave]:
-        all_regressors: list[VariableInWave] = []
+    def _all_regressors(self) -> list[Variable]:
+        all_regressors: list[Variable] = []
 
         for regression in self._regressions:
             all_regressors.extend(rval for rval in regression.rvals if rval not in all_regressors)
 
         return all_regressors
+
+    def _make_result(self) -> str:
+        return f"""# Regressions (structural part)
+{"\n".join([*map(Regression.build, self._regressions), ""])}
+# Measurement part
+{"\n".join([*map(Measurement.build, self._measurements), ""])}
+# Additional covariances
+{"\n".join([*map(Covariance.build, self._covariances), ""])}
+# Operations/constraints
+{self._ordinals.build()}
+"""
+
+    def build_nonpanel(self, data: pd.DataFrame) -> str:
+        assert_column_type_correct(data)
+
+        available_variables: list[Column] = list(data.columns)  # pyright: ignore[reportAssignmentType]
+
+        self._build_nonpanel_regression(data, available_variables)
+
+        return self._make_result()
+
+    def _build_nonpanel_regression(self, data: pd.DataFrame, available_variables: list[Column]):
+        # Majorly copy-pasta'd from self._build_regressions
+
+        y = Variable(self.y.name, None)
+        assert self.y_lag_structure == [], (
+            f"Building nonpanel regression but y had lag structure {self.y_lag_structure}"
+        )
+
+        x = Variable(self.x.name, None)
+        assert self.x_lag_structure in ([0], []), (
+            f"Building nonpanel regression but x had lag structure {self.x_lag_structure}"
+        )
+
+        # Apparently [*<values>] typecasts to parent type?
+        w = self._compile_w(None)
+        rvals: list[Variable] = [x, *w]
+
+        if (missing_info := self._find_missing_variables(w, available_variables)) is not None:
+            missing_variables, is_dummy = missing_info
+
+            if not is_dummy:
+                # There's only one Variable in missing_variables if it's not a dummy
+                # TODO: Is there a better option than ditching the whole regression
+                # because one of the vars is missing?
+                raise ValueError(f"For {y=}, {missing_variables[0]} was not in the data, can't build regression")  # noqa: TRY003
+
+            warnings.warn(
+                f"For {y=}, the dummy levels {missing_variables} were not in the data, excluding from regression",
+                stacklevel=2,
+            )
+
+            # Exclude the dummy level from the regression, as it isn't in the data.
+            for variable in missing_variables:
+                rvals.remove(variable)
+
+        if (zero_variance_variables := self._find_zero_variance_variables(w, data)) is not None:
+            warnings.warn(
+                f"For {y=}, the variables {zero_variance_variables} had zero variance, excluding from regression",
+                stacklevel=2,
+            )
+
+            for variable in zero_variance_variables:
+                rvals.remove(variable)
+
+        self._regressions.append(Regression(y, rvals, self.include_constant))
+
+        # TODO: Might be nicer to have this in a separate function,
+        # but since it so heavily relies on local variables, leaving it here for now.
+        if self.y.is_ordinal:
+            self._ordinals.add(y)
+
+        if self.x.is_ordinal:
+            self._ordinals.add(x)
+
+        ordinal_w = [] if self.w is None else [definition for definition in self.w if definition.is_ordinal]
+
+        for definition in ordinal_w:
+            variables = [variable for variable in w if variable.name == definition.name]
+            self._ordinals.update(variables)

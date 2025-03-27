@@ -8,8 +8,8 @@ import semopy
 from util.data import (
     Column,
     load_wide_panel_cached,
-    select_variable_wide,
-    select_wave_wide,
+    select_variable,
+    select_wave,
     available_years,
     available_dummy_levels,
     cleanup_dummy,
@@ -39,7 +39,7 @@ HEIGHT, WEIGHT = "ch16", "ch17"  # For BMI
 DEPRESSION_MEDICATION = "ch178"
 
 # %% Converting unhappiness categories to numbers
-unhappy = select_variable_wide(health_panel, UNHAPPY)
+unhappy = select_variable(health_panel, UNHAPPY)
 
 mapper = {
     "never": 0,
@@ -53,13 +53,13 @@ mapper = {
 unhappy = unhappy.apply(lambda column: column.map(mapper, na_action="ignore")).astype(np.float64)
 
 # %% Making sports an actual boolean instead of "yes"/"no"
-sports = select_variable_wide(leisure_panel, SPORTS)
+sports = select_variable(leisure_panel, SPORTS)
 
 sports = sports.apply(lambda column: column.map({"yes": True, "no": False}, na_action="ignore")).astype("boolean")
 
 # %% age preprocessing
 # From Chekroud 2018
-age = select_variable_wide(background_vars, AGE)
+age = select_variable(background_vars, AGE)
 
 
 age_labels = [
@@ -91,7 +91,7 @@ for column in age:
 
 # %% Income preprocessing
 # From Chekroud 2018
-income = select_variable_wide(background_vars, INCOME)
+income = select_variable(background_vars, INCOME)
 
 income_labels = [
     "under 15000",
@@ -112,7 +112,7 @@ for column in income:
     income[column] = new_column
 
 # %% derive employment from primary occupation
-occupation = select_variable_wide(background_vars, PRINCIPAL_OCCUPATION)
+occupation = select_variable(background_vars, PRINCIPAL_OCCUPATION)
 
 EMPLOYMENT = "employment"
 
@@ -158,8 +158,8 @@ columns: list[Column] = employment.columns  # pyright: ignore[reportAssignmentTy
 employment.columns = [Column(EMPLOYMENT, column.wave) for column in columns]
 
 # %% calculate BMI
-weight = select_variable_wide(health_panel, WEIGHT)
-height = select_variable_wide(health_panel, HEIGHT)
+weight = select_variable(health_panel, WEIGHT)
+height = select_variable(health_panel, HEIGHT)
 
 # Broad sanity check
 TALLEST_HEIGHT_EVER = 270  # According to google idk
@@ -190,7 +190,7 @@ bmi = bmi.apply(
 )
 
 # %% determine previous depression status
-depression = select_variable_wide(health_panel, DEPRESSION_MEDICATION)
+depression = select_variable(health_panel, DEPRESSION_MEDICATION)
 
 years_depression = sorted(available_years(depression))
 names_depression = [Column(DEPRESSION_MEDICATION, year) for year in sorted(available_years(depression))]
@@ -221,7 +221,7 @@ for person in previous_depression.index:
 previous_depression = previous_depression.astype("boolean")
 
 # %% Make education level more sane
-education = select_variable_wide(background_vars, EDUCATION_LEVEL)
+education = select_variable(background_vars, EDUCATION_LEVEL)
 
 category_map = {
     "havo/vwo (higher secondary education/preparatory university education, us: senior high school)": "havo vwo",
@@ -235,7 +235,7 @@ category_map = {
 education = education.apply(lambda column: column.cat.rename_categories(category_map))
 
 # %% Make ethnicity more sane
-ethnicity = select_variable_wide(background_vars, ETHNICITY)
+ethnicity = select_variable(background_vars, ETHNICITY)
 
 category_map = {
     "dutch background": "dutch",
@@ -251,7 +251,7 @@ ethnicity = ethnicity.apply(lambda column: column.cat.rename_categories(category
 CONSTANT = "constant"
 
 DUMMY_NA = True
-DROP_FIRST = True
+DROP_FIRST = False
 
 
 def make_dummies(df: pd.DataFrame) -> pd.DataFrame:
@@ -278,19 +278,19 @@ all_relevant_data = pd.DataFrame(index=background_vars.index).join(
         sports,
         make_dummies(age),
         make_dummies(ethnicity),
-        make_dummies(select_variable_wide(background_vars, GENDER)),
-        make_dummies(select_variable_wide(background_vars, MARITAL_STATUS)),
+        make_dummies(select_variable(background_vars, GENDER)),
+        make_dummies(select_variable(background_vars, MARITAL_STATUS)),
         make_dummies(income),
         make_dummies(education),
         make_dummies(employment),
-        make_dummies(select_variable_wide(health_panel, PHYSICAL_HEALTH)),
+        make_dummies(select_variable(health_panel, PHYSICAL_HEALTH)),
         make_dummies(bmi),
         previous_depression,
     ]
 )
 
 # Drop rows for which the dependent variable is always NA, as these will never be included in a regression.
-missing_dependent_variable = select_variable_wide(all_relevant_data, UNHAPPY)
+missing_dependent_variable = select_variable(all_relevant_data, UNHAPPY)
 missing_dependent_variable = missing_dependent_variable.isna().sum(axis=1) == missing_dependent_variable.shape[1]
 missing_dependent_variable_index = missing_dependent_variable[missing_dependent_variable].index
 all_relevant_data = all_relevant_data.drop(missing_dependent_variable_index)
@@ -307,7 +307,7 @@ def remove_year(column: Column) -> Column:
 
 
 for year in available_years(all_relevant_data):
-    subset = select_wave_wide(all_relevant_data, year)
+    subset = select_wave(all_relevant_data, year)
 
     columns: list[Column] = subset.columns  # pyright: ignore[reportAssignmentType]
 
@@ -347,68 +347,48 @@ print(model_definition)
 model = semopy.Model(model_definition)
 
 # %% naive model
-optimisation_result = model.fit(all_relevant_data.astype(np.float64), obj="FIML")
+all_data = map_columns_to_str(all_relevant_data.astype(np.float64))
+optimisation_result = model.fit(all_data, obj="FIML")
 
 print(optimisation_result)
 
 model.inspect().sort_values(["op", "Estimate", "lval"])  # pyright: ignore[reportOptionalMemberAccess, reportAttributeAccessIssue]
 
 # %% model with single regression
-# NOTE: Dropped `geslacht.nan` as a regressor because it is highly colinear with `leeftijd.nan`.
 model_single_regression = (
-    "ch14 ~ beta0*cs104"
-    " + delta0_leeftijd.45.to.49.years*leeftijd.45.to.49.years"
-    " + delta0_leeftijd.nan*leeftijd.nan"
-    " + delta0_leeftijd.55.to.59.years*leeftijd.55.to.59.years"
-    " + delta0_leeftijd.40.to.44.years*leeftijd.40.to.44.years"
-    " + delta0_leeftijd.30.to.34.years*leeftijd.30.to.34.years"
-    " + delta0_leeftijd.60.to.64.years*leeftijd.60.to.64.years"
-    " + delta0_leeftijd.75.to.79.years*leeftijd.75.to.79.years"
-    " + delta0_leeftijd.65.to.69.years*leeftijd.65.to.69.years"
-    " + delta0_leeftijd.18.to.24.years*leeftijd.18.to.24.years"
-    " + delta0_leeftijd.50.to.54.years*leeftijd.50.to.54.years"
-    " + delta0_leeftijd.70.to.74.years*leeftijd.70.to.74.years"
-    " + delta0_leeftijd.over.80*leeftijd.over.80"
-    " + delta0_leeftijd.35.to.39.years*leeftijd.35.to.39.years"
-    " + delta0_leeftijd.25.to.29.years*leeftijd.25.to.29.years"
-    " + delta0_herkomstgroep.nan*herkomstgroep.nan"
-    " + delta0_herkomstgroep.first.nonw*herkomstgroep.first.nonw"
-    " + delta0_herkomstgroep.second.nonw*herkomstgroep.second.nonw"
-    " + delta0_herkomstgroep.second.w*herkomstgroep.second.w"
-    " + delta0_herkomstgroep.first.w*herkomstgroep.first.w"
-    " + delta0_geslacht.male*geslacht.male"
-    " + delta0_burgstat.nan*burgstat.nan"
-    " + delta0_burgstat.separated*burgstat.separated"
-    " + delta0_burgstat.married*burgstat.married"
-    " + delta0_burgstat.never.been.married*burgstat.never.been.married"
-    " + delta0_burgstat.widow.or.widower*burgstat.widow.or.widower"
-    " + delta0_nettohh_f.nan*nettohh_f.nan"
-    " + delta0_nettohh_f.over.50000*nettohh_f.over.50000"
-    " + delta0_oplcat.nan*oplcat.nan"
-    " + delta0_oplcat.primary.school*oplcat.primary.school"
-    " + delta0_oplcat.vmbo*oplcat.vmbo"
-    " + delta0_oplcat.mbo*oplcat.mbo"
-    " + delta0_oplcat.hbo*oplcat.hbo"
-    " + delta0_oplcat.wo*oplcat.wo"
-    " + delta0_ch4.good*ch4.good"
-    " + delta0_ch4.nan*ch4.nan"
-    " + delta0_ch4.poor*ch4.poor"
-    " + delta0_ch4.very.good*ch4.very.good"
-    " + delta0_ch4.moderate*ch4.moderate"
-    " + delta0_bmi.overweight*bmi.overweight"
-    " + delta0_bmi.nan*bmi.nan"
-    " + delta0_bmi.normal.weight*bmi.normal.weight"
-    " + delta0_bmi.obese*bmi.obese"
-    " + delta0_prev_depr*prev_depr"
+    ModelDefinitionBuilder()
+    .with_y(VariableDefinition(UNHAPPY))
+    .with_x(VariableDefinition(SPORTS))
+    .with_w(
+        [
+            VariableDefinition(variable, dummy_levels=available_dummy_levels(all_data_flattened, variable))
+            for variable in [
+                AGE,
+                ETHNICITY,
+                GENDER,
+                MARITAL_STATUS,
+                INCOME,
+                EDUCATION_LEVEL,
+                EMPLOYMENT,
+                PHYSICAL_HEALTH,
+                BMI,
+            ]
+        ]
+        + [VariableDefinition(variable) for variable in [PREVIOUS_DEPRESSION]]
+    )  # All are dummies for now
+    .build_nonpanel(all_data_flattened)
 )
+
 
 print(model_single_regression)
 
 model = semopy.Model(model_single_regression)
 
+# TODO: Drop `geslacht.nan` as a regressor because it is highly colinear with `leeftijd.nan`.
+
 # %% fit that one
-data = map_columns_to_str(all_data_flattened.astype(np.float64))
-optimisation_result = model.fit(data)
+data_flattened = map_columns_to_str(all_data_flattened.astype(np.float64))
+optimisation_result = model.fit(data_flattened)
 
 print(optimisation_result)
 
