@@ -317,6 +317,10 @@ for year in available_years(all_relevant_data):
 
     all_data_flattened = pd.concat([all_data_flattened, subset])
 
+# Drop missing dependent var
+y_missing = all_data_flattened[Column(UNHAPPY)].isna()
+all_data_flattened = all_data_flattened.drop(y_missing[y_missing].index)
+
 # %% model with single regression
 model_single_regression = (
     ModelDefinitionBuilder()
