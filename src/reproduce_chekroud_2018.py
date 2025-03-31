@@ -397,7 +397,6 @@ model_definition = (
         ]
         + [VariableDefinition(variable) for variable in [PREVIOUS_DEPRESSION]]
     )
-    .with_checks()
     .build(all_relevant_data)
 )
 

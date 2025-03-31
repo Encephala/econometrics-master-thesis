@@ -198,9 +198,9 @@ class ModelDefinitionBuilder:
 
         available_variables: list[Column] = list(data.columns)  # pyright: ignore[reportAssignmentType]
 
-        first_year_y, last_year_y = self._determine_start_and_end_years(available_variables)
+        waves = self._available_dependent_variables(available_variables)
 
-        self._build_regressions(data, available_variables, first_year_y, last_year_y)
+        self._build_regressions(waves, available_variables, data)
 
         self._fix_y_variance()
 
@@ -211,7 +211,7 @@ class ModelDefinitionBuilder:
 
         return self._make_result()
 
-    def _determine_start_and_end_years(self, available_variables: Collection[Column]) -> Tuple[int, int]:  # pyright: ignore[reportInvalidTypeArguments]
+    def _available_dependent_variables(self, available_variables: list[Column]) -> list[Column]:
         y_years = [variable.wave for variable in available_variables if variable.name == self._y.name]
 
         assert not any(year is None for year in y_years)  # y is never time-invariant
@@ -236,30 +236,31 @@ class ModelDefinitionBuilder:
         # else, stop when y stops
         last_year_y = min(x_end + min(self._x_lag_structure), y_end)
 
-        return first_year_y, last_year_y
+        return [
+            variable
+            for variable in available_variables
+            if variable.name == self._y.name and first_year_y <= variable.wave <= last_year_y
+        ]
 
     def _build_regressions(
         self,
-        data: pd.DataFrame,
+        dependent_vars: list[Column],
         available_variables: Collection[Column],
-        first_year_y: int,
-        last_year_y: int,
+        data: pd.DataFrame,
     ):
-        for year_y in range(first_year_y, last_year_y + 1):
-            y = Variable(self._y.name, year_y)
+        for variable in dependent_vars:
+            y = Variable(variable.name, variable.wave)
 
-            if not y.is_in(available_variables):
-                logger.warning(f"{y=} not found in data, skipping regression")
-                continue
+            wave: int = y.wave  # pyright: ignore[reportAssignmentType]
 
             y_lags = [
-                VariableWithNamedParameter(self._y.name, year_y - lag, f"rho{lag}") for lag in self._y_lag_structure
+                VariableWithNamedParameter(self._y.name, wave - lag, f"rho{lag}") for lag in self._y_lag_structure
             ]
             x_lags = [
-                VariableWithNamedParameter(self._x.name, year_y - lag, f"beta{lag}") for lag in self._x_lag_structure
+                VariableWithNamedParameter(self._x.name, wave - lag, f"beta{lag}") for lag in self._x_lag_structure
             ]
 
-            w = self._compile_w(year_y)
+            w = self._compile_w(wave)
             rvals: list[Variable] = [*y_lags, *x_lags, *w]
 
             rvals = self._remove_excluded_regressors(rvals)
