@@ -350,6 +350,13 @@ model = semopy.Model(model_single_regression)
 
 # TODO: Drop `geslacht.nan` as a regressor because it is highly colinear with `leeftijd.nan`.
 
+# %% save for lavaan in R.
+# Relevant for now, because obj="FIML" gives invalid value warnings in semopy
+all_data_flattened.astype("float64").to_stata("/tmp/data.dta")  # noqa: S108
+
+print("Model definition in stata/lavaan form:")
+print(model_single_regression.replace(".", "_"))
+
 # %% fit that one
 data_flattened = map_columns_to_str(all_data_flattened.astype(np.float64))
 optimisation_result = model.fit(data_flattened)
