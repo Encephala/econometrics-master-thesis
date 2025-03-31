@@ -119,6 +119,10 @@ class ModelDefinitionBuilder:
     _w: list[VariableDefinition] | None = None
     _include_constant: bool = False
 
+    _do_missing_check: bool = False
+    _do_variance_check: bool = False
+    _do_PD_check: bool = False
+
     # To make covariance PD
     _excluded_regressors: list[Column]
 
@@ -179,11 +183,17 @@ class ModelDefinitionBuilder:
         self._include_constant = True
         return self
 
+    def with_checks(self, *, missing: bool = True, variance: bool = True, PD: bool = True) -> Self:
+        self._do_missing_check = missing
+        self._do_variance_check = variance
+        self._do_PD_check = PD
+        return self
+
     def with_excluded_regressors(self, excluded_regressors: list[Column]) -> Self:
         self._excluded_regressors = excluded_regressors
         return self
 
-    def build(self, data: pd.DataFrame, *, check_PD_ness: bool = True) -> str:
+    def build(self, data: pd.DataFrame) -> str:
         assert_column_type_correct(data)
 
         available_variables: list[Column] = list(data.columns)  # pyright: ignore[reportAssignmentType]
@@ -196,7 +206,7 @@ class ModelDefinitionBuilder:
 
         self._make_x_predetermined()
 
-        if check_PD_ness:
+        if self._do_PD_check:
             self._check_covariance_matrix_PD(data)
 
         return self._make_result()
@@ -254,33 +264,11 @@ class ModelDefinitionBuilder:
 
             rvals = self._remove_excluded_regressors(rvals)
 
-            # Check for missing variables
-            if (missing_info := self._find_missing_variables(rvals, available_variables)) is not None:
-                missing_variables, is_dummy = missing_info
+            if self._do_missing_check:
+                rvals = self._filter_missing_rvals(y, rvals, available_variables)
 
-                if not is_dummy:
-                    # There's only one Variable in missing_variables if it's not a dummy
-                    logger.warning(f"For {y=}, {missing_variables[0]} was not in the data, skipping regression")
-                    # TODO: Is there a better option than ditching the whole regression
-                    # because one of the vars is missing?
-                    continue
-
-                logger.warning(
-                    f"For {y=}, the dummy levels {missing_variables} were not in the data, excluding from regression"
-                )
-
-                # Exclude the dummy level from the regression, as it isn't in the data.
-                for variable in missing_variables:
-                    rvals.remove(variable)
-
-            # Check for variables with zero variance
-            if (zero_variance_variables := self._find_zero_variance_variables(rvals, data)) is not None:
-                logger.warning(
-                    f"For {y=}, the variables {zero_variance_variables} had zero variance, excluding from regression"
-                )
-
-                for variable in zero_variance_variables:
-                    rvals.remove(variable)
+            if self._do_variance_check:
+                rvals = self._filter_constant_rvals(y, rvals, data)
 
             self._regressions.append(Regression(y, rvals, self._include_constant))
 
@@ -320,6 +308,41 @@ class ModelDefinitionBuilder:
 
     def _remove_excluded_regressors(self, rvals: list[Variable]) -> list[Variable]:
         return [rval for rval in rvals if not rval.is_in(self._excluded_regressors)]
+
+    def _filter_missing_rvals(
+        self, y: Variable, rvals: list[Variable], available_variables: Collection[Column]
+    ) -> list[Variable]:
+        # Check for missing variables
+        if (missing_info := self._find_missing_variables(rvals, available_variables)) is not None:
+            missing_variables, is_dummy = missing_info
+
+            if not is_dummy:
+                # There's only one Variable in missing_variables if it's not a dummy
+                logger.warning(f"For {y=}, {missing_variables[0]} was not in the data, skipping regression")
+                # TODO: Is there a better option than ditching the whole regression
+                # because one of the vars is missing?
+
+            logger.warning(
+                f"For {y=}, the dummy levels {missing_variables} were not in the data, excluding from regression"
+            )
+
+            # Exclude the dummy level from the regression, as it isn't in the data.
+            for variable in missing_variables:
+                rvals.remove(variable)
+
+        return rvals
+
+    def _filter_constant_rvals(self, y: Variable, rvals: list[Variable], data: pd.DataFrame) -> list[Variable]:
+        # Check for variables with zero variance
+        if (zero_variance_variables := self._find_zero_variance_variables(rvals, data)) is not None:
+            logger.warning(
+                f"For {y=}, the variables {zero_variance_variables} had zero variance, excluding from regression"
+            )
+
+            for variable in zero_variance_variables:
+                rvals.remove(variable)
+
+        return rvals
 
     def _find_missing_variables(
         self,
@@ -422,14 +445,14 @@ class ModelDefinitionBuilder:
 {self._ordinals.build()}
 """
 
-    def build_nonpanel(self, data: pd.DataFrame, *, check_PD_ness: bool = True) -> str:
+    def build_nonpanel(self, data: pd.DataFrame) -> str:
         assert_column_type_correct(data)
 
         available_variables: list[Column] = list(data.columns)  # pyright: ignore[reportAssignmentType]
 
         self._build_nonpanel_regression(data, available_variables)
 
-        if check_PD_ness:
+        if self._do_PD_check:
             self._check_covariance_matrix_PD(data)
 
         return self._make_result()
@@ -453,30 +476,11 @@ class ModelDefinitionBuilder:
 
         rvals = self._remove_excluded_regressors(rvals)
 
-        if (missing_info := self._find_missing_variables(w, available_variables)) is not None:
-            missing_variables, is_dummy = missing_info
+        if self._do_missing_check:
+            rvals = self._filter_missing_rvals(y, rvals, available_variables)
 
-            if not is_dummy:
-                # There's only one Variable in missing_variables if it's not a dummy
-                # TODO: Is there a better option than ditching the whole regression
-                # because one of the vars is missing?
-                raise ValueError(f"For {y=}, {missing_variables[0]} was not in the data, can't build regression")  # noqa: TRY003
-
-            logger.warning(
-                f"For {y=}, the dummy levels {missing_variables} were not in the data, excluding from regression"
-            )
-
-            # Exclude the dummy level from the regression, as it isn't in the data.
-            for variable in missing_variables:
-                rvals.remove(variable)
-
-        if (zero_variance_variables := self._find_zero_variance_variables(w, data)) is not None:
-            logger.warning(
-                f"For {y=}, the variables {zero_variance_variables} had zero variance, excluding from regression"
-            )
-
-            for variable in zero_variance_variables:
-                rvals.remove(variable)
+        if self._do_variance_check:
+            rvals = self._filter_constant_rvals(y, rvals, data)
 
         self._regressions.append(Regression(y, rvals, self._include_constant))
 
