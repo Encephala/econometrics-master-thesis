@@ -352,6 +352,14 @@ print(model_single_regression)
 
 model = semopy.Model(model_single_regression)
 
+# %% fit that one
+data_flattened = map_columns_to_str(all_data_flattened.astype(np.float64))
+optimisation_result = model.fit(data_flattened, clean_slate=True, obj="FIML")
+
+print(optimisation_result)
+
+model.inspect().sort_values(["op", "rval"])  # pyright: ignore[reportOptionalMemberAccess, reportAttributeAccessIssue]
+
 # %% Improvement in unhappiness due to sports
 coeff: float = model.inspect().set_index("rval", drop=False).loc[SPORTS, "Estimate"]  # pyright: ignore  # noqa: PGH003
 
@@ -365,14 +373,6 @@ all_data_flattened.astype("float64").to_stata("/tmp/data.dta")  # noqa: S108
 
 print("Model definition in stata/lavaan form:")
 print(model_single_regression.replace(".", "_"))
-
-# %% fit that one
-data_flattened = map_columns_to_str(all_data_flattened.astype(np.float64))
-optimisation_result = model.fit(data_flattened)
-
-print(optimisation_result)
-
-model.inspect().sort_values(["op", "rval"])  # pyright: ignore[reportOptionalMemberAccess, reportAttributeAccessIssue]
 
 # %% naive model definition
 model_definition = (
@@ -409,4 +409,4 @@ optimisation_result = model.fit(all_data, obj="FIML")
 
 print(optimisation_result)
 
-model.inspect().sort_values(["op", "Estimate", "lval"])  # pyright: ignore[reportOptionalMemberAccess, reportAttributeAccessIssue]
+model.inspect().sort_values(["op", "rval"])  # pyright: ignore[reportOptionalMemberAccess, reportAttributeAccessIssue]
