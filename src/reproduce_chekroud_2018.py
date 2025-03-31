@@ -348,7 +348,12 @@ print(model_single_regression)
 
 model = semopy.Model(model_single_regression)
 
-# TODO: Drop `geslacht.nan` as a regressor because it is highly colinear with `leeftijd.nan`.
+# %% Improvement in unhappiness due to sports
+coeff: float = model.inspect().set_index("rval", drop=False).loc[SPORTS, "Estimate"]  # pyright: ignore  # noqa: PGH003
+
+mean = all_data_flattened[Column(UNHAPPY)].astype(float).describe()["mean"]
+
+print(f"Change due to sports: {coeff / mean:.1%} ({coeff:.3f} out of {mean:.3f})")
 
 # %% save for lavaan in R.
 # Relevant for now, because obj="FIML" gives invalid value warnings in semopy
