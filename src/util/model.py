@@ -273,19 +273,7 @@ class ModelDefinitionBuilder:
 
             self._regressions.append(Regression(y, rvals, self._include_constant))
 
-            # TODO: Might be nicer to have this in a separate function,
-            # but since it so heavily relies on local variables, leaving it here for now.
-            if self._y.is_ordinal:
-                self._ordinals.update(y_lags)
-
-            if self._x.is_ordinal:
-                self._ordinals.update(x_lags)
-
-            ordinal_w = [] if self._w is None else [definition for definition in self._w if definition.is_ordinal]
-
-            for definition in ordinal_w:
-                variables = [variable for variable in w if variable.name == definition.name]
-                self._ordinals.update(variables)
+            self._define_ordinals([y, *y_lags], [*x_lags], w)
 
     def _compile_w(self, wave_y: int | None) -> list[VariableWithNamedParameter]:
         if self._w is None:
@@ -388,6 +376,19 @@ class ModelDefinitionBuilder:
 
         return None
 
+    def _define_ordinals(self, y: Collection[Variable], x: Collection[Variable], w: Collection[Variable]):
+        if self._y.is_ordinal:
+            self._ordinals.update(y)
+
+        if self._x.is_ordinal:
+            self._ordinals.update(x)
+
+        ordinal_w = [] if self._w is None else [definition for definition in self._w if definition.is_ordinal]
+
+        for definition in ordinal_w:
+            variables = [variable for variable in w if variable.name == definition.name]
+            self._ordinals.update(variables)
+
     def _fix_y_variance(self):
         for regression in self._regressions:
             # Fix variance for y to be constant in time
@@ -485,16 +486,4 @@ class ModelDefinitionBuilder:
 
         self._regressions.append(Regression(y, rvals, self._include_constant))
 
-        # TODO: Might be nicer to have this in a separate function,
-        # but since it so heavily relies on local variables, leaving it here for now.
-        if self._y.is_ordinal:
-            self._ordinals.add(y)
-
-        if self._x.is_ordinal:
-            self._ordinals.add(x)
-
-        ordinal_w = [] if self._w is None else [definition for definition in self._w if definition.is_ordinal]
-
-        for definition in ordinal_w:
-            variables = [variable for variable in w if variable.name == definition.name]
-            self._ordinals.update(variables)
+        self._define_ordinals([y], [x], w)
