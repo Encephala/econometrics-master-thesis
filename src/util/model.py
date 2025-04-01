@@ -119,9 +119,9 @@ class ModelDefinitionBuilder:
     _w: list[VariableDefinition] | None = None
     _include_constant: bool = False
 
-    _do_missing_check: bool = False
-    _do_variance_check: bool = False
-    _do_PD_check: bool = False
+    _do_missing_check: bool = True
+    _do_variance_check: bool = True
+    _do_PD_check: bool = True
 
     # To make covariance PD
     _excluded_regressors: list[Column]
