@@ -16,6 +16,7 @@ from util.data import (
     map_columns_to_str,
 )
 from util.model import ModelDefinitionBuilder, VariableDefinition
+from util import print_results
 
 
 # %% data loading
@@ -46,7 +47,7 @@ mapper = {
     "seldom": 1,
     "sometimes": 3,
     "often": 10,
-    "mostly": 16,
+    "mostly": 20,
     "continuously": 30,
 }
 
@@ -358,10 +359,10 @@ optimisation_result = model.fit(data_flattened, clean_slate=True, obj="FIML")
 
 print(optimisation_result)
 
-model.inspect().sort_values(["op", "rval"])  # pyright: ignore[reportOptionalMemberAccess, reportAttributeAccessIssue]
+print_results(model)
 
 # %% Improvement in unhappiness due to sports
-coeff: float = model.inspect().set_index("rval", drop=False).loc[SPORTS, "Estimate"]  # pyright: ignore  # noqa: PGH003
+coeff: float = model.inspect().set_index("rval", drop=False).loc[SPORTS, "Estimate"]  # pyright: ignore noqa: PGH003
 
 mean = all_data_flattened[Column(UNHAPPY)].astype(float).describe()["mean"]
 
@@ -409,4 +410,4 @@ optimisation_result = model.fit(all_data, obj="FIML")
 
 print(optimisation_result)
 
-model.inspect().sort_values(["op", "rval"])  # pyright: ignore[reportOptionalMemberAccess, reportAttributeAccessIssue]
+print_results(model)
