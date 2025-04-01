@@ -25,7 +25,7 @@ model_definition = (
     ModelDefinitionBuilder()
     .with_x(VariableDefinition("x"), lag_structure=[0, 1, 2, 3])
     .with_y(VariableDefinition("y"), lag_structure=[1, 2, 3, 4])
-    .build(complete_data.columns)
+    .build(complete_data)
 )
 
 print(f"Model definition:\n{model_definition}")
