@@ -14,6 +14,7 @@ from util.data import (
     available_dummy_levels,
     cleanup_dummy,
     map_columns_to_str,
+    calc_mhi5,
 )
 from util.model import ModelDefinitionBuilder, VariableDefinition
 from util import print_results
@@ -25,7 +26,7 @@ leisure_panel = load_wide_panel_cached("cs")
 health_panel = load_wide_panel_cached("ch")
 
 # %% all variable names
-UNHAPPY = "ch14"
+MHI5 = "mhi"
 SPORTS = "cs104"
 
 AGE = "leeftijd"
@@ -39,19 +40,8 @@ PHYSICAL_HEALTH = "ch4"
 HEIGHT, WEIGHT = "ch16", "ch17"  # For BMI
 DEPRESSION_MEDICATION = "ch178"
 
-# %% Converting unhappiness categories to numbers
-unhappy = select_variable(health_panel, UNHAPPY)
-
-mapper = {
-    "never": 0,
-    "seldom": 1,
-    "sometimes": 3,
-    "often": 10,
-    "mostly": 20,
-    "continuously": 30,
-}
-
-unhappy = unhappy.apply(lambda column: column.map(mapper, na_action="ignore"))
+# %% Dependent variable
+mhi5 = calc_mhi5(health_panel)
 
 # %% Making sports an actual boolean instead of "yes"/"no"
 sports = select_variable(leisure_panel, SPORTS)
@@ -275,7 +265,7 @@ def make_dummies(df: pd.DataFrame) -> pd.DataFrame:
 all_relevant_data = pd.DataFrame(index=background_vars.index).join(
     [
         pd.Series(1, index=background_vars.index, name=Column(CONSTANT)),
-        unhappy,
+        mhi5,
         sports,
         make_dummies(age),
         make_dummies(ethnicity),
@@ -285,13 +275,13 @@ all_relevant_data = pd.DataFrame(index=background_vars.index).join(
         make_dummies(education),
         make_dummies(employment),
         make_dummies(select_variable(health_panel, PHYSICAL_HEALTH)),
-        make_dummies(bmi),
+        bmi,
         previous_depression,
     ]
 )
 
 # Drop rows for which the dependent variable is always NA, as these will never be included in a regression.
-missing_dependent_variable = select_variable(all_relevant_data, UNHAPPY)
+missing_dependent_variable = select_variable(all_relevant_data, MHI5)
 missing_dependent_variable = missing_dependent_variable.isna().sum(axis=1) == missing_dependent_variable.shape[1]
 missing_dependent_variable_index = missing_dependent_variable[missing_dependent_variable].index
 all_relevant_data = all_relevant_data.drop(missing_dependent_variable_index)
@@ -319,13 +309,13 @@ for year in available_years(all_relevant_data):
     all_data_flattened = pd.concat([all_data_flattened, subset])
 
 # Drop missing dependent var
-y_missing = all_data_flattened[Column(UNHAPPY)].isna()
+y_missing = all_data_flattened[Column(MHI5)].isna()
 all_data_flattened = all_data_flattened.drop(y_missing[y_missing].index)
 
 # %% model with single regression
 model_single_regression = (
     ModelDefinitionBuilder()
-    .with_y(VariableDefinition(UNHAPPY))
+    .with_y(VariableDefinition(MHI5))
     .with_x(VariableDefinition(SPORTS))
     .with_w(
         [
@@ -364,7 +354,7 @@ print_results(model)
 # %% Improvement in unhappiness due to sports
 coeff: float = model.inspect().set_index("rval", drop=False).loc[SPORTS, "Estimate"]  # pyright: ignore noqa: PGH003
 
-mean = all_data_flattened[Column(UNHAPPY)].astype(float).describe()["mean"]
+mean = all_data_flattened[Column(MHI5)].astype(float).describe()["mean"]
 
 print(f"Change due to sports: {coeff / mean:.1%} ({coeff:.3f} out of {mean:.3f})")
 
@@ -378,7 +368,7 @@ print(model_single_regression.replace(".", "_"))
 # %% naive model definition
 model_definition = (
     ModelDefinitionBuilder()
-    .with_y(VariableDefinition(UNHAPPY))
+    .with_y(VariableDefinition(MHI5))
     .with_x(VariableDefinition(SPORTS))
     .with_w(
         [
