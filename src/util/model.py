@@ -270,7 +270,10 @@ class ModelDefinitionBuilder:
             rvals = self._remove_excluded_regressors(rvals)
 
             if self._do_missing_check:
-                rvals = self._filter_missing_rvals(y, rvals, available_variables)
+                skip_regression, rvals = self._filter_missing_rvals(y, rvals, available_variables)
+
+                if skip_regression:
+                    continue
 
             if self._do_variance_check:
                 rvals = self._filter_constant_rvals(y, rvals, data)
@@ -304,7 +307,8 @@ class ModelDefinitionBuilder:
 
     def _filter_missing_rvals(
         self, y: Variable, rvals: list[Variable], available_variables: Collection[Column]
-    ) -> list[Variable]:
+    ) -> tuple[bool, list[Variable]]:
+        """Returns (skip_regression: `bool`, filtered_rvals: `list[Variable]`)."""
         # Check for missing variables
         if (missing_info := self._find_missing_variables(rvals, available_variables)) is not None:
             missing_variables, is_dummy = missing_info
@@ -314,6 +318,7 @@ class ModelDefinitionBuilder:
                 logger.warning(f"For {y=}, {missing_variables[0]} was not in the data, skipping regression")
                 # TODO: Is there a better option than ditching the whole regression
                 # because one of the vars is missing?
+                return True, []
 
             logger.warning(
                 f"For {y=}, the dummy levels {missing_variables} were not in the data, excluding from regression"
@@ -323,7 +328,7 @@ class ModelDefinitionBuilder:
             for variable in missing_variables:
                 rvals.remove(variable)
 
-        return rvals
+        return False, rvals
 
     def _filter_constant_rvals(self, y: Variable, rvals: list[Variable], data: pd.DataFrame) -> list[Variable]:
         # Check for variables with zero variance
@@ -483,7 +488,10 @@ class ModelDefinitionBuilder:
         rvals = self._remove_excluded_regressors(rvals)
 
         if self._do_missing_check:
-            rvals = self._filter_missing_rvals(y, rvals, available_variables)
+            skip_regression, rvals = self._filter_missing_rvals(y, rvals, available_variables)
+
+            if skip_regression:
+                return
 
         if self._do_variance_check:
             rvals = self._filter_constant_rvals(y, rvals, data)
