@@ -9,6 +9,9 @@ from .data import Column, assert_column_type_correct, cleanup_dummy, find_non_PD
 logger = logging.getLogger(__name__)
 
 
+TIME = "t"
+
+
 @dataclass(frozen=True)
 class VariableDefinition:
     "A conceptual variable in the model."
@@ -121,7 +124,9 @@ class ModelDefinitionBuilder:
     _x_lag_structure: list[int]
 
     _w: list[VariableDefinition] | None = None
+
     _include_constant: bool = False
+    _include_time_dummies: bool = False
 
     _do_missing_check: bool = True
     _do_variance_check: bool = True
@@ -185,6 +190,10 @@ class ModelDefinitionBuilder:
 
     def with_constant(self) -> Self:
         self._include_constant = True
+        return self
+
+    def with_time_dummies(self) -> Self:
+        self._include_time_dummies = True
         return self
 
     def with_checks(self, *, missing: bool = True, variance: bool = True, PD: bool = True) -> Self:
@@ -266,6 +275,9 @@ class ModelDefinitionBuilder:
 
             w = self._compile_w(wave)
             rvals: list[Variable] = [*y_lags, *x_lags, *w]
+
+            if self._include_time_dummies:
+                rvals = [VariableWithNamedParameter(TIME, wave, f"eta_{wave}"), *rvals]
 
             rvals = self._remove_excluded_regressors(rvals)
 

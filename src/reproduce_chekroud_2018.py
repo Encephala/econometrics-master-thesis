@@ -16,7 +16,7 @@ from util.data import (
     map_columns_to_str,
     calc_mhi5,
 )
-from util.model import ModelDefinitionBuilder, VariableDefinition
+from util.model import ModelDefinitionBuilder, VariableDefinition, TIME
 from util import print_results
 
 
@@ -289,6 +289,16 @@ all_relevant_data = all_relevant_data.drop(missing_dependent_variable_index)
 # Sort columns
 all_relevant_data = all_relevant_data[sorted(all_relevant_data.columns)]
 
+# %% Add time dummies
+time_dummies = [
+    pd.Series(True, index=all_relevant_data.index, name=Column(TIME, year))  # noqa: FBT003
+    for year in available_years(all_relevant_data)
+]
+
+time_dummies = pd.DataFrame(time_dummies).T
+
+all_relevant_data = all_relevant_data.join(time_dummies)
+
 # %% Flatten the data, lumping all years together in one big pile.
 all_data_flattened = pd.DataFrame()
 
@@ -387,6 +397,7 @@ model_definition = (
         ]
         + [VariableDefinition(variable) for variable in [PREVIOUS_DEPRESSION]]
     )
+    .with_time_dummies()
     .build(all_relevant_data)
 )
 
