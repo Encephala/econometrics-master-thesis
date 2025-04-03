@@ -81,9 +81,9 @@ class Regression:
     def build(self) -> str:
         return (
             f"{self.lval.build()}"
-            " ~ "
-            f"{'alpha*1 + ' if self.include_constant is not None and self.include_constant else ''}"
-            f"{' + '.join(rval.build() for rval in self.rvals)}"
+            + " ~ "
+            + ("alpha*1 + " if self.include_constant else "")
+            + (" + ".join(rval.build() for rval in self.rvals))
         )
 
 
@@ -127,7 +127,7 @@ class ModelDefinitionBuilder:
     _do_variance_check: bool = True
     _do_PD_check: bool = True
 
-    # To make covariance PD
+    # For identification
     _excluded_regressors: list[Column]
 
     # Internals

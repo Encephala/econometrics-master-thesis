@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 # %% imports
+import logging
+
 import pandas as pd
 import numpy as np
-
 import semopy
 
 from util.data import (
@@ -19,6 +20,7 @@ from util.data import (
 from util.model import ModelDefinitionBuilder, VariableDefinition
 from util import print_results
 
+logging.getLogger().setLevel(logging.DEBUG)
 
 # %% data loading
 background_vars = load_wide_panel_cached("avars")
@@ -239,8 +241,6 @@ category_map = {
 ethnicity = ethnicity.apply(lambda column: column.cat.rename_categories(category_map))
 
 # %% the big merge
-CONSTANT = "constant"
-
 DUMMY_NA = True
 DROP_FIRST = False
 
@@ -264,7 +264,6 @@ def make_dummies(df: pd.DataFrame) -> pd.DataFrame:
 
 all_relevant_data = pd.DataFrame(index=background_vars.index).join(
     [
-        pd.Series(1, index=background_vars.index, name=Column(CONSTANT)),
         mhi5,
         sports,
         make_dummies(age),
@@ -359,7 +358,6 @@ mean = all_data_flattened[Column(MHI5)].astype(float).describe()["mean"]
 print(f"Change due to sports: {coeff / mean:.1%} ({coeff:.3f} out of {mean:.3f})")
 
 # %% save for lavaan in R.
-# Relevant for now, because obj="FIML" gives invalid value warnings in semopy
 all_data_flattened.astype("float64").to_stata("/tmp/data.dta")  # noqa: S108
 
 print("Model definition in stata/lavaan form:")
