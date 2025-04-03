@@ -275,7 +275,7 @@ all_relevant_data = pd.DataFrame(index=background_vars.index).join(
         make_dummies(education),
         make_dummies(employment),
         make_dummies(select_variable(health_panel, PHYSICAL_HEALTH)),
-        bmi,
+        make_dummies(bmi),
         previous_depression,
     ]
 )
