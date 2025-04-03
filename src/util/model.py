@@ -17,6 +17,10 @@ class VariableDefinition:
     is_ordinal: bool = field(default=False, kw_only=True)
     dummy_levels: Collection[str] | None = field(default=None, kw_only=True)
 
+    def __post_init__(self):
+        if self.dummy_levels is not None:
+            assert len(self.dummy_levels) != 0, "If VariableDefinition.dummy_levels is not None, it must not be empty."
+
 
 @dataclass(frozen=True)
 class Variable:
