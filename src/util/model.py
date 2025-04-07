@@ -82,7 +82,7 @@ class Regression:
         return (
             f"{self.lval.build()}"
             + " ~ "
-            + ("alpha*1 + " if self.include_constant else "")
+            + ("alpha*1 + " if self.include_constant else "")  # Lavaan style constant, semopy doesn't accept this
             + (" + ".join(rval.build() for rval in self.rvals))
         )
 

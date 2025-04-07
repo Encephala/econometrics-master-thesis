@@ -240,11 +240,8 @@ category_map = {
 
 ethnicity = ethnicity.apply(lambda column: column.cat.rename_categories(category_map))
 
+
 # %% the big merge
-DUMMY_NA = True
-DROP_FIRST = False
-
-
 def make_dummies(df: pd.DataFrame) -> pd.DataFrame:
     # NOTE: Drop first for identification or use NA level for identification
     result = pd.get_dummies(df, prefix_sep=".", dummy_na=True, drop_first=True)
