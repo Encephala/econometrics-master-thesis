@@ -282,7 +282,8 @@ class ModelDefinitionBuilder:
 
             self._define_ordinals([y, *y_lags], [*x_lags], w)
 
-    def _compile_w(self, wave_y: int | None) -> list[VariableWithNamedParameter]:
+    def _compile_w(self, wave_y: int | None) -> list[Variable]:
+        # if wave_y is None, it's a cross-sectional regression, else panel regression.
         if self._w is None:
             return []
 
@@ -290,15 +291,21 @@ class ModelDefinitionBuilder:
 
         for variable in self._w:
             if variable.dummy_levels is None:
-                result.append(VariableWithNamedParameter(variable.name, wave_y, f"delta0_{variable.name}"))
+                if wave_y is not None:  # panel regression
+                    result.append(VariableWithNamedParameter(variable.name, wave_y, f"delta0_{variable.name}"))
+                else:
+                    result.append(Variable(variable.name, None))
                 continue
 
-            result.extend(
-                [
-                    VariableWithNamedParameter(variable.name, wave_y, f"delta0_{variable.name}", dummy_level=level)
-                    for level in variable.dummy_levels
-                ]
-            )
+            if wave_y is not None:
+                result.extend(
+                    [
+                        VariableWithNamedParameter(variable.name, wave_y, f"delta0_{variable.name}", dummy_level=level)
+                        for level in variable.dummy_levels
+                    ]
+                )
+            else:
+                result.extend([Variable(variable.name, None, dummy_level=level) for level in variable.dummy_levels])
 
         return result
 
