@@ -20,40 +20,33 @@ library(haven)
 
 ```{r Load data}
 all_relevant_data <- read_dta("/tmp/data.dta")
-head(data)
+all_relevant_data <- column_to_rownames(all_relevant_data, var = "index")
+head(all_relevant_data)
 ```
 
 ```{r}
-# Define a more complex SEM model with both measurement and structural parts
 sem_model <- "
-
-# Regressions (structural part)
-ch14 ~ cs104 + delta0_leeftijd_60_to_64_years*leeftijd_60_to_64_years + delta0_leeftijd_over_80*leeftijd_over_80 + delta0_leeftijd_25_to_29_years*leeftijd_25_to_29_years + delta0_leeftijd_70_to_74_years*leeftijd_70_to_74_years + delta0_leeftijd_18_to_24_years*leeftijd_18_to_24_years + delta0_leeftijd_65_to_69_years*leeftijd_65_to_69_years + delta0_leeftijd_45_to_49_years*leeftijd_45_to_49_years + delta0_leeftijd_55_to_59_years*leeftijd_55_to_59_years + delta0_leeftijd_35_to_39_years*leeftijd_35_to_39_years + delta0_leeftijd_40_to_44_years*leeftijd_40_to_44_years + delta0_leeftijd_75_to_79_years*leeftijd_75_to_79_years + delta0_leeftijd_30_to_34_years*leeftijd_30_to_34_years + delta0_leeftijd_50_to_54_years*leeftijd_50_to_54_years + delta0_herkomstgroep_first_w*herkomstgroep_first_w + delta0_herkomstgroep_first_nonw*herkomstgroep_first_nonw + delta0_herkomstgroep_second_nonw*herkomstgroep_second_nonw + delta0_herkomstgroep_nan*herkomstgroep_nan + delta0_herkomstgroep_second_w*herkomstgroep_second_w + delta0_geslacht_other*geslacht_other + delta0_geslacht_nan*geslacht_nan + delta0_geslacht_male*geslacht_male + delta0_burgstat_widow_or_widower*burgstat_widow_or_widower + delta0_burgstat_never_been_married*burgstat_never_been_married + delta0_burgstat_separated*burgstat_separated + delta0_burgstat_nan*burgstat_nan + delta0_burgstat_married*burgstat_married + delta0_nettohh_f_over_50000*nettohh_f_over_50000 + delta0_nettohh_f_35_to_50000*nettohh_f_35_to_50000 + delta0_nettohh_f_15_to_25000*nettohh_f_15_to_25000 + delta0_nettohh_f_nan*nettohh_f_nan + delta0_nettohh_f_25_to_35000*nettohh_f_25_to_35000 + delta0_oplcat_vmbo*oplcat_vmbo + delta0_oplcat_wo*oplcat_wo + delta0_oplcat_hbo*oplcat_hbo + delta0_oplcat_nan*oplcat_nan + delta0_oplcat_mbo*oplcat_mbo + delta0_oplcat_primary_school*oplcat_primary_school + delta0_employment_out_of_work*employment_out_of_work + delta0_employment_self_employed*employment_self_employed + delta0_employment_unable_to_work*employment_unable_to_work + delta0_employment_student*employment_student + delta0_employment_retired*employment_retired + delta0_employment_homemaker*employment_homemaker + delta0_employment_nan*employment_nan + delta0_ch4_good*ch4_good + delta0_ch4_moderate*ch4_moderate + delta0_ch4_poor*ch4_poor + delta0_ch4_very_good*ch4_very_good + delta0_bmi_obese*bmi_obese + delta0_bmi_overweight*bmi_overweight + delta0_bmi_normal_weight*bmi_normal_weight + delta0_bmi_nan*bmi_nan + delta0_prev_depr*prev_depr
-
-# Measurement part
-
-# Additional covariances
-
-# Operations/constraints
-
+mhi ~ cs104 + leeftijd_over_80 + leeftijd_50_to_54_years + leeftijd_18_to_24_years + leeftijd_60_to_64_years + leeftijd_35_to_39_years + leeftijd_55_to_59_years + leeftijd_70_to_74_years + leeftijd_65_to_69_years + leeftijd_25_to_29_years + leeftijd_40_to_44_years + leeftijd_45_to_49_years + leeftijd_75_to_79_years + leeftijd_30_to_34_years + herkomstgroep_second_nonw + herkomstgroep_second_w + herkomstgroep_nan + herkomstgroep_first_nonw + herkomstgroep_first_w + geslacht_other + geslacht_nan + geslacht_male + burgstat_separated + burgstat_married + burgstat_widow_or_widower + burgstat_never_been_married + nettohh_f_25_to_35000 + nettohh_f_35_to_50000 + nettohh_f_15_to_25000 + nettohh_f_nan + nettohh_f_over_50000 + oplcat_wo + oplcat_hbo + oplcat_primary_school + oplcat_vmbo + oplcat_mbo + oplcat_nan + employment_self_employed + employment_retired + employment_homemaker + employment_out_of_work + employment_unable_to_work + employment_student + ch4_good + ch4_poor + ch4_moderate + ch4_very_good + bmi_overweight + bmi_normal_weight + bmi_nan + bmi_obese + prev_depr
 "
 ```
 
 ```{r}
-# Fit the SEM model
-sem_fit <- lavaan(sem_model, data = all_relevant_data, ordered = c("ch14"))
+# Specific-to-general getting the model to have PD (implied) cov matrix
+sem_model <- "mhi ~ 1  + cs104"
+```
 
-# View summary of the model
+```{r}
+sem_fit <- lavaan(sem_model, data = all_relevant_data, missing = "fiml.x")
+
+
 summary(sem_fit, standardized = TRUE, fit.measures = TRUE)
+```
 
+```{r}
 # Visualize the SEM model
 semPaths(sem_fit, what = "std", edge.label.cex = .8, layout = "tree")
 ```
 
 ```{r}
-# Check model fit indices
 fitMeasures(sem_fit, c("chisq", "df", "pvalue", "cfi", "tli", "rmsea", "srmr", "aic", "bic"))
-
-# Modification indices - suggestions for model improvement
-modificationIndices(sem_fit, sort = TRUE, minimum.value = 10)
 ```
