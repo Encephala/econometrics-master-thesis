@@ -14,15 +14,15 @@ class Column:
     dummy_level: str | None = None
 
     def __str__(self) -> str:
-        match (self.wave, self.dummy_level):
-            case (None, None):
-                return self.name
-            case (wave, None):
-                return f"{self.name}_{self.wave}"
-            case (None, dummy_level):
-                return f"{self.name}.{dummy_level}"
-            case (wave, dummy_level):
-                return f"{self.name}_{wave}.{dummy_level}"
+        result = self.name
+
+        if self.wave is not None:
+            result += f"_{self.wave}"
+
+        if self.dummy_level is not None:
+            result += f".{self.dummy_level}"
+
+        return result
 
     @staticmethod
     def from_liss_variable_name(variable_name: str) -> "Column":

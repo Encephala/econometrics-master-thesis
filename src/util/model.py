@@ -42,15 +42,15 @@ class Variable:
         return result
 
     def _equals(self, other: "Column") -> bool:
-        match (self.wave, self.dummy_level):
-            case (None, None):
-                return self.name == other.name
-            case (wave, None):
-                return self.name == other.name and wave == other.wave
-            case (None, dummy_level):
-                return self.name == other.name and dummy_level == other.dummy_level
-            case (wave, dummy_level):
-                return self.name == other.name and wave == other.wave and dummy_level == other.dummy_level
+        result = self.name == other.name
+
+        if self.wave is not None:
+            result = result and self.wave == other.wave
+
+        if self.dummy_level is not None:
+            result = result and self.dummy_level == other.dummy_level
+
+        return result
 
     def is_in(self, available_variables: Collection["Column"]) -> bool:
         return any(self._equals(variable) for variable in available_variables)
