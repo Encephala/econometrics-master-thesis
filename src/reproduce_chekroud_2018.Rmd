@@ -20,7 +20,6 @@ library(haven)
 
 ```{r Load data}
 all_relevant_data <- read_dta("/tmp/data.dta")
-all_relevant_data <- column_to_rownames(all_relevant_data, var = "index")
 head(all_relevant_data)
 ```
 
