@@ -48,19 +48,21 @@ def available_years(df: pd.DataFrame) -> set[int]:
     return {column.wave for column in columns if column.wave is not None}
 
 
-def available_dummy_levels(df: pd.DataFrame, variable: str) -> set[str]:
+def available_dummy_levels(df: pd.DataFrame, variable: str) -> list[str]:
     assert_column_type_correct(df)
 
     subset = select_variable(df, variable)
 
     columns: list[Column] = subset.columns  # pyright: ignore[reportAssignmentType]
 
-    result = {column.dummy_level for column in columns if column.dummy_level is not None}
+    result = [column.dummy_level for column in columns if column.dummy_level is not None]
+
+    assert len(set(result)) == len(result), f"Dummy levels {result} are not unique"
 
     if len(result) == 0:
         logger.warning(f"No dummy levels found for {variable}")
 
-    return result
+    return sorted(result)
 
 
 def cleanup_dummy(name: str) -> str:
