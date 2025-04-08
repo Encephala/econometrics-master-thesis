@@ -57,18 +57,18 @@ age = select_variable(background_vars, AGE)
 
 age_labels = [
     "under 18",
-    "18 to 24 years",
-    "25 to 29 years",
-    "30 to 34 years",
-    "35 to 39 years",
-    "40 to 44 years",
-    "45 to 49 years",
-    "50 to 54 years",
-    "55 to 59 years",
-    "60 to 64 years",
-    "65 to 69 years",
-    "70 to 74 years",
-    "75 to 79 years",
+    "18 to 24",
+    "25 to 29",
+    "30 to 34",
+    "35 to 39",
+    "40 to 44",
+    "45 to 49",
+    "50 to 54",
+    "55 to 59",
+    "60 to 64",
+    "65 to 69",
+    "70 to 74",
+    "75 to 79",
     "over 80",
 ]
 
@@ -87,17 +87,14 @@ for column in age:
 income = select_variable(background_vars, INCOME)
 
 income_labels = [
-    "under 15000",
-    "15 to 25000",
-    "25 to 35000",
-    "35 to 50000",
-    "over 50000",
+    "under 15k",
+    "over 15k",
 ]
 
 for column in income:
     new_column = pd.cut(
         income[column],
-        bins=[-np.inf, 15000, 25000, 35000, 50000, np.inf],
+        bins=[-np.inf, 15000, np.inf],
         labels=income_labels,
     )
 
@@ -320,17 +317,26 @@ model_single_regression = (
                 AGE,
                 ETHNICITY,
                 GENDER,
+                BMI,
                 MARITAL_STATUS,
                 INCOME,
                 EDUCATION_LEVEL,
                 EMPLOYMENT,
                 PHYSICAL_HEALTH,
-                BMI,
             ]
         ]
         + [VariableDefinition(variable) for variable in [PREVIOUS_DEPRESSION]]
     )
-    .with_excluded_regressors([Column(AGE, None, dummy_level="nan")])
+    .with_excluded_regressors(
+        [
+            # The following are removed for numerical stability:
+            Column(AGE, dummy_level="nan"),  # Only 0.04% True
+            Column(GENDER, dummy_level="nan"),  # Exactly equal to AGE nan
+            Column(GENDER, dummy_level="other"),  # Only 0.02% True
+            Column(MARITAL_STATUS, dummy_level="nan"),  # Only 0.03% True
+            Column(EMPLOYMENT, dummy_level="nan"),  # Only 0.04% True
+        ]
+    )
     .build_nonpanel(all_data_flattened)
 )
 
