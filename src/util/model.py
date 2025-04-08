@@ -1,4 +1,4 @@
-from typing import Self, Tuple, Collection
+from typing import Self, Tuple, Sequence
 from dataclasses import dataclass, field
 import logging
 
@@ -15,7 +15,7 @@ class VariableDefinition:
 
     name: str
     is_ordinal: bool = field(default=False, kw_only=True)
-    dummy_levels: Collection[str] | None = field(default=None, kw_only=True)
+    dummy_levels: Sequence[str] | None = field(default=None, kw_only=True)
 
     def __post_init__(self):
         if self.dummy_levels is not None:
@@ -52,7 +52,7 @@ class Variable:
 
         return result
 
-    def is_in(self, available_variables: Collection["Column"]) -> bool:
+    def is_in(self, available_variables: Sequence["Column"]) -> bool:
         return any(self._equals(variable) for variable in available_variables)
 
     def has_zero_variance_in(self, data: pd.DataFrame) -> bool:
@@ -75,7 +75,7 @@ class VariableWithNamedParameter(Variable):
 @dataclass(frozen=True)
 class Regression:
     lval: Variable
-    rvals: Collection[Variable]
+    rvals: Sequence[Variable]
     include_constant: bool
 
     def build(self) -> str:
@@ -90,7 +90,7 @@ class Regression:
 @dataclass(frozen=True)
 class Measurement:
     lval: Variable
-    rvals: Collection[Variable]
+    rvals: Sequence[Variable]
 
     def build(self) -> str:
         return f"{self.lval.build()} =~ {' + '.join(rval.build() for rval in self.rvals)}"
@@ -99,7 +99,7 @@ class Measurement:
 @dataclass(frozen=True)
 class Covariance:
     lval: Variable
-    rvals: Collection[Variable]
+    rvals: Sequence[Variable]
 
     def build(self) -> str:
         return f"{self.lval.build()} ~~ {' + '.join(rval.build() for rval in self.rvals)}"
@@ -197,14 +197,14 @@ class ModelDefinitionBuilder:
         self._excluded_regressors = excluded_regressors
         return self
 
-    def build(self, data: pd.DataFrame) -> str:
+    def build(self, data: pd.DataFrame, *, drop_first_dummy: bool = True) -> str:
         assert_column_type_correct(data)
 
         available_variables: list[Column] = list(data.columns)  # pyright: ignore[reportAssignmentType]
 
         waves = self._available_dependent_variables(available_variables)
 
-        self._build_regressions(waves, available_variables, data)
+        self._build_regressions(waves, available_variables, data, drop_first_dummy)
 
         self._fix_y_variance()
 
@@ -249,8 +249,9 @@ class ModelDefinitionBuilder:
     def _build_regressions(
         self,
         dependent_vars: list[Column],
-        available_variables: Collection[Column],
+        available_variables: Sequence[Column],
         data: pd.DataFrame,
+        drop_first_dummy: bool,  # noqa: FBT001
     ):
         for variable in dependent_vars:
             y = Variable(variable.name, variable.wave)
@@ -264,7 +265,7 @@ class ModelDefinitionBuilder:
                 VariableWithNamedParameter(self._x.name, wave - lag, f"beta{lag}") for lag in self._x_lag_structure
             ]
 
-            w = self._compile_w(wave)
+            w = self._compile_w(wave, drop_first_dummy)
             rvals: list[Variable] = [*y_lags, *x_lags, *w]
 
             rvals = self._remove_excluded_regressors(rvals)
@@ -282,7 +283,7 @@ class ModelDefinitionBuilder:
 
             self._define_ordinals([y, *y_lags], [*x_lags], w)
 
-    def _compile_w(self, wave_y: int | None) -> list[Variable]:
+    def _compile_w(self, wave_y: int | None, drop_first_dummy: bool) -> list[Variable]:  # noqa: FBT001
         # if wave_y is None, it's a cross-sectional regression, else panel regression.
         if self._w is None:
             return []
@@ -297,15 +298,21 @@ class ModelDefinitionBuilder:
                     result.append(Variable(variable.name, None))
                 continue
 
+            dummy_levels = variable.dummy_levels
+
+            if drop_first_dummy:
+                logger.debug(f"Dropping first dummy level {dummy_levels[0]} for {variable.name}")
+                dummy_levels = dummy_levels[1:]
+
             if wave_y is not None:
                 result.extend(
                     [
                         VariableWithNamedParameter(variable.name, wave_y, f"delta0_{variable.name}", dummy_level=level)
-                        for level in variable.dummy_levels
+                        for level in dummy_levels
                     ]
                 )
             else:
-                result.extend([Variable(variable.name, None, dummy_level=level) for level in variable.dummy_levels])
+                result.extend([Variable(variable.name, None, dummy_level=level) for level in dummy_levels])
 
         return result
 
@@ -322,7 +329,7 @@ class ModelDefinitionBuilder:
         return result
 
     def _filter_missing_rvals(
-        self, y: Variable, rvals: list[Variable], available_variables: Collection[Column]
+        self, y: Variable, rvals: list[Variable], available_variables: Sequence[Column]
     ) -> tuple[bool, list[Variable]]:
         """Returns (skip_regression: `bool`, filtered_rvals: `list[Variable]`)."""
         # Check for missing variables
@@ -360,8 +367,8 @@ class ModelDefinitionBuilder:
 
     def _find_missing_variables(
         self,
-        variables: Collection[Variable],
-        available_variables: Collection[Column],  # pyright: ignore[reportInvalidTypeArguments]
+        variables: Sequence[Variable],
+        available_variables: Sequence[Column],  # pyright: ignore[reportInvalidTypeArguments]
     ) -> Tuple[list[Variable], bool] | None:
         """Checks if all the regressors are in the data.
 
@@ -386,7 +393,7 @@ class ModelDefinitionBuilder:
 
     def _find_zero_variance_variables(
         self,
-        variables: Collection[Variable],
+        variables: Sequence[Variable],
         data: pd.DataFrame,
     ) -> list[Variable] | None:
         """Checks if all the regressors have finite variance.
@@ -400,7 +407,7 @@ class ModelDefinitionBuilder:
 
         return None
 
-    def _define_ordinals(self, y: Collection[Variable], x: Collection[Variable], w: Collection[Variable]):
+    def _define_ordinals(self, y: Sequence[Variable], x: Sequence[Variable], w: Sequence[Variable]):
         if self._y.is_ordinal:
             self._ordinals.update(y)
 
@@ -471,19 +478,24 @@ class ModelDefinitionBuilder:
 {self._ordinals.build()}
 """
 
-    def build_nonpanel(self, data: pd.DataFrame) -> str:
+    def build_nonpanel(self, data: pd.DataFrame, *, drop_first_dummy: bool = True) -> str:
         assert_column_type_correct(data)
 
         available_variables: list[Column] = list(data.columns)  # pyright: ignore[reportAssignmentType]
 
-        self._build_nonpanel_regression(data, available_variables)
+        self._build_nonpanel_regression(data, available_variables, drop_first_dummy)
 
         if self._do_PD_check:
             self._check_covariance_matrix_PD(data)
 
         return self._make_result()
 
-    def _build_nonpanel_regression(self, data: pd.DataFrame, available_variables: list[Column]):
+    def _build_nonpanel_regression(
+        self,
+        data: pd.DataFrame,
+        available_variables: list[Column],
+        drop_first_dummy: bool,  # noqa: FBT001
+    ):
         # Majorly copy-pasta'd from self._build_regressions
 
         y = Variable(self._y.name, None)
@@ -497,7 +509,7 @@ class ModelDefinitionBuilder:
         )
 
         # Apparently [*<values>] typecasts to parent type?
-        w = self._compile_w(None)
+        w = self._compile_w(None, drop_first_dummy)
         rvals: list[Variable] = [x, *w]
 
         rvals = self._remove_excluded_regressors(rvals)
