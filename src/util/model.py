@@ -380,11 +380,10 @@ class ModelDefinitionBuilder:
         variables: Collection[Variable],
         data: pd.DataFrame,
     ) -> list[Variable] | None:
-        """Checks if all the regressors are in the data.
+        """Checks if all the regressors have finite variance.
 
-        If a variable is missing, returns ([variable], False).
-        If just a dummy level of a variable is missing, returns ([levels], True)
-        Returns `None` if all variables are found."""
+        If a variable has zero variance, returns [variable].
+        Returns `None` if all variables have finite variance."""
         zero_variance = [variable for variable in variables if variable.has_zero_variance_in(data)]
 
         if len(zero_variance) != 0:
