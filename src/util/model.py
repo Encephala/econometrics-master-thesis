@@ -310,7 +310,16 @@ class ModelDefinitionBuilder:
         return result
 
     def _remove_excluded_regressors(self, rvals: list[Variable]) -> list[Variable]:
-        return [rval for rval in rvals if not rval.is_in(self._excluded_regressors)]
+        result = []
+
+        for rval in rvals:
+            if not rval.is_in(self._excluded_regressors):
+                result.append(rval)
+
+            else:
+                logger.debug(f"Removing {rval} from regressors as requested")
+
+        return result
 
     def _filter_missing_rvals(
         self, y: Variable, rvals: list[Variable], available_variables: Collection[Column]
