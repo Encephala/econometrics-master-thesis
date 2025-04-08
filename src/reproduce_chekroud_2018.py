@@ -13,12 +13,11 @@ from util.data import (
     select_wave,
     available_years,
     available_dummy_levels,
-    cleanup_dummy,
     map_columns_to_str,
     calc_mhi5,
 )
 from util.model import ModelDefinitionBuilder, VariableDefinition
-from util import print_results
+from util import make_dummies, print_results
 
 logging.getLogger().setLevel(logging.DEBUG)
 
@@ -239,23 +238,6 @@ ethnicity = ethnicity.apply(lambda column: column.cat.rename_categories(category
 
 
 # %% the big merge
-def make_dummies(df: pd.DataFrame) -> pd.DataFrame:
-    # NOTE: Drop first for identification or use NA level for identification
-    result = pd.get_dummies(df, prefix_sep=".", dummy_na=True, drop_first=True)
-
-    new_columns: list[Column] = []
-    for column in result.columns:
-        name = column[: column.rfind("_")]
-        wave = int(column[column.rfind("_") + 1 : column.find(".")])
-        dummy_level = column[column.find(".") + 1 :]
-
-        new_columns.append(Column(name, wave, cleanup_dummy(dummy_level)))
-
-    result.columns = new_columns
-
-    return result
-
-
 all_relevant_data = pd.DataFrame(index=background_vars.index).join(
     [
         mhi5,
