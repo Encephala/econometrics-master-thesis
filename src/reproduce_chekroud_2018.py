@@ -261,9 +261,6 @@ missing_dependent_variable = missing_dependent_variable.isna().sum(axis=1) == mi
 missing_dependent_variable_index = missing_dependent_variable[missing_dependent_variable].index
 all_relevant_data = all_relevant_data.drop(missing_dependent_variable_index)
 
-# Sort columns
-all_relevant_data = all_relevant_data[sorted(all_relevant_data.columns)]
-
 # %% Flatten the data, lumping all years together in one big pile.
 all_data_flattened = pd.DataFrame()
 

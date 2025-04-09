@@ -62,7 +62,7 @@ def available_dummy_levels(df: pd.DataFrame, variable: str) -> list[str]:
     if len(result) == 0:
         logger.warning(f"No dummy levels found for {variable}")
 
-    return sorted(result)
+    return result
 
 
 def cleanup_dummy(name: str) -> str:
