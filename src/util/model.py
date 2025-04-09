@@ -301,7 +301,7 @@ class ModelDefinitionBuilder:
             dummy_levels = variable.dummy_levels
 
             if drop_first_dummy:
-                logger.debug(f"Dropping first dummy level {dummy_levels[0]} for {variable.name}")
+                logger.debug(f"Dropping first dummy level '{dummy_levels[0]}' for {variable.name}")
                 dummy_levels = dummy_levels[1:]
 
             if wave_y is not None:
