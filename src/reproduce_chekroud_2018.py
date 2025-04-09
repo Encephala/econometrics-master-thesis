@@ -16,7 +16,7 @@ from util.data import (
     map_columns_to_str,
     calc_mhi5,
 )
-from util.model import ModelDefinitionBuilder, VariableDefinition
+from util.model import PanelModelDefinitionBuilder, CSModelDefinitionBuilder, VariableDefinition
 from util import make_dummies, print_results
 
 logging.getLogger().setLevel(logging.DEBUG)
@@ -288,7 +288,7 @@ all_data_flattened = all_data_flattened.drop(y_missing_flat[y_missing_flat].inde
 
 # %% model with single regression
 model_single_regression = (
-    ModelDefinitionBuilder()
+    CSModelDefinitionBuilder()
     .with_y(VariableDefinition(MHI5))
     .with_x(VariableDefinition(SPORTS))
     .with_w(
@@ -308,7 +308,7 @@ model_single_regression = (
         ]
         + [VariableDefinition(variable) for variable in [PREVIOUS_DEPRESSION]]
     )
-    .build_nonpanel(all_data_flattened)
+    .build(all_data_flattened)
 )
 
 
@@ -339,7 +339,7 @@ print(model_single_regression.replace(".", "_"))
 
 # %% naive model definition
 model_definition = (
-    ModelDefinitionBuilder()
+    PanelModelDefinitionBuilder()
     .with_y(VariableDefinition(MHI5))
     .with_x(VariableDefinition(SPORTS))
     .with_w(

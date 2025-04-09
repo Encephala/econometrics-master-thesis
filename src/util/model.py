@@ -1,5 +1,6 @@
 from typing import Self, Tuple, Sequence
 from dataclasses import dataclass, field
+from abc import ABC, abstractmethod
 import logging
 
 import pandas as pd
@@ -41,7 +42,7 @@ class Variable:
 
         return result
 
-    def _equals(self, other: "Column") -> bool:
+    def equals(self, other: "Column") -> bool:
         result = self.name == other.name
 
         if self.wave is not None:
@@ -53,7 +54,7 @@ class Variable:
         return result
 
     def is_in(self, available_variables: Sequence["Column"]) -> bool:
-        return any(self._equals(variable) for variable in available_variables)
+        return any(self.equals(variable) for variable in available_variables)
 
     def has_zero_variance_in(self, data: pd.DataFrame) -> bool:
         return data[Column(self.name, self.wave, self.dummy_level)].var() == 0
@@ -113,7 +114,7 @@ class OrdinalVariableSet(set[Variable]):
         return f"DEFINE(ordinal) {' '.join(sorted(variable.build() for variable in self))}"
 
 
-class ModelDefinitionBuilder:
+class ModelDefinitionBuilder(ABC):
     _y: VariableDefinition
     _y_lag_structure: list[int]
 
@@ -197,6 +198,146 @@ class ModelDefinitionBuilder:
         self._excluded_regressors = excluded_regressors
         return self
 
+    @abstractmethod
+    def build(self, data: pd.DataFrame, *, drop_first_dummy: bool = True) -> str: ...
+
+    def _filter_excluded_regressors(self, rvals: list[Variable]) -> list[Variable]:
+        result = []
+
+        for rval in rvals:
+            if not rval.is_in(self._excluded_regressors):
+                result.append(rval)
+
+            else:
+                logger.debug(f"Removing {rval} from regressors as requested")
+
+        return result
+
+    def _filter_missing_rvals(
+        self, y: Variable, rvals: list[Variable], available_variables: Sequence[Column]
+    ) -> tuple[bool, list[Variable]]:
+        """Returns (skip_regression: `bool`, filtered_rvals: `list[Variable]`)."""
+        # Check for missing variables
+        if (missing_info := self._find_missing_variables(rvals, available_variables)) is not None:
+            missing_variables, is_dummy = missing_info
+
+            if not is_dummy:
+                # There's only one Variable in missing_variables if it's not a dummy
+                logger.warning(f"For {y=}, {missing_variables[0]} was not in the data, skipping regression")
+                # TODO: Is there a better option than ditching the whole regression
+                # because one of the vars is missing?
+                return True, []
+
+            logger.warning(
+                f"For {y=}, the dummy levels {missing_variables} were not in the data, excluding from regression"
+            )
+
+            # Exclude the dummy level from the regression, as it isn't in the data.
+            for variable in missing_variables:
+                rvals.remove(variable)
+
+        return False, rvals
+
+    def _find_missing_variables(
+        self,
+        variables: Sequence[Variable],
+        available_variables: Sequence[Column],  # pyright: ignore[reportInvalidTypeArguments]
+    ) -> Tuple[list[Variable], bool] | None:
+        """Checks if all the regressors are in the data.
+
+        If a variable is missing, returns ([variable], False).
+        If just a dummy level of a variable is missing, returns ([levels], True)
+        Returns `None` if all variables are found."""
+        missing_dummies = []
+
+        for variable in variables:
+            if not variable.is_in(available_variables):
+                if variable.dummy_level is None:
+                    return [variable], False
+
+                missing_dummies.append(variable)
+
+        # TODO: If all dummy levels for a variable are missing, this is a missing variable altogether
+        # and should return False to raise an error.
+        if len(missing_dummies) != 0:
+            return missing_dummies, True
+
+        return None
+
+    def _filter_constant_rvals(self, y: Variable, rvals: list[Variable], data: pd.DataFrame) -> list[Variable]:
+        # Check for variables with zero variance
+        if (zero_variance_variables := self._find_zero_variance_variables(rvals, data)) is not None:
+            logger.warning(
+                f"For {y=}, the variables {zero_variance_variables} had zero variance, excluding from regression"
+            )
+
+            for variable in zero_variance_variables:
+                rvals.remove(variable)
+
+        return rvals
+
+    def _find_zero_variance_variables(
+        self,
+        variables: Sequence[Variable],
+        data: pd.DataFrame,
+    ) -> list[Variable] | None:
+        """Checks if all the regressors have finite variance.
+
+        If a variable has zero variance, returns [variable].
+        Returns `None` if all variables have finite variance."""
+        zero_variance = [variable for variable in variables if variable.has_zero_variance_in(data)]
+
+        if len(zero_variance) != 0:
+            return zero_variance
+
+        return None
+
+    def _define_ordinals(self, y: Sequence[Variable], x: Sequence[Variable], w: Sequence[Variable]):
+        if self._y.is_ordinal:
+            self._ordinals.update(y)
+
+        if self._x.is_ordinal:
+            self._ordinals.update(x)
+
+        ordinal_w = [] if self._w is None else [definition for definition in self._w if definition.is_ordinal]
+
+        for definition in ordinal_w:
+            variables = [variable for variable in w if variable.name == definition.name]
+            self._ordinals.update(variables)
+
+    def _all_regressors(self) -> list[Variable]:
+        all_regressors: list[Variable] = []
+
+        for regression in self._regressions:
+            all_regressors.extend(rval for rval in regression.rvals if rval not in all_regressors)
+
+        return all_regressors
+
+    def _check_covariance_matrix_PD(self, data: pd.DataFrame):
+        all_regressors = [
+            Column(variable.name, variable.wave, variable.dummy_level) for variable in self._all_regressors()
+        ]
+
+        subset = data[all_regressors]
+
+        suspicious_columns = find_non_PD_suspicious_columns(subset)
+
+        if len(suspicious_columns) > 0:
+            logger.warning(f"Data covariance matrix is not PD, culprits seem to be {suspicious_columns}")
+
+    def _make_result(self) -> str:
+        return f"""# Regressions (structural part)
+{"\n".join([*map(Regression.build, self._regressions), ""])}
+# Measurement part
+{"\n".join([*map(Measurement.build, self._measurements), ""])}
+# Additional covariances
+{"\n".join([*map(Covariance.build, self._covariances), ""])}
+# Operations/constraints
+{self._ordinals.build()}
+"""
+
+
+class PanelModelDefinitionBuilder(ModelDefinitionBuilder):
     def build(self, data: pd.DataFrame, *, drop_first_dummy: bool = True) -> str:
         assert_column_type_correct(data)
 
@@ -268,7 +409,7 @@ class ModelDefinitionBuilder:
             w = self._compile_w(wave, drop_first_dummy)
             rvals: list[Variable] = [*y_lags, *x_lags, *w]
 
-            rvals = self._remove_excluded_regressors(rvals)
+            rvals = self._filter_excluded_regressors(rvals)
 
             if self._do_missing_check:
                 skip_regression, rvals = self._filter_missing_rvals(y, rvals, available_variables)
@@ -283,7 +424,7 @@ class ModelDefinitionBuilder:
 
             self._define_ordinals([y, *y_lags], [*x_lags], w)
 
-    def _compile_w(self, wave_y: int | None, drop_first_dummy: bool) -> list[Variable]:  # noqa: FBT001
+    def _compile_w(self, wave_y: int, drop_first_dummy: bool) -> list[Variable]:  # noqa: FBT001
         # if wave_y is None, it's a cross-sectional regression, else panel regression.
         if self._w is None:
             return []
@@ -292,10 +433,7 @@ class ModelDefinitionBuilder:
 
         for variable in self._w:
             if variable.dummy_levels is None:
-                if wave_y is not None:  # panel regression
-                    result.append(VariableWithNamedParameter(variable.name, wave_y, f"delta0_{variable.name}"))
-                else:
-                    result.append(Variable(variable.name, None))
+                result.append(VariableWithNamedParameter(variable.name, wave_y, f"delta0_{variable.name}"))
                 continue
 
             dummy_levels = variable.dummy_levels
@@ -304,121 +442,14 @@ class ModelDefinitionBuilder:
                 logger.debug(f"Dropping first dummy level '{dummy_levels[0]}' for {variable.name}")
                 dummy_levels = dummy_levels[1:]
 
-            if wave_y is not None:
-                result.extend(
-                    [
-                        VariableWithNamedParameter(variable.name, wave_y, f"delta0_{variable.name}", dummy_level=level)
-                        for level in dummy_levels
-                    ]
-                )
-            else:
-                result.extend([Variable(variable.name, None, dummy_level=level) for level in dummy_levels])
-
-        return result
-
-    def _remove_excluded_regressors(self, rvals: list[Variable]) -> list[Variable]:
-        result = []
-
-        for rval in rvals:
-            if not rval.is_in(self._excluded_regressors):
-                result.append(rval)
-
-            else:
-                logger.debug(f"Removing {rval} from regressors as requested")
-
-        return result
-
-    def _filter_missing_rvals(
-        self, y: Variable, rvals: list[Variable], available_variables: Sequence[Column]
-    ) -> tuple[bool, list[Variable]]:
-        """Returns (skip_regression: `bool`, filtered_rvals: `list[Variable]`)."""
-        # Check for missing variables
-        if (missing_info := self._find_missing_variables(rvals, available_variables)) is not None:
-            missing_variables, is_dummy = missing_info
-
-            if not is_dummy:
-                # There's only one Variable in missing_variables if it's not a dummy
-                logger.warning(f"For {y=}, {missing_variables[0]} was not in the data, skipping regression")
-                # TODO: Is there a better option than ditching the whole regression
-                # because one of the vars is missing?
-                return True, []
-
-            logger.warning(
-                f"For {y=}, the dummy levels {missing_variables} were not in the data, excluding from regression"
+            result.extend(
+                [
+                    VariableWithNamedParameter(variable.name, wave_y, f"delta0_{variable.name}", dummy_level=level)
+                    for level in dummy_levels
+                ]
             )
 
-            # Exclude the dummy level from the regression, as it isn't in the data.
-            for variable in missing_variables:
-                rvals.remove(variable)
-
-        return False, rvals
-
-    def _filter_constant_rvals(self, y: Variable, rvals: list[Variable], data: pd.DataFrame) -> list[Variable]:
-        # Check for variables with zero variance
-        if (zero_variance_variables := self._find_zero_variance_variables(rvals, data)) is not None:
-            logger.warning(
-                f"For {y=}, the variables {zero_variance_variables} had zero variance, excluding from regression"
-            )
-
-            for variable in zero_variance_variables:
-                rvals.remove(variable)
-
-        return rvals
-
-    def _find_missing_variables(
-        self,
-        variables: Sequence[Variable],
-        available_variables: Sequence[Column],  # pyright: ignore[reportInvalidTypeArguments]
-    ) -> Tuple[list[Variable], bool] | None:
-        """Checks if all the regressors are in the data.
-
-        If a variable is missing, returns ([variable], False).
-        If just a dummy level of a variable is missing, returns ([levels], True)
-        Returns `None` if all variables are found."""
-        missing_dummies = []
-
-        for variable in variables:
-            if not variable.is_in(available_variables):
-                if variable.dummy_level is None:
-                    return [variable], False
-
-                missing_dummies.append(variable)
-
-        # TODO: If all dummy levels for a variable are missing, this is a missing variable altogether
-        # and should return False to raise an error.
-        if len(missing_dummies) != 0:
-            return missing_dummies, True
-
-        return None
-
-    def _find_zero_variance_variables(
-        self,
-        variables: Sequence[Variable],
-        data: pd.DataFrame,
-    ) -> list[Variable] | None:
-        """Checks if all the regressors have finite variance.
-
-        If a variable has zero variance, returns [variable].
-        Returns `None` if all variables have finite variance."""
-        zero_variance = [variable for variable in variables if variable.has_zero_variance_in(data)]
-
-        if len(zero_variance) != 0:
-            return zero_variance
-
-        return None
-
-    def _define_ordinals(self, y: Sequence[Variable], x: Sequence[Variable], w: Sequence[Variable]):
-        if self._y.is_ordinal:
-            self._ordinals.update(y)
-
-        if self._x.is_ordinal:
-            self._ordinals.update(x)
-
-        ordinal_w = [] if self._w is None else [definition for definition in self._w if definition.is_ordinal]
-
-        for definition in ordinal_w:
-            variables = [variable for variable in w if variable.name == definition.name]
-            self._ordinals.update(variables)
+        return result
 
     def _fix_y_variance(self):
         for regression in self._regressions:
@@ -430,7 +461,6 @@ class ModelDefinitionBuilder:
             )
 
     # Allow for pre-determined variables, i.e. arbitrary correlation between x and previous values of y
-    # NOTE: The very first value of y in the data is considered exogenous and thus it can't be correlated with future x
     def _make_x_predetermined(self):
         # Establish list of used regressors, as defining covariances between y and unused x is meaningless
         # (and causes the model to crash)
@@ -447,38 +477,9 @@ class ModelDefinitionBuilder:
             if len(x_future) != 0:
                 self._covariances.append(Covariance(y_current, x_future))
 
-    def _all_regressors(self) -> list[Variable]:
-        all_regressors: list[Variable] = []
 
-        for regression in self._regressions:
-            all_regressors.extend(rval for rval in regression.rvals if rval not in all_regressors)
-
-        return all_regressors
-
-    def _check_covariance_matrix_PD(self, data: pd.DataFrame):
-        all_regressors = [
-            Column(variable.name, variable.wave, variable.dummy_level) for variable in self._all_regressors()
-        ]
-
-        subset = data[all_regressors]
-
-        suspicious_columns = find_non_PD_suspicious_columns(subset)
-
-        if len(suspicious_columns) > 0:
-            logger.warning(f"Data covariance matrix is not PD, culprits seem to be {suspicious_columns}")
-
-    def _make_result(self) -> str:
-        return f"""# Regressions (structural part)
-{"\n".join([*map(Regression.build, self._regressions), ""])}
-# Measurement part
-{"\n".join([*map(Measurement.build, self._measurements), ""])}
-# Additional covariances
-{"\n".join([*map(Covariance.build, self._covariances), ""])}
-# Operations/constraints
-{self._ordinals.build()}
-"""
-
-    def build_nonpanel(self, data: pd.DataFrame, *, drop_first_dummy: bool = True) -> str:
+class CSModelDefinitionBuilder(ModelDefinitionBuilder):
+    def build(self, data: pd.DataFrame, *, drop_first_dummy: bool = True) -> str:
         assert_column_type_correct(data)
 
         available_variables: list[Column] = list(data.columns)  # pyright: ignore[reportAssignmentType]
@@ -496,7 +497,7 @@ class ModelDefinitionBuilder:
         available_variables: list[Column],
         drop_first_dummy: bool,  # noqa: FBT001
     ):
-        # Majorly copy-pasta'd from self._build_regressions
+        # Majorly copy-pasta'd from PanelModelDefinitionBuilder._build_regressions
 
         y = Variable(self._y.name, None)
         assert self._y_lag_structure == [], (
@@ -509,10 +510,10 @@ class ModelDefinitionBuilder:
         )
 
         # Apparently [*<values>] typecasts to parent type?
-        w = self._compile_w(None, drop_first_dummy)
+        w = self._compile_w(drop_first_dummy)
         rvals: list[Variable] = [x, *w]
 
-        rvals = self._remove_excluded_regressors(rvals)
+        rvals = self._filter_excluded_regressors(rvals)
 
         if self._do_missing_check:
             skip_regression, rvals = self._filter_missing_rvals(y, rvals, available_variables)
@@ -526,3 +527,25 @@ class ModelDefinitionBuilder:
         self._regressions.append(Regression(y, rvals, self._include_constant))
 
         self._define_ordinals([y], [x], w)
+
+    def _compile_w(self, drop_first_dummy: bool) -> list[Variable]:  # noqa: FBT001
+        # if wave_y is None, it's a cross-sectional regression, else panel regression.
+        if self._w is None:
+            return []
+
+        result = []
+
+        for variable in self._w:
+            if variable.dummy_levels is None:
+                result.append(Variable(variable.name, None))
+                continue
+
+            dummy_levels = variable.dummy_levels
+
+            if drop_first_dummy:
+                logger.debug(f"Dropping first dummy level '{dummy_levels[0]}' for {variable.name}")
+                dummy_levels = dummy_levels[1:]
+
+            result.extend([Variable(variable.name, None, dummy_level=level) for level in dummy_levels])
+
+        return result
