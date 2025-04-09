@@ -5,7 +5,8 @@ rng = np.random.default_rng()
 
 def take_lagged_subset(values: np.ndarray, current_t: int, num_lags: int) -> np.ndarray:
     """For correlating one variable to another.
-    Takes a subset of passed values, such that the values at `current_t` and the `num_lags` values before it are returned.
+    Takes a subset of passed values, such that the values at
+    `current_t` and the `num_lags` values before it are returned.
     Does not reorder, i.e. maintains chronological order in the resulting array.
     """
     # Lil sanity check

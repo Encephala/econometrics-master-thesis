@@ -4,7 +4,8 @@ import numpy as np
 
 import semopy
 
-from util.model import ModelDefinitionBuilder, VariableDefinition
+from util.data import Column, map_columns_to_str
+from util.model import PanelModelDefinitionBuilder, VariableDefinition
 
 # %% data generation
 N = 500
@@ -57,16 +58,16 @@ for t in range(3, T):
 # %% model definition
 complete_data = pd.DataFrame()
 for t in range(T):
-    complete_data[f"y_{t}"] = y[:, t]
-    complete_data[f"x_{t}"] = x[:, t]
-    complete_data[f"some_control_{t}"] = some_control[:, t]
+    complete_data[Column("y", t)] = y[:, t]
+    complete_data[Column("x", t)] = x[:, t]
+    complete_data[Column("some_control", t)] = some_control[:, t]
 
 model_definition = (
-    ModelDefinitionBuilder()
-    .with_x(VariableDefinition("x"))
+    PanelModelDefinitionBuilder()
+    .with_x(VariableDefinition("x"), lag_structure=[1])
     .with_y(VariableDefinition("y"), lag_structure=[1, 2, 3])
     .with_w([VariableDefinition("some_control")])
-    .build(complete_data.columns)
+    .build(complete_data)
 )
 
 print(f"Model definition:\n{model_definition}")
@@ -74,7 +75,7 @@ print(f"Model definition:\n{model_definition}")
 model = semopy.Model(model_definition)
 
 # %% model estimation
-optimisation_result = model.fit(complete_data)
+optimisation_result = model.fit(map_columns_to_str(complete_data))
 print(optimisation_result)
 
 model.inspect().sort_values(["op", "Estimate", "lval"])  # pyright: ignore[reportOptionalMemberAccess, reportAttributeAccessIssue]
