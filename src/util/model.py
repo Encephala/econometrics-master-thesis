@@ -204,12 +204,29 @@ class ModelDefinitionBuilder(ABC):
     def _filter_excluded_regressors(self, rvals: list[Variable]) -> list[Variable]:
         result = []
 
+        # For debug warning about requested excluded regressors that weren't in the model in the first place
+        removed_variables: list[Variable] = []
+
         for rval in rvals:
             if not rval.is_in(self._excluded_regressors):
                 result.append(rval)
 
             else:
+                removed_variables.append(rval)
                 logger.debug(f"Removing {rval} from regressors as requested")
+
+        for regressor in self._excluded_regressors:
+            for variable in removed_variables:
+                if variable.equals(regressor):
+                    # It was removed, continue outer loop
+                    break
+
+            else:
+                # TODO: This still fires if the requested regressor is a dummy level that was automatically excluded
+                # in self._compile_w.
+                # It's not a solution to run this method in _compile_w though,
+                # as at that point we don't know the regressors yet.
+                logger.debug(f"{regressor} was requested to be removed, but it wasn't in the model")
 
         return result
 
