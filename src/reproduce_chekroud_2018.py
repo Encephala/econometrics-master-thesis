@@ -309,16 +309,6 @@ model_single_regression = (
         ]
         + [VariableDefinition(variable) for variable in [PREVIOUS_DEPRESSION]]
     )
-    .with_excluded_regressors(
-        [
-            # The following are removed for numerical stability:
-            Column(AGE, dummy_level="nan"),  # Only 0.04% True
-            Column(GENDER, dummy_level="nan"),  # Exactly equal to AGE nan
-            Column(GENDER, dummy_level="other"),  # Only 0.02% True
-            Column(MARITAL_STATUS, dummy_level="nan"),  # Only 0.03% True
-            Column(EMPLOYMENT, dummy_level="nan"),  # Only 0.04% True
-        ]
-    )
     .build_nonpanel(all_data_flattened)
 )
 
