@@ -157,6 +157,6 @@ def calc_mhi5(health_panel: pd.DataFrame) -> pd.DataFrame:
         # all are missing. No need to f.i. impute NAs as the average of the other variables
         mhi = 4 * (anxious + cheer_up + calm + depressed + happy)
 
-        result[Column("mhi", year)] = mhi
+        result[Column("mhi5", year)] = mhi
 
     return result

@@ -16,7 +16,7 @@ def _series_to_dummies(series: pd.Series) -> pd.DataFrame:
 
     # Fix column names
     old_column: Column = series.name  # type: ignore  # noqa: PGH003
-    result.columns = [replace(old_column, dummy_level=cleanup_dummy(dummy_level)) for dummy_level in result]  # type: ignore  # noqa: PGH003
+    result.columns = [replace(old_column, dummy_level=cleanup_dummy(dummy_level)) for dummy_level in result]  # type: ignore noqa: PGH003
 
     # If original was NA, the result will have False in each column.
     # Replace that False with NA

@@ -27,7 +27,7 @@ leisure_panel = load_wide_panel_cached("cs")
 health_panel = load_wide_panel_cached("ch")
 
 # %% all variable names
-MHI5 = "mhi"
+MHI5 = "mhi5"
 SPORTS = "cs104"
 
 AGE = "leeftijd"
@@ -256,10 +256,10 @@ all_relevant_data = pd.DataFrame(index=background_vars.index).join(
 )
 
 # Drop rows for which the dependent variable is always NA, as these will never be included in a regression.
-missing_dependent_variable = select_variable(all_relevant_data, MHI5)
-missing_dependent_variable = missing_dependent_variable.isna().sum(axis=1) == missing_dependent_variable.shape[1]
-missing_dependent_variable_index = missing_dependent_variable[missing_dependent_variable].index
-all_relevant_data = all_relevant_data.drop(missing_dependent_variable_index)
+y = select_variable(all_relevant_data, MHI5)
+y_missing = y.isna().sum(axis=1) == y.shape[1]
+y_missing = y_missing[y_missing].index
+all_relevant_data = all_relevant_data.drop(y_missing)
 
 # %% Flatten the data, lumping all years together in one big pile.
 all_data_flattened = pd.DataFrame()
@@ -281,8 +281,10 @@ for year in available_years(all_relevant_data):
     all_data_flattened = pd.concat([all_data_flattened, subset])
 
 # Drop missing dependent var
-y_missing = all_data_flattened[Column(MHI5)].isna()
-all_data_flattened = all_data_flattened.drop(y_missing[y_missing].index)
+# These are left over from above missing_dependent_variable stuff, because that only removed variables when an
+# individual was missing for all waves, but this deletes any waves that have missing y
+y_missing_flat = all_data_flattened[Column(MHI5)].isna()
+all_data_flattened = all_data_flattened.drop(y_missing_flat[y_missing_flat].index)
 
 # %% model with single regression
 model_single_regression = (
