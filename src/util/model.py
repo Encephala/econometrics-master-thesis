@@ -364,6 +364,7 @@ class ModelDefinitionBuilder(ABC):
                 continue
 
             for i in range(len(dummy_levels) - 1):
+                # TODO: Add named parameter in PanelMDB to fix covariances in time
                 lval = dummy_levels[i].to_unnamed()
                 rvals = [dummy_level.to_unnamed() for dummy_level in dummy_levels[i + 1 :]]
 
