@@ -16,7 +16,7 @@ from util.data import (
     calc_mhi5,
 )
 from util.model import PanelModelDefinitionBuilder, VariableDefinition
-from util import make_dummies, print_results
+from util import make_dummies
 
 logging.getLogger().setLevel(logging.DEBUG)
 
@@ -290,18 +290,14 @@ model_definition = (
 
 print(model_definition)
 
+# Lil syntax check
+# (semopy syntax is similar enough to lavaan syntax)
 model = semopy.Model(model_definition)
 
-# %% fit
-data = map_columns_to_str(all_relevant_data.astype(np.float64))
-optimisation_result = model.fit(data, clean_slate=True, obj="FIML")
-
-print(optimisation_result)
-
-print_results(model)
-
 # %% save for lavaan in R.
-all_relevant_data.astype("float64").to_stata("/tmp/data.dta")  # noqa: S108
+data = map_columns_to_str(all_relevant_data.astype(np.float64))
+
+data.to_stata("/tmp/data.dta")  # noqa: S108
 
 print("Model definition in stata/lavaan form:")
 print(model_definition.replace(".", "_"))

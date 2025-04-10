@@ -17,7 +17,7 @@ from util.data import (
     calc_mhi5,
 )
 from util.model import CSModelDefinitionBuilder, VariableDefinition
-from util import make_dummies, print_results
+from util import make_dummies
 
 logging.getLogger().setLevel(logging.DEBUG)
 
@@ -315,25 +315,14 @@ model_definition = (
 
 print(model_definition)
 
+# Lil syntax check
+# (semopy syntax is similar enough to lavaan syntax)
 model = semopy.Model(model_definition)
 
-# %% fit that one
-data_flattened = map_columns_to_str(all_data_flattened.astype(np.float64))
-optimisation_result = model.fit(data_flattened, clean_slate=True, obj="FIML")
-
-print(optimisation_result)
-
-print_results(model)
-
-# %% Improvement in unhappiness due to sports
-coeff: float = model.inspect().set_index("rval", drop=False).loc[SPORTS, "Estimate"]  # pyright: ignore noqa: PGH003
-
-mean = all_data_flattened[Column(MHI5)].astype(float).describe()["mean"]
-
-print(f"Change due to sports: {coeff / mean:.1%} ({coeff:.3f} out of {mean:.3f})")
-
 # %% save for lavaan in R.
-all_data_flattened.astype("float64").to_stata("/tmp/data.dta")  # noqa: S108
+data_flattened = map_columns_to_str(all_data_flattened.astype(np.float64))
+
+data_flattened.to_stata("/tmp/data.dta")  # noqa: S108
 
 print("Model definition in stata/lavaan form:")
 print(model_definition.replace(".", "_"))
