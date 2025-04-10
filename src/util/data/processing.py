@@ -110,7 +110,6 @@ def map_mhi5_categories(series: pd.Series, *, is_positive: bool = False) -> pd.S
     "Takes a Categorical series of MHI-5 questionnaire responses and maps the textual responses to int values."
     # https://www.cbs.nl/nl-nl/achtergrond/2015/18/beperkingen-in-dagelijkse-handelingen-bij-ouderen/mhi-5
     # LISS response run from 1-6 for all questions
-    # TODO: I'm not 100% this doesn't map NA to -1
     result = series.map(
         {
             "continuously": 0,
