@@ -6,15 +6,11 @@ Takes a model and the preprocessed data from the python script and runs the mode
 if (!requireNamespace("lavaan")) {
     install.packages("lavaan")
 }
-if (!requireNamespace("semPlot")) {
-    install.packages("semPlot")
-}
 if (!requireNamespace("haven")) {
     install.packages("haven")
 }
 
 library(lavaan)
-library(semPlot)
 library(haven)
 ```
 
@@ -69,16 +65,12 @@ ch4_poor ~~ ch4_very_good
 ```
 
 ```{r}
-sem_fit <- sem(sem_model, data = all_relevant_data)
+sem_fit <- sem(sem_model, data = all_relevant_data, missing = "fiml.x", se = "sandwich")
 
-summary(sem_fit, standardized = TRUE, fit.measures = TRUE)
+summary(sem_fit, fit.measures = TRUE)
 ```
 
 ```{r}
-# Visualize the SEM model
-semPaths(sem_fit, what = "std", edge.label.cex = .8, layout = "tree")
-```
-
-```{r}
-fitMeasures(sem_fit, c("chisq", "df", "pvalue", "cfi", "tli", "rmsea", "srmr", "aic", "bic"))
+# Potential model improvements
+modindices(sem_fit)
 ```
