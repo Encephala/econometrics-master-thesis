@@ -498,8 +498,8 @@ class PanelModelDefinitionBuilder(ModelDefinitionBuilder):
             dummy_levels = variable.dummy_levels
 
             if drop_first_dummy:
-                logger.debug(f"Dropping first dummy level '{dummy_levels[0]}' for {variable.name}")
-                dummy_levels = dummy_levels[1:]
+                dropped, *dummy_levels = dummy_levels
+                logger.debug(f"Dropped first dummy level '{dropped}' for {variable.name}")
 
             result.extend(
                 [
@@ -609,8 +609,8 @@ class CSModelDefinitionBuilder(ModelDefinitionBuilder):
             dummy_levels = variable.dummy_levels
 
             if drop_first_dummy:
-                logger.debug(f"Dropping first dummy level '{dummy_levels[0]}' for {variable.name}")
-                dummy_levels = dummy_levels[1:]
+                dropped, *dummy_levels = dummy_levels
+                logger.debug(f"Dropped first dummy level '{dropped}' for {variable.name}")
 
             result.extend([Variable(variable.name, dummy_level=level) for level in dummy_levels])
 
