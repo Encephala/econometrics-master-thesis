@@ -84,13 +84,13 @@ class VariableWithNamedParameter(Variable):
 class Regression:
     lval: Variable
     rvals: Sequence[Variable]
-    include_constant: bool
+    include_time_dummy: bool
 
     def build(self) -> str:
         return (
             f"{self.lval.build()}"
             + " ~ "
-            + ("alpha*1 + " if self.include_constant else "")  # Lavaan style constant, semopy doesn't accept this
+            + (f"alpha_t{self.lval.wave}*1 + " if self.include_time_dummy else "")
             + (" + ".join(rval.build() for rval in self.rvals))
         )
 
@@ -120,7 +120,7 @@ class ModelDefinitionBuilder(ABC):
     _x_lag_structure: list[int]
 
     _w: list[VariableDefinition]
-    _include_constant: bool = False
+    _include_time_dummy: bool = False
 
     _do_missing_check: bool = True
     _do_variance_check: bool = True
@@ -183,8 +183,8 @@ class ModelDefinitionBuilder(ABC):
         self._w = variables
         return self
 
-    def with_constant(self) -> Self:
-        self._include_constant = True
+    def with_time_dummy(self) -> Self:
+        self._include_time_dummy = True
         return self
 
     def with_checks(self, *, missing: bool = True, variance: bool = True, PD: bool = True) -> Self:
@@ -477,7 +477,7 @@ class PanelModelDefinitionBuilder(ModelDefinitionBuilder):
             if self._do_variance_check:
                 rvals = self._filter_constant_rvals(y, rvals, data)
 
-            self._regressions.append(Regression(y, rvals, self._include_constant))
+            self._regressions.append(Regression(y, rvals, self._include_time_dummy))
 
             if self._do_add_dummy_covariances:
                 self._add_dummy_covariances(rvals)
@@ -590,7 +590,7 @@ class CSModelDefinitionBuilder(ModelDefinitionBuilder):
         if self._do_variance_check:
             rvals = self._filter_constant_rvals(y, rvals, data)
 
-        self._regressions.append(Regression(y, rvals, self._include_constant))
+        self._regressions.append(Regression(y, rvals, self._include_time_dummy))
 
         if self._do_add_dummy_covariances:
             self._add_dummy_covariances(rvals)

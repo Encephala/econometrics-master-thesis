@@ -282,6 +282,7 @@ model_definition = (
         ]
         + [VariableDefinition(variable) for variable in [PREVIOUS_DEPRESSION]]
     )
+    .with_time_dummy()
     .with_excluded_regressors([Column(PREVIOUS_DEPRESSION, wave=13)])
     .with_dummy_level_covariances()
     .build(all_relevant_data)
