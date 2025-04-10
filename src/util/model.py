@@ -2,6 +2,7 @@ from typing import Self, Tuple, Sequence
 from dataclasses import dataclass, field
 from abc import ABC, abstractmethod
 import logging
+from itertools import groupby
 
 import pandas as pd
 
@@ -28,7 +29,7 @@ class Variable:
     "A variable in the dataset, that is, a specific (level of a) variable in a specific wave."
 
     name: str
-    wave: int | None
+    wave: int | None = field(default=None, kw_only=True)
     dummy_level: str | None = field(default=None, kw_only=True)
 
     def build(self) -> str:
@@ -64,7 +65,7 @@ class Variable:
 class VariableWithNamedParameter(Variable):
     "A variable in the dataset that has an associated named parameter."
 
-    parameter: str = field(repr=False)
+    parameter: str = field(repr=False, kw_only=True)
 
     def build(self) -> str:
         if self.dummy_level is not None:
@@ -121,6 +122,9 @@ class ModelDefinitionBuilder(ABC):
 
     # For identification
     _excluded_regressors: list[Column]
+
+    # To set covariances between dummy levels of the same variable as free parameters
+    _do_add_dummy_covariances: bool = False
 
     # Internals
     _regressions: list[Regression]
@@ -185,6 +189,10 @@ class ModelDefinitionBuilder(ABC):
 
     def with_excluded_regressors(self, excluded_regressors: list[Column]) -> Self:
         self._excluded_regressors = excluded_regressors
+        return self
+
+    def with_dummy_level_covariances(self) -> Self:
+        self._do_add_dummy_covariances = True
         return self
 
     @abstractmethod
@@ -319,6 +327,28 @@ class ModelDefinitionBuilder(ABC):
 
         return all_regressors
 
+    def _add_dummy_covariances(self, rvals: list[Variable]):
+        """Adds the covariances between dummy levels for the given rvals (lvals must be interval scale).
+
+        Should thus be called once for each regression."""
+        # NOTE/TODO: Because this function works on the rvals and not self._w,
+        # it does not include a covariance for the dummy level that is excluded for identification.
+        # I'm not 100% on if that is correct behaviour.
+
+        variables = groupby(rvals, lambda rval: rval.name)
+
+        for name, values in variables:
+            dummy_levels = [rval for rval in values if rval.name == name and rval.dummy_level is not None]
+
+            if len(dummy_levels) == 0:
+                continue
+
+            for i in range(len(dummy_levels) - 1):
+                lval = dummy_levels[i]
+                rvals = dummy_levels[i + 1 :]
+
+                self._covariances.append(Covariance(lval, rvals))
+
     def _check_covariance_matrix_PD(self, data: pd.DataFrame):
         all_regressors = [
             Column(variable.name, variable.wave, variable.dummy_level) for variable in self._all_regressors()
@@ -399,15 +429,17 @@ class PanelModelDefinitionBuilder(ModelDefinitionBuilder):
         drop_first_dummy: bool,  # noqa: FBT001
     ):
         for variable in dependent_vars:
-            y = Variable(variable.name, variable.wave)
+            y = Variable(variable.name, wave=variable.wave)
 
             wave: int = y.wave  # pyright: ignore[reportAssignmentType]
 
             y_lags = [
-                VariableWithNamedParameter(self._y.name, wave - lag, f"rho{lag}") for lag in self._y_lag_structure
+                VariableWithNamedParameter(self._y.name, wave=wave - lag, parameter=f"rho{lag}")
+                for lag in self._y_lag_structure
             ]
             x_lags = [
-                VariableWithNamedParameter(self._x.name, wave - lag, f"beta{lag}") for lag in self._x_lag_structure
+                VariableWithNamedParameter(self._x.name, wave=wave - lag, parameter=f"beta{lag}")
+                for lag in self._x_lag_structure
             ]
 
             w = self._compile_w(wave, drop_first_dummy)
@@ -426,6 +458,9 @@ class PanelModelDefinitionBuilder(ModelDefinitionBuilder):
 
             self._regressions.append(Regression(y, rvals, self._include_constant))
 
+            if self._do_add_dummy_covariances:
+                self._add_dummy_covariances(rvals)
+
             self._define_ordinals([y, *y_lags], [*x_lags], w)
 
     def _compile_w(self, wave_y: int, drop_first_dummy: bool) -> list[Variable]:  # noqa: FBT001
@@ -437,7 +472,9 @@ class PanelModelDefinitionBuilder(ModelDefinitionBuilder):
 
         for variable in self._w:
             if variable.dummy_levels is None:
-                result.append(VariableWithNamedParameter(variable.name, wave_y, f"delta0_{variable.name}"))
+                result.append(
+                    VariableWithNamedParameter(variable.name, wave=wave_y, parameter=f"delta0_{variable.name}")
+                )
                 continue
 
             dummy_levels = variable.dummy_levels
@@ -448,7 +485,9 @@ class PanelModelDefinitionBuilder(ModelDefinitionBuilder):
 
             result.extend(
                 [
-                    VariableWithNamedParameter(variable.name, wave_y, f"delta0_{variable.name}", dummy_level=level)
+                    VariableWithNamedParameter(
+                        variable.name, wave=wave_y, parameter=f"delta0_{variable.name}", dummy_level=level
+                    )
                     for level in dummy_levels
                 ]
             )
@@ -460,7 +499,8 @@ class PanelModelDefinitionBuilder(ModelDefinitionBuilder):
             # Fix variance for y to be constant in time
             self._covariances.append(
                 Covariance(
-                    regression.lval, [VariableWithNamedParameter(regression.lval.name, regression.lval.wave, "sigma")]
+                    regression.lval,
+                    [VariableWithNamedParameter(regression.lval.name, wave=regression.lval.wave, parameter="sigma")],
                 )
             )
 
@@ -473,7 +513,11 @@ class PanelModelDefinitionBuilder(ModelDefinitionBuilder):
         for regression in self._regressions:
             y_current = regression.lval
             x_future = [
-                VariableWithNamedParameter(variable.name, variable.wave, f"gamma{variable.wave - regression.lval.wave}")  # pyright: ignore[reportOperatorIssue]
+                VariableWithNamedParameter(
+                    variable.name,
+                    wave=variable.wave,
+                    parameter=f"gamma{variable.wave - regression.lval.wave}",  # pyright: ignore[reportOperatorIssue]
+                )
                 for variable in all_regressors
                 if variable.name == self._x.name and variable.wave > regression.lval.wave  # pyright: ignore[reportOperatorIssue]
             ]
@@ -503,12 +547,12 @@ class CSModelDefinitionBuilder(ModelDefinitionBuilder):
     ):
         # Majorly copy-pasta'd from PanelModelDefinitionBuilder._build_regressions
 
-        y = Variable(self._y.name, None)
+        y = Variable(self._y.name)
         assert self._y_lag_structure == [], (
             f"Building nonpanel regression but y had lag structure {self._y_lag_structure}"
         )
 
-        x = Variable(self._x.name, None)
+        x = Variable(self._x.name)
         assert self._x_lag_structure in ([0], []), (
             f"Building nonpanel regression but x had lag structure {self._x_lag_structure}"
         )
@@ -530,6 +574,9 @@ class CSModelDefinitionBuilder(ModelDefinitionBuilder):
 
         self._regressions.append(Regression(y, rvals, self._include_constant))
 
+        if self._do_add_dummy_covariances:
+            self._add_dummy_covariances(rvals)
+
         self._define_ordinals([y], [x], w)
 
     def _compile_w(self, drop_first_dummy: bool) -> list[Variable]:  # noqa: FBT001
@@ -541,7 +588,7 @@ class CSModelDefinitionBuilder(ModelDefinitionBuilder):
 
         for variable in self._w:
             if variable.dummy_levels is None:
-                result.append(Variable(variable.name, None))
+                result.append(Variable(variable.name))
                 continue
 
             dummy_levels = variable.dummy_levels
@@ -550,6 +597,6 @@ class CSModelDefinitionBuilder(ModelDefinitionBuilder):
                 logger.debug(f"Dropping first dummy level '{dummy_levels[0]}' for {variable.name}")
                 dummy_levels = dummy_levels[1:]
 
-            result.extend([Variable(variable.name, None, dummy_level=level) for level in dummy_levels])
+            result.extend([Variable(variable.name, dummy_level=level) for level in dummy_levels])
 
         return result
