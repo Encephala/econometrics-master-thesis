@@ -60,6 +60,9 @@ class Variable:
     def has_zero_variance_in(self, data: pd.DataFrame) -> bool:
         return data[Column(self.name, self.wave, self.dummy_level)].var() == 0
 
+    def to_unnamed(self) -> "Variable":
+        return self
+
 
 @dataclass(frozen=True)
 class VariableWithNamedParameter(Variable):
@@ -72,6 +75,9 @@ class VariableWithNamedParameter(Variable):
             return f"{self.parameter}.{cleanup_dummy(self.dummy_level)}*{super().build()}"
 
         return f"{self.parameter}*{super().build()}"
+
+    def to_unnamed(self) -> Variable:
+        return Variable(self.name, wave=self.wave, dummy_level=self.dummy_level)
 
 
 @dataclass(frozen=True)
@@ -223,6 +229,7 @@ class ModelDefinitionBuilder(ABC):
                 # in self._compile_w.
                 # It's not a solution to run this method in _compile_w though,
                 # as at that point we don't know the regressors yet.
+                # TODO: It also fires for every wave in a panel regression, that doesn't make sense.
                 logger.debug(f"{regressor} was requested to be removed, but it wasn't in the model")
 
         return result
@@ -357,8 +364,8 @@ class ModelDefinitionBuilder(ABC):
                 continue
 
             for i in range(len(dummy_levels) - 1):
-                lval = dummy_levels[i]
-                rvals = dummy_levels[i + 1 :]
+                lval = dummy_levels[i].to_unnamed()
+                rvals = [dummy_level.to_unnamed() for dummy_level in dummy_levels[i + 1 :]]
 
                 self._covariances.append(Covariance(lval, rvals))
 

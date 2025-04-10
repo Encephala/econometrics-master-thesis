@@ -57,7 +57,8 @@ def available_dummy_levels(df: pd.DataFrame, variable: str) -> list[str]:
 
     result = [column.dummy_level for column in columns if column.dummy_level is not None]
 
-    assert len(set(result)) == len(result), f"Dummy levels {result} are not unique"
+    # Make unique, dicts maintain order as well nowadays
+    result = list(dict.fromkeys(result))
 
     if len(result) == 0:
         logger.warning(f"No dummy levels found for {variable}")
@@ -80,6 +81,7 @@ def map_columns_to_str(df: pd.DataFrame) -> pd.DataFrame:
 
 def find_non_PD_suspicious_columns(df: pd.DataFrame) -> set[Column]:
     # https://stats.stackexchange.com/questions/153632/how-to-find-factor-that-is-making-matrix-singular
+
     assert_column_type_correct(df)
 
     result = set()

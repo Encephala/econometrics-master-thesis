@@ -10,13 +10,12 @@ from util.data import (
     Column,
     load_wide_panel_cached,
     select_variable,
-    select_wave,
     available_years,
     available_dummy_levels,
     map_columns_to_str,
     calc_mhi5,
 )
-from util.model import CSModelDefinitionBuilder, VariableDefinition
+from util.model import PanelModelDefinitionBuilder, VariableDefinition
 from util import make_dummies, print_results
 
 logging.getLogger().setLevel(logging.DEBUG)
@@ -261,39 +260,14 @@ y_missing = y.isna().sum(axis=1) == y.shape[1]
 y_missing = y_missing[y_missing].index
 all_relevant_data = all_relevant_data.drop(y_missing)
 
-# %% Flatten the data, lumping all years together in one big pile.
-all_data_flattened = pd.DataFrame()
-
-
-def remove_year(column: Column) -> Column:
-    return Column(column.name, None, column.dummy_level)
-
-
-for year in available_years(all_relevant_data):
-    subset = select_wave(all_relevant_data, year)
-
-    columns: list[Column] = subset.columns  # pyright: ignore[reportAssignmentType]
-
-    subset.columns = [remove_year(column) for column in columns]
-
-    subset.index = pd.Index([f"{idx}_{year}" for idx in subset.index])
-
-    all_data_flattened = pd.concat([all_data_flattened, subset])
-
-# Drop missing dependent var
-# These are left over from above missing_dependent_variable stuff, because that only removed variables when an
-# individual was missing for all waves, but this deletes any waves that have missing y
-y_missing_flat = all_data_flattened[Column(MHI5)].isna()
-all_data_flattened = all_data_flattened.drop(y_missing_flat[y_missing_flat].index)
-
 # %% model with single regression
 model_definition = (
-    CSModelDefinitionBuilder()
+    PanelModelDefinitionBuilder()
     .with_y(VariableDefinition(MHI5))
     .with_x(VariableDefinition(SPORTS))
     .with_w(
         [
-            VariableDefinition(variable, dummy_levels=available_dummy_levels(all_data_flattened, variable))
+            VariableDefinition(variable, dummy_levels=available_dummy_levels(all_relevant_data, variable))
             for variable in [
                 AGE,
                 ETHNICITY,
@@ -308,8 +282,9 @@ model_definition = (
         ]
         + [VariableDefinition(variable) for variable in [PREVIOUS_DEPRESSION]]
     )
+    .with_excluded_regressors([Column(PREVIOUS_DEPRESSION, wave=13)])
     .with_dummy_level_covariances()
-    .build(all_data_flattened)
+    .build(all_relevant_data)
 )
 
 
@@ -317,23 +292,16 @@ print(model_definition)
 
 model = semopy.Model(model_definition)
 
-# %% fit that one
-data_flattened = map_columns_to_str(all_data_flattened.astype(np.float64))
-optimisation_result = model.fit(data_flattened, clean_slate=True, obj="FIML")
+# %% fit
+data = map_columns_to_str(all_relevant_data.astype(np.float64))
+optimisation_result = model.fit(data, clean_slate=True, obj="FIML")
 
 print(optimisation_result)
 
 print_results(model)
 
-# %% Improvement in unhappiness due to sports
-coeff: float = model.inspect().set_index("rval", drop=False).loc[SPORTS, "Estimate"]  # pyright: ignore noqa: PGH003
-
-mean = all_data_flattened[Column(MHI5)].astype(float).describe()["mean"]
-
-print(f"Change due to sports: {coeff / mean:.1%} ({coeff:.3f} out of {mean:.3f})")
-
 # %% save for lavaan in R.
-all_data_flattened.astype("float64").to_stata("/tmp/data.dta")  # noqa: S108
+all_relevant_data.astype("float64").to_stata("/tmp/data.dta")  # noqa: S108
 
 print("Model definition in stata/lavaan form:")
 print(model_definition.replace(".", "_"))
