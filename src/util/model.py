@@ -113,7 +113,7 @@ class ModelDefinitionBuilder(ABC):
     _x: VariableDefinition
     _x_lag_structure: list[int]
 
-    _w: list[VariableDefinition] | None = None
+    _w: list[VariableDefinition]
     _include_constant: bool = False
 
     _do_missing_check: bool = True
@@ -313,7 +313,7 @@ class ModelDefinitionBuilder(ABC):
         if self._x.is_ordinal:
             self._ordinals.update(x)
 
-        ordinal_w = [] if self._w is None else [definition for definition in self._w if definition.is_ordinal]
+        ordinal_w = [definition for definition in self._w if definition.is_ordinal]
 
         for definition in ordinal_w:
             variables = [variable for variable in w if variable.name == definition.name]
@@ -465,9 +465,6 @@ class PanelModelDefinitionBuilder(ModelDefinitionBuilder):
 
     def _compile_w(self, wave_y: int, drop_first_dummy: bool) -> list[Variable]:  # noqa: FBT001
         # if wave_y is None, it's a cross-sectional regression, else panel regression.
-        if self._w is None:
-            return []
-
         result = []
 
         for variable in self._w:
@@ -581,9 +578,6 @@ class CSModelDefinitionBuilder(ModelDefinitionBuilder):
 
     def _compile_w(self, drop_first_dummy: bool) -> list[Variable]:  # noqa: FBT001
         # if wave_y is None, it's a cross-sectional regression, else panel regression.
-        if self._w is None:
-            return []
-
         result = []
 
         for variable in self._w:
