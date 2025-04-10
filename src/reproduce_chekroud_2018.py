@@ -16,7 +16,7 @@ from util.data import (
     map_columns_to_str,
     calc_mhi5,
 )
-from util.model import PanelModelDefinitionBuilder, CSModelDefinitionBuilder, VariableDefinition
+from util.model import CSModelDefinitionBuilder, VariableDefinition
 from util import make_dummies, print_results
 
 logging.getLogger().setLevel(logging.DEBUG)
