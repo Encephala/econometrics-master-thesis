@@ -89,15 +89,6 @@ class Regression:
 
 
 @dataclass(frozen=True)
-class Measurement:
-    lval: Variable
-    rvals: Sequence[Variable]
-
-    def build(self) -> str:
-        return f"{self.lval.build()} =~ {' + '.join(rval.build() for rval in self.rvals)}"
-
-
-@dataclass(frozen=True)
 class Covariance:
     lval: Variable
     rvals: Sequence[Variable]
@@ -133,13 +124,11 @@ class ModelDefinitionBuilder(ABC):
 
     # Internals
     _regressions: list[Regression]
-    _measurements: list[Measurement]  # Unused (for now)
     _covariances: list[Covariance]
     _ordinals: OrdinalVariableSet
 
     def __init__(self):
         self._regressions = []
-        self._measurements = []  # Unused (for now)
         self._covariances = []
         self._ordinals = OrdinalVariableSet()
 
@@ -345,8 +334,6 @@ class ModelDefinitionBuilder(ABC):
     def _make_result(self) -> str:
         return f"""# Regressions (structural part)
 {"\n".join([*map(Regression.build, self._regressions), ""])}
-# Measurement part
-{"\n".join([*map(Measurement.build, self._measurements), ""])}
 # Additional covariances
 {"\n".join([*map(Covariance.build, self._covariances), ""])}
 # Operations/constraints
