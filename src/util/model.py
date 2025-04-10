@@ -237,7 +237,7 @@ class ModelDefinitionBuilder(ABC):
 
             if not is_dummy:
                 # There's only one Variable in missing_variables if it's not a dummy
-                logger.warning(f"For {y=}, {missing_variables[0]} was not in the data, skipping regression")
+                logger.warning(f"For {y=}, {missing_variables} were not in the data, skipping regression")
                 # TODO: Is there a better option than ditching the whole regression
                 # because one of the vars is missing?
                 return True, []
@@ -254,7 +254,7 @@ class ModelDefinitionBuilder(ABC):
 
     def _find_missing_variables(
         self,
-        variables: Sequence[Variable],
+        model_variables: Sequence[Variable],
         available_variables: Sequence[Column],  # pyright: ignore[reportInvalidTypeArguments]
     ) -> Tuple[list[Variable], bool] | None:
         """Checks if all the regressors are in the data.
@@ -262,21 +262,34 @@ class ModelDefinitionBuilder(ABC):
         If a variable is missing, returns ([variable], False).
         If just a dummy level of a variable is missing, returns ([levels], True)
         Returns `None` if all variables are found."""
-        missing_dummies = []
+        all_missing_dummies: list[Variable] = []
 
-        for variable in variables:
+        for variable in model_variables:
             if not variable.is_in(available_variables):
                 if variable.dummy_level is None:
                     return [variable], False
 
-                missing_dummies.append(variable)
+                all_missing_dummies.append(variable)
 
-        # TODO: If all dummy levels for a variable are missing, this is a missing variable altogether
-        # and should return False to raise an error.
-        if len(missing_dummies) != 0:
-            return missing_dummies, True
+        if len(all_missing_dummies) == 0:
+            return None
 
-        return None
+        # If all dummy levels for a variable are missing, this is a missing variable altogether
+        # and we should return False to trigger an error.
+        for name, model_vars in groupby(model_variables, lambda variable: variable.name):
+            missing_dummies = [dummy for dummy in all_missing_dummies if dummy.name == name]
+
+            if len(missing_dummies) == 0:
+                continue
+
+            missing_dummy_levels = [var.dummy_level for var in missing_dummies]
+            model_dummy_level = [var.dummy_level for var in model_vars]
+
+            if all((level in missing_dummy_levels) for level in model_dummy_level):
+                return missing_dummies, False
+
+        # All good, just some random dummy levels
+        return all_missing_dummies, True
 
     def _filter_constant_rvals(self, y: Variable, rvals: list[Variable], data: pd.DataFrame) -> list[Variable]:
         # Check for variables with zero variance
