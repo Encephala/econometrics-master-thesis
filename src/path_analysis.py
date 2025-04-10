@@ -298,7 +298,7 @@ model = semopy.Model(model_definition)
 # %% save for lavaan in R.
 data = map_columns_to_str(all_relevant_data.astype(np.float64))
 
-data.to_stata("/tmp/data.dta")  # noqa: S108
+data.to_stata("/tmp/data_panel.dta")  # noqa: S108
 
 print("Model definition in stata/lavaan form:")
 print(model_definition.replace(".", "_"))
