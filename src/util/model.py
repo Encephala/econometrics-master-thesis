@@ -11,7 +11,7 @@ from .data import Column, assert_column_type_correct, cleanup_dummy, find_non_PD
 logger = logging.getLogger(__name__)
 
 
-@dataclass(frozen=True)
+@dataclass
 class VariableDefinition:
     "A conceptual variable in the model."
 
@@ -22,6 +22,8 @@ class VariableDefinition:
     def __post_init__(self):
         if self.dummy_levels is not None:
             assert len(self.dummy_levels) != 0, "If VariableDefinition.dummy_levels is not None, it must not be empty."
+
+            self.dummy_levels = [cleanup_dummy(level) for level in self.dummy_levels]
 
 
 @dataclass(frozen=True)
@@ -60,8 +62,17 @@ class Variable:
     def has_zero_variance_in(self, data: pd.DataFrame) -> bool:
         return data[Column(self.name, self.wave, self.dummy_level)].var() == 0
 
+    def with_named_parameter(self, parameter: str) -> "VariableWithNamedParameter":
+        return VariableWithNamedParameter(self.name, wave=self.wave, dummy_level=self.dummy_level, parameter=parameter)
+
     def to_unnamed(self) -> "Variable":
-        return self
+        return Variable(self.name, wave=self.wave, dummy_level=self.dummy_level)
+
+    def as_parameter_name(self) -> str:
+        if self.dummy_level is None:
+            return self.name
+
+        return f"{self.name}.{self.dummy_level}"
 
 
 @dataclass(frozen=True)
@@ -71,13 +82,7 @@ class VariableWithNamedParameter(Variable):
     parameter: str = field(repr=False, kw_only=True)
 
     def build(self) -> str:
-        if self.dummy_level is not None:
-            return f"{self.parameter}.{cleanup_dummy(self.dummy_level)}*{super().build()}"
-
         return f"{self.parameter}*{super().build()}"
-
-    def to_unnamed(self) -> Variable:
-        return Variable(self.name, wave=self.wave, dummy_level=self.dummy_level)
 
 
 @dataclass(frozen=True)
@@ -347,29 +352,6 @@ class ModelDefinitionBuilder(ABC):
 
         return all_regressors
 
-    def _add_dummy_covariances(self, rvals: list[Variable]):
-        """Adds the covariances between dummy levels for the given rvals (lvals must be interval scale).
-
-        Should thus be called once for each regression."""
-        # NOTE/TODO: Because this function works on the rvals and not self._w,
-        # it does not include a covariance for the dummy level that is excluded for identification.
-        # I'm not 100% on if that is correct behaviour.
-
-        variables = groupby(rvals, lambda rval: rval.name)
-
-        for name, values in variables:
-            dummy_levels = [rval for rval in values if rval.name == name and rval.dummy_level is not None]
-
-            if len(dummy_levels) == 0:
-                continue
-
-            for i in range(len(dummy_levels) - 1):
-                # TODO: Add named parameter in PanelMDB to fix covariances in time
-                lval = dummy_levels[i].to_unnamed()
-                rvals = [dummy_level.to_unnamed() for dummy_level in dummy_levels[i + 1 :]]
-
-                self._covariances.append(Covariance(lval, rvals))
-
     def _check_covariance_matrix_PD(self, data: pd.DataFrame):
         all_regressors = [
             Column(variable.name, variable.wave, variable.dummy_level) for variable in self._all_regressors()
@@ -504,7 +486,10 @@ class PanelModelDefinitionBuilder(ModelDefinitionBuilder):
             result.extend(
                 [
                     VariableWithNamedParameter(
-                        variable.name, wave=wave_y, parameter=f"delta0_{variable.name}", dummy_level=level
+                        variable.name,
+                        wave=wave_y,
+                        parameter=f"delta0_{variable.name}.{level}",
+                        dummy_level=level,
                     )
                     for level in dummy_levels
                 ]
@@ -512,13 +497,47 @@ class PanelModelDefinitionBuilder(ModelDefinitionBuilder):
 
         return result
 
+    def _add_dummy_covariances(self, rvals: list[Variable]):
+        """Adds the covariances between dummy levels for the given rvals (lvals must be interval scale).
+
+        Should thus be called once for each regression."""
+        # NOTE/TODO: Because this function works on the rvals and not self._w,
+        # it does not include a covariance for the dummy level that is excluded for identification.
+        # I'm not 100% that is correct behaviour.
+
+        variables = groupby(rvals, lambda rval: rval.name)
+
+        for name, values in variables:
+            dummy_levels = [rval for rval in values if rval.name == name and rval.dummy_level is not None]
+
+            if len(dummy_levels) == 0:
+                continue
+
+            for i in range(len(dummy_levels) - 1):
+                lval = dummy_levels[i].to_unnamed()
+                rvals = [dummy_level.to_unnamed() for dummy_level in dummy_levels[i + 1 :]]
+
+                # Make covariances constant in time
+                rvals = [
+                    rval.with_named_parameter(f"sigma_{lval.as_parameter_name()}_{rval.as_parameter_name()}")
+                    for rval in rvals
+                ]
+
+                self._covariances.append(Covariance(lval, rvals))
+
     def _fix_y_variance(self):
         for regression in self._regressions:
             # Fix variance for y to be constant in time
             self._covariances.append(
                 Covariance(
                     regression.lval,
-                    [VariableWithNamedParameter(regression.lval.name, wave=regression.lval.wave, parameter="sigma")],
+                    [
+                        VariableWithNamedParameter(
+                            regression.lval.name,
+                            wave=regression.lval.wave,
+                            parameter=f"sigma_{regression.lval.as_parameter_name()}",
+                        )
+                    ],
                 )
             )
 
@@ -615,3 +634,25 @@ class CSModelDefinitionBuilder(ModelDefinitionBuilder):
             result.extend([Variable(variable.name, dummy_level=level) for level in dummy_levels])
 
         return result
+
+    def _add_dummy_covariances(self, rvals: list[Variable]):
+        """Adds the covariances between dummy levels for the given rvals (lvals must be interval scale).
+
+        Should thus be called once for each regression."""
+        # NOTE/TODO: Because this function works on the rvals and not self._w,
+        # it does not include a covariance for the dummy level that is excluded for identification.
+        # I'm not 100% that is correct behaviour.
+
+        variables = groupby(rvals, lambda rval: rval.name)
+
+        for name, values in variables:
+            dummy_levels = [rval for rval in values if rval.name == name and rval.dummy_level is not None]
+
+            if len(dummy_levels) == 0:
+                continue
+
+            for i in range(len(dummy_levels) - 1):
+                lval = dummy_levels[i].to_unnamed()
+                rvals = [dummy_level.to_unnamed() for dummy_level in dummy_levels[i + 1 :]]
+
+                self._covariances.append(Covariance(lval, rvals))
