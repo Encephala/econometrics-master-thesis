@@ -56,25 +56,16 @@ age = select_variable(background_vars, AGE)
 
 age_labels = [
     "under 18",
-    "18 to 24",
-    "25 to 29",
-    "30 to 34",
-    "35 to 39",
-    "40 to 44",
-    "45 to 49",
-    "50 to 54",
-    "55 to 59",
-    "60 to 64",
-    "65 to 69",
-    "70 to 74",
-    "75 to 79",
-    "over 80",
+    "18-24",
+    "25-39",
+    "40-66",
+    "over 67",
 ]
 
 for column in age:
     new_column = pd.cut(
         age[column],
-        bins=[-np.inf, 18, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, np.inf],
+        bins=[-np.inf, 18, 24, 40, 66, np.inf],
         labels=age_labels,
     )
 
@@ -86,15 +77,18 @@ for column in age:
 income = select_variable(background_vars, INCOME)
 
 income_labels = [
+    "none",
     "under 15k",
-    "over 15k",
+    "15k-50k",
+    "over 50k",
 ]
 
 for column in income:
     new_column = pd.cut(
         income[column],
-        bins=[-np.inf, 15000, np.inf],
+        bins=[-np.inf, 0, 15000, 50000, np.inf],
         labels=income_labels,
+        right=True,  # Relevant especially for 0 level
     )
 
     income = income.copy()
@@ -107,9 +101,10 @@ EMPLOYMENT = "employment"
 
 
 def merge_and_map_categories(column: pd.Series) -> pd.Series:
+    # It would be nice to have fewer levels here for sparsity and stuff,
+    # but I don't think it gets any less than this.
     EMPLOYED = "employed"
-    SELF_EMPLOYED = "self-employed"
-    OUT_OF_WORK = "out of work"
+    UNEMPLOYED = "unemployed"
     HOMEMAKER = "homemaker"
     STUDENT = "student"
     RETIRED = "retired"
@@ -119,15 +114,14 @@ def merge_and_map_categories(column: pd.Series) -> pd.Series:
     old_category_to_new_category = {
         "paid employment": EMPLOYED,
         "works or assists in family business": EMPLOYED,
-        "autonomous professional, freelancer, or self-employed": SELF_EMPLOYED,
-        "job seeker following job loss": OUT_OF_WORK,
-        "first-time job seeker": OUT_OF_WORK,
-        "exempted from job seeking following job loss": UNABLE,
+        "autonomous professional, freelancer, or self-employed": EMPLOYED,
+        "job seeker following job loss": UNEMPLOYED,
+        "first-time job seeker": STUDENT,
+        "exempted from job seeking following job loss": UNEMPLOYED,  # Very rare anyways, close enough to UNEMPLOYED
         "attends school or is studying": STUDENT,
         "takes care of the housekeeping": HOMEMAKER,
         "is pensioner ([voluntary] early retirement, old age pension scheme)": RETIRED,
         "has (partial) work disability": UNABLE,
-        # Not sure about all the ones below, think they're the best?
         "performs unpaid work while retaining unemployment benefit": EMPLOYED,
         "performs voluntary work": EMPLOYED,
         "does something else": EMPLOYED,
@@ -137,6 +131,7 @@ def merge_and_map_categories(column: pd.Series) -> pd.Series:
     result = pd.Categorical(column.map(old_category_to_new_category))
 
     # Apparently if you set name=... here, it gets ignored because of .apply
+    # Restore old index, otherwise things go NaN
     return pd.Series(result, index=column.index)
 
 
@@ -152,14 +147,14 @@ height = select_variable(health_panel, HEIGHT)
 
 # Broad sanity check
 TALLEST_HEIGHT_EVER = 270  # According to google idk
-VERY_SHORT_TEEN = 100
+VERY_SHORT_BABY = 5
 height = height.mask(height > TALLEST_HEIGHT_EVER, pd.NA)
-height = height.mask(height < VERY_SHORT_TEEN, pd.NA)
+height = height.mask(height < VERY_SHORT_BABY, pd.NA)
 
 HEAVIEST_PERSON_EVER = 635  # According to google
-VERY_LIGHT_TEEN = 30
+VERY_LIGHT_BABY = 1
 weight = weight.mask(weight > HEAVIEST_PERSON_EVER, pd.NA)
-weight = weight.mask(weight < VERY_LIGHT_TEEN, pd.NA)
+weight = weight.mask(weight < VERY_LIGHT_BABY, pd.NA)
 
 bmi = pd.DataFrame(index=health_panel.index)
 
@@ -174,7 +169,6 @@ bmi = bmi.apply(
         column,
         bins=[-np.inf, 18.5, 25.0, 30, np.inf],
         labels=["underweight", "normal weight", "overweight", "obese"],
-        right=False,
     )
 )
 

@@ -22,21 +22,12 @@ head(all_relevant_data)
 ```{r}
 sem_model <- "
 # Regressions (structural part)
-mhi5 ~ cs104 + leeftijd_18_to_24 + leeftijd_25_to_29 + leeftijd_30_to_34 + leeftijd_35_to_39 + leeftijd_40_to_44 + leeftijd_45_to_49 + leeftijd_50_to_54 + leeftijd_55_to_59 + leeftijd_60_to_64 + leeftijd_65_to_69 + leeftijd_70_to_74 + leeftijd_75_to_79 + leeftijd_over_80 + herkomstgroep_first_w + herkomstgroep_first_nonw + herkomstgroep_second_w + herkomstgroep_second_nonw + geslacht_male + geslacht_other + bmi_normal_weight + bmi_overweight + bmi_obese + burgstat_married + burgstat_never_been_married + burgstat_separated + burgstat_widow_or_widower + nettohh_f_over_15k + oplcat_hbo + oplcat_mbo + oplcat_primary_school + oplcat_vmbo + oplcat_wo + employment_homemaker + employment_out_of_work + employment_retired + employment_self_employed + employment_student + employment_unable_to_work + ch4_good + ch4_moderate + ch4_poor + ch4_very_good + prev_depr
+mhi5 ~ cs104 + leeftijd_18_24 + leeftijd_25_39 + leeftijd_40_66 + leeftijd_over_67 + herkomstgroep_first_w + herkomstgroep_first_nonw + herkomstgroep_second_w + herkomstgroep_second_nonw + geslacht_male + geslacht_other + bmi_normal_weight + bmi_overweight + bmi_obese + burgstat_married + burgstat_never_been_married + burgstat_separated + burgstat_widow_or_widower + nettohh_f_under_15k + nettohh_f_15k_50k + nettohh_f_over_50k + oplcat_hbo + oplcat_mbo + oplcat_primary_school + oplcat_vmbo + oplcat_wo + employment_homemaker + employment_retired + employment_student + employment_unable_to_work + employment_unemployed + ch4_good + ch4_moderate + ch4_poor + ch4_very_good + prev_depr
 
 # Additional covariances
-leeftijd_18_to_24 ~~ leeftijd_25_to_29 + leeftijd_30_to_34 + leeftijd_35_to_39 + leeftijd_40_to_44 + leeftijd_45_to_49 + leeftijd_50_to_54 + leeftijd_55_to_59 + leeftijd_60_to_64 + leeftijd_65_to_69 + leeftijd_70_to_74 + leeftijd_75_to_79 + leeftijd_over_80
-leeftijd_25_to_29 ~~ leeftijd_30_to_34 + leeftijd_35_to_39 + leeftijd_40_to_44 + leeftijd_45_to_49 + leeftijd_50_to_54 + leeftijd_55_to_59 + leeftijd_60_to_64 + leeftijd_65_to_69 + leeftijd_70_to_74 + leeftijd_75_to_79 + leeftijd_over_80
-leeftijd_30_to_34 ~~ leeftijd_35_to_39 + leeftijd_40_to_44 + leeftijd_45_to_49 + leeftijd_50_to_54 + leeftijd_55_to_59 + leeftijd_60_to_64 + leeftijd_65_to_69 + leeftijd_70_to_74 + leeftijd_75_to_79 + leeftijd_over_80
-leeftijd_35_to_39 ~~ leeftijd_40_to_44 + leeftijd_45_to_49 + leeftijd_50_to_54 + leeftijd_55_to_59 + leeftijd_60_to_64 + leeftijd_65_to_69 + leeftijd_70_to_74 + leeftijd_75_to_79 + leeftijd_over_80
-leeftijd_40_to_44 ~~ leeftijd_45_to_49 + leeftijd_50_to_54 + leeftijd_55_to_59 + leeftijd_60_to_64 + leeftijd_65_to_69 + leeftijd_70_to_74 + leeftijd_75_to_79 + leeftijd_over_80
-leeftijd_45_to_49 ~~ leeftijd_50_to_54 + leeftijd_55_to_59 + leeftijd_60_to_64 + leeftijd_65_to_69 + leeftijd_70_to_74 + leeftijd_75_to_79 + leeftijd_over_80
-leeftijd_50_to_54 ~~ leeftijd_55_to_59 + leeftijd_60_to_64 + leeftijd_65_to_69 + leeftijd_70_to_74 + leeftijd_75_to_79 + leeftijd_over_80
-leeftijd_55_to_59 ~~ leeftijd_60_to_64 + leeftijd_65_to_69 + leeftijd_70_to_74 + leeftijd_75_to_79 + leeftijd_over_80
-leeftijd_60_to_64 ~~ leeftijd_65_to_69 + leeftijd_70_to_74 + leeftijd_75_to_79 + leeftijd_over_80
-leeftijd_65_to_69 ~~ leeftijd_70_to_74 + leeftijd_75_to_79 + leeftijd_over_80
-leeftijd_70_to_74 ~~ leeftijd_75_to_79 + leeftijd_over_80
-leeftijd_75_to_79 ~~ leeftijd_over_80
+leeftijd_18_24 ~~ leeftijd_25_39 + leeftijd_40_66 + leeftijd_over_67
+leeftijd_25_39 ~~ leeftijd_40_66 + leeftijd_over_67
+leeftijd_40_66 ~~ leeftijd_over_67
 herkomstgroep_first_w ~~ herkomstgroep_first_nonw + herkomstgroep_second_w + herkomstgroep_second_nonw
 herkomstgroep_first_nonw ~~ herkomstgroep_second_w + herkomstgroep_second_nonw
 herkomstgroep_second_w ~~ herkomstgroep_second_nonw
@@ -46,26 +37,25 @@ bmi_overweight ~~ bmi_obese
 burgstat_married ~~ burgstat_never_been_married + burgstat_separated + burgstat_widow_or_widower
 burgstat_never_been_married ~~ burgstat_separated + burgstat_widow_or_widower
 burgstat_separated ~~ burgstat_widow_or_widower
+nettohh_f_under_15k ~~ nettohh_f_15k_50k + nettohh_f_over_50k
+nettohh_f_15k_50k ~~ nettohh_f_over_50k
 oplcat_hbo ~~ oplcat_mbo + oplcat_primary_school + oplcat_vmbo + oplcat_wo
 oplcat_mbo ~~ oplcat_primary_school + oplcat_vmbo + oplcat_wo
 oplcat_primary_school ~~ oplcat_vmbo + oplcat_wo
 oplcat_vmbo ~~ oplcat_wo
-employment_homemaker ~~ employment_out_of_work + employment_retired + employment_self_employed + employment_student + employment_unable_to_work
-employment_out_of_work ~~ employment_retired + employment_self_employed + employment_student + employment_unable_to_work
-employment_retired ~~ employment_self_employed + employment_student + employment_unable_to_work
-employment_self_employed ~~ employment_student + employment_unable_to_work
-employment_student ~~ employment_unable_to_work
+employment_homemaker ~~ employment_retired + employment_student + employment_unable_to_work + employment_unemployed
+employment_retired ~~ employment_student + employment_unable_to_work + employment_unemployed
+employment_student ~~ employment_unable_to_work + employment_unemployed
+employment_unable_to_work ~~ employment_unemployed
 ch4_good ~~ ch4_moderate + ch4_poor + ch4_very_good
 ch4_moderate ~~ ch4_poor + ch4_very_good
 ch4_poor ~~ ch4_very_good
-
-# Operations/constraints
 
 "
 ```
 
 ```{r}
-sem_fit <- sem(sem_model, data = all_relevant_data, missing = "fiml.x", se = "sandwich")
+sem_fit <- sem(sem_model, data = all_relevant_data)
 
 summary(sem_fit, fit.measures = TRUE)
 ```
