@@ -4,8 +4,8 @@
 import semopy
 import pandas as pd
 
-from util.model import ModelDefinitionBuilder, VariableDefinition
-from util.data import (
+from lib.model import ModelDefinitionBuilder, VariableDefinition
+from lib.data import (
     load_wide_panel_cached,
     standardise_wide_column_name,
     select_variable,

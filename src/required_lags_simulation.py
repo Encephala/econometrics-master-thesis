@@ -3,8 +3,8 @@
 import pandas as pd
 import semopy
 
-from util.simulation import DataGenerator
-from util.model import ModelDefinitionBuilder, VariableDefinition
+from lib.simulation import DataGenerator
+from lib.model import ModelDefinitionBuilder, VariableDefinition
 
 # %%
 N = 50000

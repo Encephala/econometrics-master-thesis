@@ -6,7 +6,8 @@ from itertools import groupby
 
 import pandas as pd
 
-from .data import Column, assert_column_type_correct, cleanup_dummy, find_non_PD_suspicious_columns
+from .data import Column
+from .data.util import assert_column_type_correct, cleanup_dummy, find_non_PD_suspicious_columns
 
 logger = logging.getLogger(__name__)
 

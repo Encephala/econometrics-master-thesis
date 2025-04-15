@@ -4,8 +4,8 @@ import numpy as np
 
 import semopy
 
-from util.data import Column, map_columns_to_str
-from util.model import PanelModelDefinitionBuilder, VariableDefinition
+from lib.data import Column, map_columns_to_str
+from lib.model import PanelModelDefinitionBuilder, VariableDefinition
 
 # %% data generation
 N = 500

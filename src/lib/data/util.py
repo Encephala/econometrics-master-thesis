@@ -3,7 +3,7 @@ import logging
 import pandas as pd
 import numpy as np
 
-from util.data import Column
+from lib.data import Column
 
 logger = logging.getLogger(__name__)
 
@@ -104,60 +104,5 @@ def find_non_PD_suspicious_columns(df: pd.DataFrame) -> set[Column]:
         suspicious_columns = eigvec[~np.isclose(eigvec, 0)].index
 
         result.update(suspicious_columns)
-
-    return result
-
-
-def map_mhi5_categories(series: pd.Series, *, is_positive: bool = False) -> pd.Series:
-    "Takes a Categorical series of MHI-5 questionnaire responses and maps the textual responses to int values."
-    # https://www.cbs.nl/nl-nl/achtergrond/2015/18/beperkingen-in-dagelijkse-handelingen-bij-ouderen/mhi-5
-    # LISS response run from 1-6 for all questions
-    result = series.map(
-        {
-            "continuously": 0,
-            "mostly": 1,
-            "often": 2,
-            "sometimes": 3,
-            "seldom": 4,
-            "never": 5,
-        },
-        na_action="ignore",
-    ).astype("Int64")
-
-    if is_positive:
-        result = 5 - result
-
-    return result
-
-
-def calc_mhi5(health_panel: pd.DataFrame) -> pd.DataFrame:
-    """Calculates the MHI-5 score for each individual-year available in the passed dataframe.
-
-    Returns the MHI-5 scores in a new df (does not mutate the passed df)."""
-    assert_column_type_correct(health_panel)
-
-    # Appropriate question indices
-    ANXIOUS = "ch11"
-    CANT_CHEER_UP = "ch12"
-    CALM_PEACEFUL = "ch13"
-    DEPRESSED_GLOOMY = "ch14"
-    HAPPY = "ch15"
-
-    # The epic calculation
-    result = pd.DataFrame()
-
-    for year in available_years(health_panel):
-        # These contain the responses of all individuals for this `year`
-        anxious = map_mhi5_categories(health_panel[Column(ANXIOUS, year)])
-        cheer_up = map_mhi5_categories(health_panel[Column(CANT_CHEER_UP, year)])
-        calm = map_mhi5_categories(health_panel[Column(CALM_PEACEFUL, year)], is_positive=True)
-        depressed = map_mhi5_categories(health_panel[Column(DEPRESSED_GLOOMY, year)])
-        happy = map_mhi5_categories(health_panel[Column(HAPPY, year)], is_positive=True)
-
-        # NOTE: There is no partial missingness, as in whenever one variable is missing,
-        # all are missing. No need to f.i. impute NAs as the average of the other variables
-        mhi = 4 * (anxious + cheer_up + calm + depressed + happy)
-
-        result[Column("mhi5", year)] = mhi
 
     return result

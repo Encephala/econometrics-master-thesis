@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
 
-from util import load_df, strip_column_prefixes
+from lib import load_df, strip_column_prefixes
 
 # %% Load data
 data_2018 = load_df(Path("cp18j_EN_1.0p.sav"))
