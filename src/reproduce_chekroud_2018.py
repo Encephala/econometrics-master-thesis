@@ -61,6 +61,9 @@ model_definition = (
     CSModelDefinitionBuilder()
     .with_y(VariableDefinition(MHI5))
     .with_x(VariableDefinition(SPORTS))
+    .with_mediators(
+        [VariableDefinition(PHYSICAL_HEALTH, dummy_levels=available_dummy_levels(all_data_flattened, PHYSICAL_HEALTH))]
+    )
     .with_w(
         [
             VariableDefinition(variable, dummy_levels=available_dummy_levels(all_data_flattened, variable))
@@ -73,7 +76,6 @@ model_definition = (
                 INCOME,
                 EDUCATION_LEVEL,
                 EMPLOYMENT,
-                PHYSICAL_HEALTH,
             ]
         ]
         + [VariableDefinition(variable) for variable in [PREVIOUS_DEPRESSION]]

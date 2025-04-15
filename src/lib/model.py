@@ -125,6 +125,8 @@ class ModelDefinitionBuilder(ABC):
     _x: VariableDefinition
     _x_lag_structure: list[int]
 
+    _mediators: list[VariableDefinition]
+
     _w: list[VariableDefinition]
     _include_time_dummy: bool = False
 
@@ -144,12 +146,13 @@ class ModelDefinitionBuilder(ABC):
     _ordinals: OrdinalVariableSet
 
     def __init__(self):
+        self._mediators = []
+        self._w = []
+        self._excluded_regressors = []
+
         self._regressions = []
         self._covariances = []
         self._ordinals = OrdinalVariableSet()
-
-        self._w = []
-        self._excluded_regressors = []
 
     def with_y(self, y: VariableDefinition, *, lag_structure: list[int] | None = None) -> Self:
         if y.dummy_levels is not None:
@@ -183,6 +186,11 @@ class ModelDefinitionBuilder(ABC):
         else:
             self._x_lag_structure = [0]
 
+        return self
+
+    def with_mediators(self, mediators: list[VariableDefinition]) -> Self:
+        # TODO: I'm not sure if simultaneously modelling multiple mediators is valid, let's think about that.
+        self._mediators = mediators
         return self
 
     def with_w(self, variables: list[VariableDefinition]) -> Self:
@@ -446,8 +454,10 @@ class PanelModelDefinitionBuilder(ModelDefinitionBuilder):
                 for lag in self._x_lag_structure
             ]
 
-            w = self._compile_w(wave, drop_first_dummy)
-            rvals: list[Variable] = [*y_lags, *x_lags, *w]
+            mediators = self._compile_regressors(self._mediators, "zeta", wave, drop_first_dummy)
+
+            w = self._compile_regressors(self._w, "delta0", wave, drop_first_dummy)
+            rvals: list[Variable] = [*y_lags, *x_lags, *mediators, *w]
 
             rvals = self._filter_excluded_regressors(rvals)
 
@@ -461,20 +471,28 @@ class PanelModelDefinitionBuilder(ModelDefinitionBuilder):
                 rvals = self._filter_constant_rvals(y, rvals, data)
 
             self._regressions.append(Regression(y, rvals, self._include_time_dummy))
+            self._add_mediator_regressions(mediators, rvals)
 
             if self._do_add_dummy_covariances:
                 self._add_dummy_covariances(rvals)
 
             self._define_ordinals([y, *y_lags], [*x_lags], w)
 
-    def _compile_w(self, wave_y: int, drop_first_dummy: bool) -> list[Variable]:  # noqa: FBT001
-        # if wave_y is None, it's a cross-sectional regression, else panel regression.
+    def _compile_regressors(
+        self,
+        regressors: list[VariableDefinition],
+        parameter_name: str,
+        wave_y: int,
+        drop_first_dummy: bool,  # noqa: FBT001
+    ) -> list[Variable]:
         result = []
 
-        for variable in self._w:
+        for variable in regressors:
             if variable.dummy_levels is None:
                 result.append(
-                    VariableWithNamedParameter(variable.name, wave=wave_y, parameter=f"delta0_{variable.name}")
+                    VariableWithNamedParameter(
+                        variable.name, wave=wave_y, parameter=f"{parameter_name}_{variable.name}"
+                    )
                 )
                 continue
 
@@ -489,7 +507,7 @@ class PanelModelDefinitionBuilder(ModelDefinitionBuilder):
                     VariableWithNamedParameter(
                         variable.name,
                         wave=wave_y,
-                        parameter=f"delta0_{variable.name}.{level}",
+                        parameter=f"{parameter_name}_{variable.name}.{level}",
                         dummy_level=level,
                     )
                     for level in dummy_levels
@@ -497,6 +515,18 @@ class PanelModelDefinitionBuilder(ModelDefinitionBuilder):
             )
 
         return result
+
+    def _add_mediator_regressions(
+        self,
+        mediators: Sequence[Variable],
+        rvals: Sequence[Variable],
+    ):
+        for mediator in [mediator.to_unnamed() for mediator in mediators]:
+            current_rvals = [
+                rval.with_named_parameter(f"eta{rval.name}") for rval in rvals if rval.name != mediator.name
+            ]
+
+            self._regressions.append(Regression(mediator, current_rvals, self._include_time_dummy))
 
     def _add_dummy_covariances(self, rvals: list[Variable]):
         """Adds the covariances between dummy levels for the given rvals (lvals must be interval scale).
@@ -595,9 +625,11 @@ class CSModelDefinitionBuilder(ModelDefinitionBuilder):
             f"Building nonpanel regression but x had lag structure {self._x_lag_structure}"
         )
 
+        mediators = self._compile_regressors(self._mediators, drop_first_dummy)
+
         # Apparently [*<values>] typecasts to parent type?
-        w = self._compile_w(drop_first_dummy)
-        rvals: list[Variable] = [x, *w]
+        w = self._compile_regressors(self._w, drop_first_dummy)
+        rvals: list[Variable] = [x, *mediators, *w]
 
         rvals = self._filter_excluded_regressors(rvals)
 
@@ -611,17 +643,22 @@ class CSModelDefinitionBuilder(ModelDefinitionBuilder):
             rvals = self._filter_constant_rvals(y, rvals, data)
 
         self._regressions.append(Regression(y, rvals, self._include_time_dummy))
+        self._add_mediator_regressions(mediators, rvals)
 
         if self._do_add_dummy_covariances:
             self._add_dummy_covariances(rvals)
 
         self._define_ordinals([y], [x], w)
 
-    def _compile_w(self, drop_first_dummy: bool) -> list[Variable]:  # noqa: FBT001
+    def _compile_regressors(
+        self,
+        regressors: list[VariableDefinition],
+        drop_first_dummy: bool,  # noqa: FBT001
+    ) -> list[Variable]:
         # if wave_y is None, it's a cross-sectional regression, else panel regression.
         result = []
 
-        for variable in self._w:
+        for variable in regressors:
             if variable.dummy_levels is None:
                 result.append(Variable(variable.name))
                 continue
@@ -635,6 +672,16 @@ class CSModelDefinitionBuilder(ModelDefinitionBuilder):
             result.extend([Variable(variable.name, dummy_level=level) for level in dummy_levels])
 
         return result
+
+    def _add_mediator_regressions(
+        self,
+        mediators: Sequence[Variable],
+        rvals: Sequence[Variable],
+    ):
+        for mediator in mediators:
+            current_rvals = [rval for rval in rvals if rval.name != mediator.name]
+
+            self._regressions.append(Regression(mediator, current_rvals, self._include_time_dummy))
 
     def _add_dummy_covariances(self, rvals: list[Variable]):
         """Adds the covariances between dummy levels for the given rvals (lvals must be interval scale).
