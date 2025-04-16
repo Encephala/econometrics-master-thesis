@@ -152,7 +152,6 @@ class _ModelDefinitionBuilder(ABC):
         self._ordinals = OrdinalVariableSet()
 
     def with_mediators(self, mediators: list[VariableDefinition]) -> Self:
-        # TODO: I'm not sure if simultaneously modelling multiple mediators is valid, let's think about that.
         self._mediators = mediators
 
         self._check_duplicate_definition()
