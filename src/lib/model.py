@@ -578,12 +578,9 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
             for i in range(len(dummy_levels) - 1):
                 lval = dummy_levels[i].to_unnamed()
-                rvals = [dummy_level.to_unnamed() for dummy_level in dummy_levels[i + 1 :]]
-
-                # Make covariances constant in time
                 rvals = [
                     rval.with_named_parameter(f"sigma_{lval.as_parameter_name()}_{rval.as_parameter_name()}")
-                    for rval in rvals
+                    for rval in dummy_levels[i + 1 :]
                 ]
 
                 self._covariances.append(Covariance(lval, rvals))
