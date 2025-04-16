@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 import semopy
 
-from lib.data.util import map_columns_to_str
+from lib.data import map_columns_to_str
 
 
 def print_results(model: semopy.Model):

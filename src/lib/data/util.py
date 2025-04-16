@@ -39,7 +39,6 @@ def select_wave(df: pd.DataFrame, year: int) -> pd.DataFrame:
     return df[selected_columns]
 
 
-# This assumes columns named as in standardise_wide_column_name above
 def available_years(df: pd.DataFrame) -> set[int]:
     assert_column_type_correct(df)
 
