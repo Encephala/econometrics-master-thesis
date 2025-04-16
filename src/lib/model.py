@@ -538,9 +538,15 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
         mediators: Sequence[Variable],
         rvals: Sequence[Variable],
     ):
+        mediator_names = {mediator.name for mediator in mediators}
+
         for mediator in [mediator.to_unnamed() for mediator in mediators]:
+            # Filter self and other mediators from rvals,
+            # because otherwise the mediator regressions aren't identified due to simultaneity.
             current_rvals = [
-                rval.with_named_parameter(f"eta{rval.name}") for rval in rvals if rval.name != mediator.name
+                rval.with_named_parameter(f"eta_{mediator.as_parameter_name()}_{rval.as_parameter_name()}")
+                for rval in rvals
+                if rval.name not in mediator_names
             ]
 
             self._regressions.append(Regression(mediator, current_rvals, self._include_time_dummy))
@@ -704,8 +710,10 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
         mediators: Sequence[Variable],
         rvals: Sequence[Variable],
     ):
+        mediator_names = {mediator.name for mediator in mediators}
+
         for mediator in mediators:
-            current_rvals = [rval for rval in rvals if rval.name != mediator.name]
+            current_rvals = [rval for rval in rvals if rval.name not in mediator_names]
 
             self._regressions.append(Regression(mediator, current_rvals, self._include_time_dummy))
 
