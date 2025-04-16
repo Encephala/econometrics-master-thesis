@@ -118,12 +118,9 @@ class OrdinalVariableSet(set[Variable]):
         return f"DEFINE(ordinal) {' '.join(sorted(variable.build() for variable in self))}"
 
 
-class ModelDefinitionBuilder(ABC):
+class _ModelDefinitionBuilder(ABC):
     _y: VariableDefinition
-    _y_lag_structure: list[int]
-
     _x: VariableDefinition
-    _x_lag_structure: list[int]
 
     _mediators: list[VariableDefinition]
 
@@ -153,40 +150,6 @@ class ModelDefinitionBuilder(ABC):
         self._regressions = []
         self._covariances = []
         self._ordinals = OrdinalVariableSet()
-
-    def with_y(self, y: VariableDefinition, *, lag_structure: list[int] | None = None) -> Self:
-        if y.dummy_levels is not None:
-            raise ValueError("Cannot have dependent variable be a dummy variable, must be interval scale.")  # noqa: TRY003
-
-        self._y = y
-
-        if lag_structure is not None:
-            # Zero lag breaks the regression, negative lags break the logic for when the first/last regressions are
-            assert all(i > 0 for i in lag_structure) and len(lag_structure) == len(set(lag_structure)), (
-                "Invalid lags provided for y"
-            )
-            self._y_lag_structure = lag_structure
-        else:
-            self._y_lag_structure = []
-
-        return self
-
-    def with_x(self, x: VariableDefinition, *, lag_structure: list[int] | None = None) -> Self:
-        if x.dummy_levels is not None:
-            raise NotImplementedError("Dummy x-variables are not implemented yet")
-
-        self._x = x
-
-        if lag_structure is not None:
-            # Negative lags break the logic for when the first/last regressions are
-            assert all(i >= 0 for i in lag_structure) and len(lag_structure) == len(set(lag_structure)), (
-                "Invalid lags provided for x"
-            )
-            self._x_lag_structure = lag_structure
-        else:
-            self._x_lag_structure = [0]
-
-        return self
 
     def with_mediators(self, mediators: list[VariableDefinition]) -> Self:
         # TODO: I'm not sure if simultaneously modelling multiple mediators is valid, let's think about that.
@@ -400,7 +363,44 @@ class ModelDefinitionBuilder(ABC):
 """
 
 
-class PanelModelDefinitionBuilder(ModelDefinitionBuilder):
+class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
+    _y_lag_structure: list[int]
+    _x_lag_structure: list[int]
+
+    def with_y(self, y: VariableDefinition, *, lag_structure: list[int] | None = None) -> Self:
+        if y.dummy_levels is not None:
+            raise ValueError("Cannot have dependent variable be a dummy variable, must be interval scale.")  # noqa: TRY003
+
+        self._y = y
+
+        if lag_structure is not None:
+            # Zero lag breaks the regression, negative lags break the logic for when the first/last regressions are
+            assert all(i > 0 for i in lag_structure) and len(lag_structure) == len(set(lag_structure)), (
+                "Invalid lags provided for y"
+            )
+            self._y_lag_structure = lag_structure
+        else:
+            self._y_lag_structure = []
+
+        return self
+
+    def with_x(self, x: VariableDefinition, *, lag_structure: list[int] | None = None) -> Self:
+        if x.dummy_levels is not None:
+            raise NotImplementedError("Dummy x-variables are not implemented yet")
+
+        self._x = x
+
+        if lag_structure is not None:
+            # Negative lags break the logic for when the first/last regressions are
+            assert all(i >= 0 for i in lag_structure) and len(lag_structure) == len(set(lag_structure)), (
+                "Invalid lags provided for x"
+            )
+            self._x_lag_structure = lag_structure
+        else:
+            self._x_lag_structure = [0]
+
+        return self
+
     def build(self, data: pd.DataFrame, *, drop_first_dummy: bool = True) -> str:
         assert_column_type_correct(data)
 
@@ -611,7 +611,23 @@ class PanelModelDefinitionBuilder(ModelDefinitionBuilder):
                 self._covariances.append(Covariance(y_current, x_future))
 
 
-class CSModelDefinitionBuilder(ModelDefinitionBuilder):
+class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
+    def with_y(self, y: VariableDefinition) -> Self:
+        if y.dummy_levels is not None:
+            raise ValueError("Cannot have dependent variable be a dummy variable, must be interval scale.")  # noqa: TRY003
+
+        self._y = y
+
+        return self
+
+    def with_x(self, x: VariableDefinition) -> Self:
+        if x.dummy_levels is not None:
+            raise NotImplementedError("Dummy x-variables are not implemented yet")
+
+        self._x = x
+
+        return self
+
     def build(self, data: pd.DataFrame, *, drop_first_dummy: bool = True) -> str:
         assert_column_type_correct(data)
 
@@ -633,14 +649,7 @@ class CSModelDefinitionBuilder(ModelDefinitionBuilder):
         # Majorly copy-pasta'd from PanelModelDefinitionBuilder._build_regressions
 
         y = Variable(self._y.name)
-        assert self._y_lag_structure == [], (
-            f"Building nonpanel regression but y had lag structure {self._y_lag_structure}"
-        )
-
         x = Variable(self._x.name)
-        assert self._x_lag_structure in ([0], []), (
-            f"Building nonpanel regression but x had lag structure {self._x_lag_structure}"
-        )
 
         mediators = self._compile_regressors(self._mediators, drop_first_dummy)
 
