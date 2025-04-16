@@ -585,7 +585,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
                 self._covariances.append(Covariance(lval, rvals))
 
-    def _fix_y_variance(self):
+    def _fix_regressand_variance(self):
         for regression in self._regressions:
             # Fix variance for y to be constant in time
             self._covariances.append(
@@ -595,6 +595,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
                         VariableWithNamedParameter(
                             regression.lval.name,
                             wave=regression.lval.wave,
+                            dummy_level=regression.lval.dummy_level,
                             parameter=f"sigma_{regression.lval.as_parameter_name()}",
                         )
                     ],
