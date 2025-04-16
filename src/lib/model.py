@@ -644,6 +644,10 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
     # Allow for pre-determined variables, i.e. arbitrary correlation between x and previous values of y
     def _make_x_predetermined(self):
+        # TODO: Don't (or do?) make x predetermined for the mediator regressions.
+        # Even if the answer is do make them predetermined,
+        # make it so we don't get the same rval twice in the Covariances (through _all_regressors)
+
         # Establish list of used regressors, as defining covariances between y and unused x is meaningless
         # (and causes the model to crash)
         all_regressors = self._all_regressors()
@@ -704,9 +708,8 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
         y = Variable(self._y.name)
         x = Variable(self._x.name)
 
-        mediators = self._compile_regressors(self._mediators, drop_first_dummy)
+        mediators = self._compile_regressors(self._mediators, drop_first_dummy, "zeta")
 
-        # Apparently [*<values>] typecasts to parent type?
         controls = self._compile_regressors(self._controls, drop_first_dummy)
         rvals: list[Variable] = [x, *mediators, *controls]
 
@@ -722,7 +725,7 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
             rvals = self._filter_constant_rvals(y, rvals, data)
 
         self._regressions.append(Regression(y, rvals, self._include_time_dummy))
-        self._add_mediator_regressions(mediators, rvals)
+        self._add_mediator_regressions(mediators, x, controls)
 
         if self._do_add_dummy_covariances:
             self._add_dummy_covariances(rvals)
@@ -733,36 +736,62 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
         self,
         regressors: list[VariableDefinition],
         drop_first_dummy: bool,  # noqa: FBT001
+        parameter_name: str | None = None,
     ) -> list[Variable]:
         # if wave_y is None, it's a cross-sectional regression, else panel regression.
-        result = []
+        result: list[Variable] = []
 
-        for variable in regressors:
-            if variable.dummy_levels is None:
-                result.append(Variable(variable.name))
+        for regressor in regressors:
+            if regressor.dummy_levels is None:
+                regressor_as_variable = Variable(regressor.name)
+
+                if parameter_name is not None:
+                    regressor_as_variable = regressor_as_variable.with_named_parameter(
+                        f"{parameter_name}_{regressor_as_variable.as_parameter_name()}"
+                    )
+
+                result.append(regressor_as_variable)
+
                 continue
 
-            dummy_levels = variable.dummy_levels
+            dummy_levels = regressor.dummy_levels
 
             if drop_first_dummy:
                 dropped, *dummy_levels = dummy_levels
-                logger.debug(f"Dropped first dummy level '{dropped}' for {variable.name}")
+                logger.debug(f"Dropped first dummy level '{dropped}' for {regressor.name}")
 
-            result.extend([Variable(variable.name, dummy_level=level) for level in dummy_levels])
+            for level in dummy_levels:
+                regressor_as_variable = Variable(regressor.name, dummy_level=level)
+
+                if parameter_name is not None:
+                    regressor_as_variable = regressor_as_variable.with_named_parameter(
+                        f"{parameter_name}_{regressor_as_variable.as_parameter_name()}"
+                    )
+
+                result.append(regressor_as_variable)
 
         return result
 
     def _add_mediator_regressions(
         self,
         mediators: Sequence[Variable],
-        rvals: Sequence[Variable],
+        x: Variable,
+        controls: Sequence[Variable],
     ):
-        mediator_names = {mediator.name for mediator in mediators}
-
         for mediator in mediators:
-            current_rvals = [rval for rval in rvals if rval.name not in mediator_names]
+            current_rvals: list[VariableWithNamedParameter] = []
 
-            self._regressions.append(Regression(mediator, current_rvals, self._include_time_dummy))
+            current_rvals.append(x.with_named_parameter(f"eta_{mediator.as_parameter_name()}_x"))
+
+            for control in controls:
+                current_rvals.append(  # noqa: PERF401
+                    control.with_named_parameter(f"eta_{mediator.as_parameter_name()}_{control.as_parameter_name()}")
+                )
+
+            self._regressions.append(Regression(mediator.to_unnamed(), current_rvals, self._include_time_dummy))
+            self._mediator_pathways.append(
+                MediatorPathway(f"zeta_{mediator.as_parameter_name()}", f"eta_{mediator.as_parameter_name()}_x")
+            )
 
     def _add_dummy_covariances(self, rvals: list[Variable]):
         """Adds the covariances between dummy levels for the given rvals (lvals must be interval scale).
