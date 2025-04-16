@@ -191,10 +191,16 @@ class ModelDefinitionBuilder(ABC):
     def with_mediators(self, mediators: list[VariableDefinition]) -> Self:
         # TODO: I'm not sure if simultaneously modelling multiple mediators is valid, let's think about that.
         self._mediators = mediators
+
+        self._check_duplicate_definition()
+
         return self
 
     def with_w(self, variables: list[VariableDefinition]) -> Self:
         self._w = variables
+
+        self._check_duplicate_definition()
+
         return self
 
     def with_time_dummy(self) -> Self:
@@ -214,6 +220,17 @@ class ModelDefinitionBuilder(ABC):
     def with_dummy_level_covariances(self) -> Self:
         self._do_add_dummy_covariances = True
         return self
+
+    def _check_duplicate_definition(self):
+        all_regressors = [self._x, *self._mediators, *self._w]
+
+        seen_regressors: set[str] = set()
+
+        for regressor in all_regressors:
+            if regressor.name in seen_regressors:
+                raise ValueError(f"Duplicate use of {regressor} as rval")  # noqa: TRY003
+
+            seen_regressors.add(regressor.name)
 
     @abstractmethod
     def build(self, data: pd.DataFrame, *, drop_first_dummy: bool = True) -> str: ...
