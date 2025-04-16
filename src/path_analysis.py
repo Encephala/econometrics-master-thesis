@@ -3,8 +3,6 @@
 import logging
 from pathlib import Path
 
-import semopy
-
 from lib import save_for_R
 from lib.data import (
     Column,
@@ -58,10 +56,6 @@ model_definition = (
 
 
 print(model_definition)
-
-# Lil syntax check
-# (semopy syntax is similar enough to lavaan syntax)
-_ = semopy.Model(model_definition)
 
 # %% save for lavaan in R.
 save_for_R(model_definition, all_data, Path("/tmp/panel_data.dta"))  # noqa: S108

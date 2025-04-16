@@ -4,7 +4,6 @@ import logging
 from pathlib import Path
 
 import pandas as pd
-import semopy
 
 from lib import save_for_R
 from lib.data import (
@@ -62,7 +61,12 @@ model_definition = (
     .with_y(VariableDefinition(MHI5))
     .with_x(VariableDefinition(SPORTS))
     .with_mediators(
-        [VariableDefinition(PHYSICAL_HEALTH, dummy_levels=available_dummy_levels(all_data_flattened, PHYSICAL_HEALTH))]
+        [
+            VariableDefinition(
+                PHYSICAL_HEALTH, dummy_levels=available_dummy_levels(all_data_flattened, PHYSICAL_HEALTH)
+            ),
+            VariableDefinition(BMI, dummy_levels=available_dummy_levels(all_data_flattened, BMI)),
+        ]
     )
     .with_controls(
         [
@@ -71,7 +75,6 @@ model_definition = (
                 AGE,
                 ETHNICITY,
                 GENDER,
-                BMI,
                 MARITAL_STATUS,
                 INCOME,
                 EDUCATION_LEVEL,
@@ -86,10 +89,6 @@ model_definition = (
 
 
 print(model_definition)
-
-# Lil syntax check
-# (semopy syntax is similar enough to lavaan syntax)
-_ = semopy.Model(model_definition)
 
 # %% save for lavaan in R.
 save_for_R(model_definition, all_data_flattened, Path("/tmp/data.dta"))  # noqa: S108

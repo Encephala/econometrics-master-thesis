@@ -120,11 +120,12 @@ class OrdinalVariableSet(set[Variable]):
 
 @dataclass(frozen=True)
 class MediatorPathway:
+    mediator: Variable
     main_param: str
-    mediator_param: str
+    mediator_params: list[str]
 
     def build(self) -> str:
-        return f"{self.main_param}*{self.mediator_param}"
+        return " + ".join([f"{self.main_param}*{mediator_param}" for mediator_param in self.mediator_params])
 
 
 class _ModelDefinitionBuilder(ABC):
@@ -378,7 +379,7 @@ class _ModelDefinitionBuilder(ABC):
 {"\n".join(map(Regression.build, self._regressions))}
 
 # Total effect
-{self._make_total_effect()}
+{"\n".join(self._make_total_effects())}
 
 # Additional covariances
 {"\n".join(map(Covariance.build, self._covariances))}
@@ -387,15 +388,26 @@ class _ModelDefinitionBuilder(ABC):
 {self._ordinals.build()}
 """
 
-    def _make_total_effect(self):
-        rvals: list[str] = []
+    def _make_total_effects(self) -> list[str]:
+        result: list[str] = []
 
-        # TODO: Only valid when _x_lag_structure = [0] right now
-        rvals.append("beta0")
+        # TODO: Only valid for x_lag_structure = [0] right now
+        # Not sure yet how to generalise to multiple x-lags
+        result.append("direct := beta0")
+        global_total = "total := direct"
 
-        rvals.extend([pathway.build() for pathway in self._mediator_pathways])
+        for pathway in self._mediator_pathways:
+            # Contributions to mediations through this mediator
+            name = f"total_{pathway.mediator.as_parameter_name()}"
+            contributions = [f"{pathway.main_param}*{mediator_param}" for mediator_param in pathway.mediator_params]
 
-        return f"total := {' + '.join(rvals)}"
+            result.append(f"{name} := {' + '.join(contributions)}")
+
+            global_total += f" + {name}"
+
+        result.append(global_total)
+
+        return result
 
 
 class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
@@ -590,14 +602,12 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
                 )
 
             self._regressions.append(Regression(mediator, current_rvals, self._include_time_dummy))
-            self._mediator_pathways.extend(
-                [
-                    MediatorPathway(
-                        f"zeta_{mediator.as_parameter_name()}",
-                        f"eta_{mediator.as_parameter_name()}_x{lag}",
-                    )
-                    for lag in self._x_lag_structure
-                ]
+            self._mediator_pathways.append(
+                MediatorPathway(
+                    mediator,
+                    f"zeta_{mediator.as_parameter_name()}",
+                    [f"eta_{mediator.as_parameter_name()}_x{lag}" for lag in self._x_lag_structure],
+                )
             )
 
     def _add_dummy_covariances(self, rvals: list[Variable]):
@@ -690,14 +700,14 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
 
         available_variables: list[Column] = list(data.columns)  # pyright: ignore[reportAssignmentType]
 
-        self._build_nonpanel_regression(data, available_variables, drop_first_dummy)
+        self._build_regression(data, available_variables, drop_first_dummy)
 
         if self._do_PD_check:
             self._check_covariance_matrix_PD(data)
 
         return self._make_result()
 
-    def _build_nonpanel_regression(
+    def _build_regression(
         self,
         data: pd.DataFrame,
         available_variables: list[Column],
@@ -706,7 +716,7 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
         # Majorly copy-pasta'd from PanelModelDefinitionBuilder._build_regressions
 
         y = Variable(self._y.name)
-        x = Variable(self._x.name)
+        x = VariableWithNamedParameter(self._x.name, parameter="beta0")
 
         mediators = self._compile_regressors(self._mediators, drop_first_dummy, "zeta")
 
@@ -790,7 +800,11 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
 
             self._regressions.append(Regression(mediator.to_unnamed(), current_rvals, self._include_time_dummy))
             self._mediator_pathways.append(
-                MediatorPathway(f"zeta_{mediator.as_parameter_name()}", f"eta_{mediator.as_parameter_name()}_x")
+                MediatorPathway(
+                    mediator,
+                    f"zeta_{mediator.as_parameter_name()}",
+                    [f"eta_{mediator.as_parameter_name()}_x"],
+                )
             )
 
     def _add_dummy_covariances(self, rvals: list[Variable]):
