@@ -33,7 +33,7 @@ model_definition = (
     PanelModelDefinitionBuilder()
     .with_y(VariableDefinition(MHI5))
     .with_x(VariableDefinition(SPORTS))
-    .with_w(
+    .with_controls(
         [
             VariableDefinition(variable, dummy_levels=available_dummy_levels(all_data, variable))
             for variable in [

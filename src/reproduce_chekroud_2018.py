@@ -64,7 +64,7 @@ model_definition = (
     .with_mediators(
         [VariableDefinition(PHYSICAL_HEALTH, dummy_levels=available_dummy_levels(all_data_flattened, PHYSICAL_HEALTH))]
     )
-    .with_w(
+    .with_controls(
         [
             VariableDefinition(variable, dummy_levels=available_dummy_levels(all_data_flattened, variable))
             for variable in [

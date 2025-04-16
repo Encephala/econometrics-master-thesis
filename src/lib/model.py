@@ -124,7 +124,7 @@ class _ModelDefinitionBuilder(ABC):
 
     _mediators: list[VariableDefinition]
 
-    _w: list[VariableDefinition]
+    _controls: list[VariableDefinition]
     _include_time_dummy: bool = False
 
     _do_missing_check: bool = True
@@ -144,7 +144,7 @@ class _ModelDefinitionBuilder(ABC):
 
     def __init__(self):
         self._mediators = []
-        self._w = []
+        self._controls = []
         self._excluded_regressors = []
 
         self._regressions = []
@@ -158,8 +158,8 @@ class _ModelDefinitionBuilder(ABC):
 
         return self
 
-    def with_w(self, variables: list[VariableDefinition]) -> Self:
-        self._w = variables
+    def with_controls(self, controls: list[VariableDefinition]) -> Self:
+        self._controls = controls
 
         self._check_duplicate_definition()
 
@@ -184,7 +184,7 @@ class _ModelDefinitionBuilder(ABC):
         return self
 
     def _check_duplicate_definition(self):
-        all_regressors = [self._x, *self._mediators, *self._w]
+        all_regressors = [self._x, *self._mediators, *self._controls]
 
         seen_regressors: set[str] = set()
 
@@ -219,8 +219,8 @@ class _ModelDefinitionBuilder(ABC):
 
             else:
                 # TODO: This still fires if the requested regressor is a dummy level that was automatically excluded
-                # in self._compile_w.
-                # It's not a solution to run this method in _compile_w though,
+                # in self._compile_regressors.
+                # It's not a solution to run this method in _compile_regressors though,
                 # as at that point we don't know the regressors yet.
                 # TODO: It also fires for every wave in a panel regression, that doesn't make sense.
                 logger.debug(f"{regressor} was requested to be removed, but it wasn't in the model")
@@ -319,17 +319,27 @@ class _ModelDefinitionBuilder(ABC):
 
         return None
 
-    def _define_ordinals(self, y: Sequence[Variable], x: Sequence[Variable], w: Sequence[Variable]):
+    def _define_ordinals(
+        self,
+        y: Sequence[Variable],
+        x: Sequence[Variable],
+        mediators: Sequence[Variable],
+        controls: Sequence[Variable],
+    ):
         if self._y.is_ordinal:
             self._ordinals.update(y)
 
         if self._x.is_ordinal:
             self._ordinals.update(x)
 
-        ordinal_w = [definition for definition in self._w if definition.is_ordinal]
+        ordinal_mediators = [definition for definition in self._mediators if definition.is_ordinal]
+        for definition in ordinal_mediators:
+            variables = [variable for variable in mediators if variable.name == definition.name]
+            self._ordinals.update(variables)
 
-        for definition in ordinal_w:
-            variables = [variable for variable in w if variable.name == definition.name]
+        ordinal_controls = [definition for definition in self._controls if definition.is_ordinal]
+        for definition in ordinal_controls:
+            variables = [variable for variable in controls if variable.name == definition.name]
             self._ordinals.update(variables)
 
     def _all_regressors(self) -> list[Variable]:
@@ -472,8 +482,8 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
             mediators = self._compile_regressors(self._mediators, "zeta", wave, drop_first_dummy)
 
-            w = self._compile_regressors(self._w, "delta0", wave, drop_first_dummy)
-            rvals: list[Variable] = [*y_lags, *x_lags, *mediators, *w]
+            controls = self._compile_regressors(self._controls, "delta0", wave, drop_first_dummy)
+            rvals: list[Variable] = [*y_lags, *x_lags, *mediators, *controls]
 
             rvals = self._filter_excluded_regressors(rvals)
 
@@ -492,7 +502,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
             if self._do_add_dummy_covariances:
                 self._add_dummy_covariances(rvals)
 
-            self._define_ordinals([y, *y_lags], [*x_lags], w)
+            self._define_ordinals([y, *y_lags], [*x_lags], mediators, controls)
 
     def _compile_regressors(
         self,
@@ -554,7 +564,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
         """Adds the covariances between dummy levels for the given rvals (lvals must be interval scale).
 
         Should thus be called once for each regression."""
-        # NOTE/TODO: Because this function works on the rvals and not self._w,
+        # NOTE/TODO: Because this function works on the rvals and not self._controls,
         # it does not include a covariance for the dummy level that is excluded for identification.
         # I'm not 100% that is correct behaviour.
 
@@ -659,8 +669,8 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
         mediators = self._compile_regressors(self._mediators, drop_first_dummy)
 
         # Apparently [*<values>] typecasts to parent type?
-        w = self._compile_regressors(self._w, drop_first_dummy)
-        rvals: list[Variable] = [x, *mediators, *w]
+        controls = self._compile_regressors(self._controls, drop_first_dummy)
+        rvals: list[Variable] = [x, *mediators, *controls]
 
         rvals = self._filter_excluded_regressors(rvals)
 
@@ -679,7 +689,7 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
         if self._do_add_dummy_covariances:
             self._add_dummy_covariances(rvals)
 
-        self._define_ordinals([y], [x], w)
+        self._define_ordinals([y], [x], mediators, controls)
 
     def _compile_regressors(
         self,
@@ -720,7 +730,7 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
         """Adds the covariances between dummy levels for the given rvals (lvals must be interval scale).
 
         Should thus be called once for each regression."""
-        # NOTE/TODO: Because this function works on the rvals and not self._w,
+        # NOTE/TODO: Because this function works on the rvals and not self._controls,
         # it does not include a covariance for the dummy level that is excluded for identification.
         # I'm not 100% that is correct behaviour.
 

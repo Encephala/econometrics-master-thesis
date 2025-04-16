@@ -66,7 +66,7 @@ model_definition = (
     PanelModelDefinitionBuilder()
     .with_x(VariableDefinition("x"), lag_structure=[1])
     .with_y(VariableDefinition("y"), lag_structure=[1, 2, 3])
-    .with_w([VariableDefinition("some_control")])
+    .with_controls([VariableDefinition("some_control")])
     .build(complete_data)
 )
 
