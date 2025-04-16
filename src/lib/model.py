@@ -118,6 +118,15 @@ class OrdinalVariableSet(set[Variable]):
         return f"DEFINE(ordinal) {' '.join(sorted(variable.build() for variable in self))}"
 
 
+@dataclass(frozen=True)
+class MediatorPathway:
+    main_param: str
+    mediator_param: str
+
+    def build(self) -> str:
+        return f"{self.main_param}*{self.mediator_param}"
+
+
 class _ModelDefinitionBuilder(ABC):
     _y: VariableDefinition
     _x: VariableDefinition
@@ -141,6 +150,7 @@ class _ModelDefinitionBuilder(ABC):
     _regressions: list[Regression]
     _covariances: list[Covariance]
     _ordinals: OrdinalVariableSet
+    _mediator_pathways: list[MediatorPathway]
 
     def __init__(self):
         self._mediators = []
@@ -150,6 +160,7 @@ class _ModelDefinitionBuilder(ABC):
         self._regressions = []
         self._covariances = []
         self._ordinals = OrdinalVariableSet()
+        self._mediator_pathways = []
 
     def with_mediators(self, mediators: list[VariableDefinition]) -> Self:
         self._mediators = mediators
@@ -364,12 +375,27 @@ class _ModelDefinitionBuilder(ABC):
 
     def _make_result(self) -> str:
         return f"""# Regressions (structural part)
-{"\n".join([*map(Regression.build, self._regressions), ""])}
+{"\n".join(map(Regression.build, self._regressions))}
+
+# Total effect
+{self._make_total_effect()}
+
 # Additional covariances
-{"\n".join([*map(Covariance.build, self._covariances), ""])}
+{"\n".join(map(Covariance.build, self._covariances))}
+
 # Operations/constraints
 {self._ordinals.build()}
 """
+
+    def _make_total_effect(self):
+        rvals: list[str] = []
+
+        # TODO: Only valid when _x_lag_structure = [0] right now
+        rvals.append("beta0")
+
+        rvals.extend([pathway.build() for pathway in self._mediator_pathways])
+
+        return f"total := {' + '.join(rvals)}"
 
 
 class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
@@ -419,7 +445,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
         self._build_regressions(waves, available_variables, data, drop_first_dummy)
 
-        self._fix_y_variance()
+        self._fix_regressand_variance()
 
         self._make_x_predetermined()
 
@@ -497,7 +523,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
                 rvals = self._filter_constant_rvals(y, rvals, data)
 
             self._regressions.append(Regression(y, rvals, self._include_time_dummy))
-            self._add_mediator_regressions(mediators, rvals)
+            self._add_mediator_regressions(mediators, y_lags, x_lags, controls)
 
             if self._do_add_dummy_covariances:
                 self._add_dummy_covariances(rvals)
@@ -545,20 +571,34 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
     def _add_mediator_regressions(
         self,
         mediators: Sequence[Variable],
-        rvals: Sequence[Variable],
+        y_lags: Sequence[VariableWithNamedParameter],
+        x_lags: Sequence[VariableWithNamedParameter],
+        controls: Sequence[Variable],
     ):
-        mediator_names = {mediator.name for mediator in mediators}
-
         for mediator in [mediator.to_unnamed() for mediator in mediators]:
-            # Filter self and other mediators from rvals,
-            # because otherwise the mediator regressions aren't identified due to simultaneity.
-            current_rvals = [
-                rval.with_named_parameter(f"eta_{mediator.as_parameter_name()}_{rval.as_parameter_name()}")
-                for rval in rvals
-                if rval.name not in mediator_names
-            ]
+            current_rvals: list[VariableWithNamedParameter] = []
+
+            for lag, lagged_y in zip(self._y_lag_structure, y_lags, strict=True):
+                current_rvals.append(lagged_y.with_named_parameter(f"eta_{mediator.as_parameter_name()}_y{lag}"))
+
+            for lag, lagged_x in zip(self._x_lag_structure, x_lags, strict=True):
+                current_rvals.append(lagged_x.with_named_parameter(f"eta_{mediator.as_parameter_name()}_x{lag}"))
+
+            for control in controls:
+                current_rvals.append(  # noqa: PERF401
+                    control.with_named_parameter(f"eta_{mediator.as_parameter_name()}_{control.as_parameter_name()}")
+                )
 
             self._regressions.append(Regression(mediator, current_rvals, self._include_time_dummy))
+            self._mediator_pathways.extend(
+                [
+                    MediatorPathway(
+                        f"zeta_{mediator.as_parameter_name()}",
+                        f"eta_{mediator.as_parameter_name()}_x{lag}",
+                    )
+                    for lag in self._x_lag_structure
+                ]
+            )
 
     def _add_dummy_covariances(self, rvals: list[Variable]):
         """Adds the covariances between dummy levels for the given rvals (lvals must be interval scale).
