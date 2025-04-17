@@ -4,6 +4,7 @@ from IPython.display import display
 import pandas as pd
 import numpy as np
 import semopy
+import pyperclip
 
 from lib.data import map_columns_to_str
 
@@ -26,3 +27,6 @@ def save_for_R(model: str, data: pd.DataFrame, path: Path):
     # Because the stata file format doesn't allow "." in variable names
     print("Model definition in stata/lavaan form:")
     print(model.replace(".", "_"))
+
+    pyperclip.copy(model.replace(".", "_"))
+    print("Copied model to clipboard.")

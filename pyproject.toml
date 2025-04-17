@@ -13,6 +13,8 @@ dependencies = [
     "pyreadstat",
 
     "semopy @ git+https://github.com/Encephala/semopy.git@master",
+
+    "pyperclip", 
 ]
 
 [tool.ruff]
