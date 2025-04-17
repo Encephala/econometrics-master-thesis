@@ -719,6 +719,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
                 VariableWithNamedParameter(
                     variable.name,
                     wave=variable.wave,
+                    dummy_level=variable.dummy_level,
                     parameter=f"gamma{variable.wave - regression.lval.wave}",  # pyright: ignore[reportOperatorIssue]
                 )
                 for variable in all_regressors
