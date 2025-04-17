@@ -361,9 +361,10 @@ class _ModelDefinitionBuilder(ABC):
         all_regressors: list[Variable] = []
 
         for regression in self._regressions:
-            all_regressors.extend(rval for rval in regression.rvals if rval not in all_regressors)
+            all_regressors.extend(rval.to_unnamed() for rval in regression.rvals if rval not in all_regressors)
 
-        return all_regressors
+        # Filter non-unique, conveniently maintains order
+        return list(dict.fromkeys(all_regressors))
 
     def _check_covariance_matrix_PD(self, data: pd.DataFrame):
         all_regressors = [
