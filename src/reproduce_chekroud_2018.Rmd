@@ -17,6 +17,8 @@ library(haven)
 ```{r Load data}
 all_relevant_data <- read_dta("/tmp/data.dta")
 head(all_relevant_data)
+
+options(max.print = 2500)
 ```
 
 ```{r}
