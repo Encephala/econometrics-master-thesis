@@ -21,5 +21,6 @@ def save_for_R(model: str, data: pd.DataFrame, path: Path):
 
     data_flattened.to_stata(path)
 
+    # Because the stata file format doesn't allow "." in variable names
     print("Model definition in stata/lavaan form:")
     print(model.replace(".", "_"))

@@ -393,19 +393,26 @@ class _ModelDefinitionBuilder(ABC):
 
         # TODO: Only valid for x_lag_structure = [0] right now
         # Not sure yet how to generalise to multiple x-lags
-        result.append("direct := beta0")
-        global_total = "total := direct"
+        direct_effect_name = "effect_direct"
+        result.append(f"{direct_effect_name} := beta0")
+        components_global_total: list[str] = [direct_effect_name]
 
-        for pathway in self._mediator_pathways:
-            # Contributions to mediations through this mediator
-            name = f"total_{pathway.mediator.as_parameter_name()}"
-            contributions = [f"{pathway.main_param}*{mediator_param}" for mediator_param in pathway.mediator_params]
+        for variable_name, pathways in groupby(self._mediator_pathways, lambda pathway: pathway.mediator.name):
+            # Contributions to mediation through this mediator
+            components_local_total: list[str] = []
 
-            result.append(f"{name} := {' + '.join(contributions)}")
+            for pathway in pathways:
+                local_name = f"effect_{pathway.mediator.as_parameter_name()}"
+                contributions = [f"{pathway.main_param}*{mediator_param}" for mediator_param in pathway.mediator_params]
 
-            global_total += f" + {name}"
+                result.append(f"{local_name} := {' + '.join(contributions)}")
+                components_local_total.append(local_name)
 
-        result.append(global_total)
+            global_name = f"total_{variable_name}"
+            result.append(f"{global_name} := {' + '.join(components_local_total)}")
+            components_global_total.append(global_name)
+
+        result.append(f"total := {' + '.join(components_global_total)}")
 
         return result
 
