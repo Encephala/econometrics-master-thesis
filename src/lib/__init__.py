@@ -19,6 +19,8 @@ def print_results(model: semopy.Model):
 def save_for_R(model: str, data: pd.DataFrame, path: Path):
     data_flattened = map_columns_to_str(data.astype(np.float64))
 
+    # Manually replace . by _ to avoid a huge warning from stat
+    data_flattened.columns = [column.replace(".", "_") for column in data_flattened.columns]
     data_flattened.to_stata(path)
 
     # Because the stata file format doesn't allow "." in variable names
