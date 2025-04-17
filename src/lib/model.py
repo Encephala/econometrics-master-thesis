@@ -805,6 +805,8 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
                     control.with_named_parameter(f"eta_{mediator.as_parameter_name()}_{control.as_parameter_name()}")
                 )
 
+            current_rvals.extend(controls)
+
             self._regressions.append(Regression(mediator.to_unnamed(), current_rvals, self._include_time_dummy))
             self._mediator_pathways.append(
                 MediatorPathway(
