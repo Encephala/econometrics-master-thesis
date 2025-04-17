@@ -194,9 +194,8 @@ class _ModelDefinitionBuilder(ABC):
         self._excluded_regressors = excluded_regressors
         return self
 
-    def with_dummy_level_covariances(self) -> Self:
-        self._do_add_dummy_covariances = True
-        return self
+    @abstractmethod
+    def with_additional_covariances(self) -> Self: ...
 
     def _check_duplicate_definition(self):
         all_regressors = [self._x, *self._mediators, *self._controls]
@@ -469,6 +468,14 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
     _y_lag_structure: list[int]
     _x_lag_structure: list[int]
 
+    # To make epsilon fixed
+    _fix_regressand_variance: bool = True
+
+    # To set covariance between current value and future value of a regressor as a free value
+    _free_covariance_across_time: bool = True
+
+    _do_make_x_predetermined: bool = True
+
     def with_y(self, y: VariableDefinition, *, lag_structure: list[int] | None = None) -> Self:
         if y.dummy_levels is not None:
             raise ValueError("Cannot have dependent variable be a dummy variable, must be interval scale.")  # noqa: TRY003
@@ -500,6 +507,20 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
         return self
 
+    def with_additional_covariances(
+        self,
+        *,
+        fixed_regressand_variance: bool = True,
+        free_covariance_across_time: bool = True,
+        within_dummy_covariance: bool = True,
+        x_predetermined: bool = True,
+    ) -> Self:
+        self._fix_regressand_variance = fixed_regressand_variance
+        self._free_covariance_across_time = free_covariance_across_time
+        self._do_add_dummy_covariances = within_dummy_covariance
+        self._do_make_x_predetermined = x_predetermined
+        return self
+
     def build(self, data: pd.DataFrame, *, drop_first_dummy: bool = True) -> str:
         assert_column_type_correct(data)
 
@@ -509,11 +530,14 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
         self._build_regressions(waves, available_variables, data, drop_first_dummy)
 
-        self._fix_variances_across_time()
+        if self._fix_regressand_variance:
+            self._fix_variances_across_time()
 
-        self._free_regressor_correlations_across_time()
+        if self._free_covariance_across_time:
+            self._free_regressor_correlations_across_time()
 
-        self._make_x_predetermined()
+        if self._do_make_x_predetermined:
+            self._make_x_predetermined()
 
         if self._do_PD_check:
             self._check_covariance_matrix_PD(data)
@@ -716,7 +740,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
         NOTE: Not done for y because y's autocorrelation should be captured by the AR lags."""
         all_regressors = self._all_regressors()
-        # Sort by name because groupby eagerly makes new groups
+        # Sort because groupby eagerly makes new groups
         all_regressors = sorted(
             all_regressors,
             key=lambda regressor: (
@@ -728,6 +752,9 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
         for _, variables in groupby(all_regressors, lambda regressor: regressor.name):
             variables = list(variables)  # noqa: PLW2901
+
+            # TODO: Currently, this also includes covariance with a future different dummy level
+            # Would be great if that also respected _do_add_dummy_covariances
             for i in range(len(variables) - 1):
                 lval = variables[i]
                 rvals = [
@@ -774,6 +801,14 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
     def with_x(self, x: VariableDefinition) -> Self:
         self._x = x
 
+        return self
+
+    def with_additional_covariances(
+        self,
+        *,
+        within_dummy_covariance: bool = True,
+    ) -> Self:
+        self._do_add_dummy_covariances = within_dummy_covariance
         return self
 
     def build(self, data: pd.DataFrame, *, drop_first_dummy: bool = True) -> str:
