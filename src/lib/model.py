@@ -722,12 +722,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
             y_current = regression.lval
             x_future = [
-                VariableWithNamedParameter(
-                    variable.name,
-                    wave=variable.wave,
-                    dummy_level=variable.dummy_level,
-                    parameter=f"gamma{variable.wave - regression.lval.wave}",  # pyright: ignore[reportOperatorIssue]
-                )
+                variable.with_named_parameter(f"gamma{variable.wave - regression.lval.wave}")  # pyright: ignore[reportOperatorIssue]
                 for variable in all_regressors
                 if variable.name == self._x.name and variable.wave > regression.lval.wave  # pyright: ignore[reportOperatorIssue]
             ]
