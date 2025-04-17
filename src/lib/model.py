@@ -509,7 +509,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
         self._build_regressions(waves, available_variables, data, drop_first_dummy)
 
-        self._fix_regressand_variance()
+        self._fix_variances_across_time()
 
         self._make_x_predetermined()
 
@@ -687,15 +687,27 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
                 self._covariances.append(Covariance(lval, rvals))
 
-    def _fix_regressand_variance(self):
+    def _fix_variances_across_time(self):
+        "Fix the variance of all the variables in self._regressions to be constant in time."
+        all_variables: list[Variable] = []
+
         for regression in self._regressions:
-            # Fix variance for y to be constant in time
-            self._covariances.append(
+            all_variables.append(regression.lval.to_unnamed())
+
+            all_variables.extend([rval.to_unnamed() for rval in regression.rvals])
+
+        # Remove duplicates
+        all_variables = list(dict.fromkeys(all_variables))
+
+        self._covariances.extend(
+            [
                 Covariance(
-                    regression.lval,
-                    [regression.lval.with_named_parameter(f"sigma_{regression.lval.as_parameter_name()}")],
+                    variable,
+                    [variable.with_named_parameter(f"sigma_{variable.as_parameter_name()}")],
                 )
-            )
+                for variable in all_variables
+            ]
+        )
 
     # Allow for pre-determined variables, i.e. arbitrary correlation between x and previous values of y
     def _make_x_predetermined(self):
