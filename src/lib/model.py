@@ -759,9 +759,11 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
                 lval = variables[i]
                 rvals = [
                     rval.with_named_parameter(
-                        f"gamma{rval.wave - lval.wave}_{lval.as_parameter_name()}_{rval.as_parameter_name()}"  # type: ignore[reportOperatorIssue]
+                        f"gamma{rval.wave - lval.wave}_{lval.as_parameter_name()}_{rval.as_parameter_name()}"  # pyright: ignore[reportOperatorIssue]
                     )
                     for rval in variables[i + 1 :]
+                    # Needed because rval might be the same wave but different dummy level
+                    if rval.wave > lval.wave  # pyright: ignore[reportOperatorIssue]
                 ]
 
                 if len(rvals) != 0:
