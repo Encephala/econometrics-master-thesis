@@ -693,25 +693,12 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
             self._covariances.append(
                 Covariance(
                     regression.lval,
-                    [
-                        VariableWithNamedParameter(
-                            regression.lval.name,
-                            wave=regression.lval.wave,
-                            dummy_level=regression.lval.dummy_level,
-                            parameter=f"sigma_{regression.lval.as_parameter_name()}",
-                        )
-                    ],
+                    [regression.lval.with_named_parameter(f"sigma_{regression.lval.as_parameter_name()}")],
                 )
             )
 
     # Allow for pre-determined variables, i.e. arbitrary correlation between x and previous values of y
     def _make_x_predetermined(self):
-        # TODO: Don't (or do?) make x predetermined for the mediator regressions.
-        # Even if the answer is do make them predetermined,
-        # make it so we don't get the same rval twice in the Covariances (through _all_regressors)
-
-        # Establish list of used regressors, as defining covariances between y and unused x is meaningless
-        # (and causes the model to crash)
         all_regressors = self._all_regressors()
 
         for regression in self._regressions:
