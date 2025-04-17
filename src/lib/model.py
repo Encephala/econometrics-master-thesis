@@ -121,8 +121,11 @@ class OrdinalVariableSet(set[Variable]):
 @dataclass(frozen=True)
 class MediatorPathway:
     mediator: Variable
+
     main_param: str
     mediator_params: list[str]
+
+    for_dummy_level: str | None = None
 
     def build(self) -> str:
         return " + ".join([f"{self.main_param}*{mediator_param}" for mediator_param in self.mediator_params])
@@ -389,30 +392,74 @@ class _ModelDefinitionBuilder(ABC):
 """
 
     def _make_total_effects(self) -> list[str]:
+        if self._x.dummy_levels is None:
+            return self._make_total_for_dummy_level(self._mediator_pathways, None)
+
+        result: list[str] = []
+
+        for x_dummy_level in self._x.dummy_levels:
+            relevant_pathways = list(
+                filter(lambda pathway: pathway.for_dummy_level == x_dummy_level, self._mediator_pathways)
+            )
+
+            if len(relevant_pathways) == 0:
+                # This is a dummy level that was dropped for identification
+                continue
+
+            result.extend(self._make_total_for_dummy_level(relevant_pathways, x_dummy_level))
+
+        return result
+
+    def _make_total_for_dummy_level(
+        self,
+        relevant_pathways: Sequence[MediatorPathway],
+        dummy_level: str | None,
+    ) -> list[str]:
+        def make_effect_name(prefix: str, dummy_level: str | None, suffix: str | None) -> str:
+            result = prefix
+
+            if dummy_level is not None:
+                result += f"_{dummy_level}"
+
+            if suffix is not None:
+                result += f"_{suffix}"
+
+            return result
+
         result: list[str] = []
 
         # TODO: Only valid for x_lag_structure = [0] right now
         # Not sure yet how to generalise to multiple x-lags
-        direct_effect_name = "effect_direct"
-        result.append(f"{direct_effect_name} := beta0")
+        direct_effect_name = make_effect_name("effect", dummy_level, "direct")
+
+        # NOTE: Mimicking `Variable.as_parameter_name`
+        # Could avoid the duplication when including x in a MediatorPathway, but not sure how
+        # to handle multiple lags yet so that's a TODO
+        if dummy_level is not None:
+            result.append(f"{direct_effect_name} := beta0_{self._x.name}.{dummy_level}")
+        else:
+            result.append(f"{direct_effect_name} := beta0_{self._x.name}")
+
         components_global_total: list[str] = [direct_effect_name]
 
-        for variable_name, pathways in groupby(self._mediator_pathways, lambda pathway: pathway.mediator.name):
-            # Contributions to mediation through this mediator
+        for variable_name, pathways in groupby(relevant_pathways, lambda pathway: pathway.mediator.name):
+            # Contributions to mediation through this entire variable
             components_local_total: list[str] = []
 
             for pathway in pathways:
-                local_name = f"effect_{pathway.mediator.as_parameter_name()}"
+                local_name = make_effect_name("effect", dummy_level, pathway.mediator.as_parameter_name())
+
                 contributions = [f"{pathway.main_param}*{mediator_param}" for mediator_param in pathway.mediator_params]
 
                 result.append(f"{local_name} := {' + '.join(contributions)}")
                 components_local_total.append(local_name)
 
-            global_name = f"total_{variable_name}"
-            result.append(f"{global_name} := {' + '.join(components_local_total)}")
-            components_global_total.append(global_name)
+            global_component_name = make_effect_name("total", dummy_level, variable_name)
+            result.append(f"{global_component_name} := {' + '.join(components_local_total)}")
+            components_global_total.append(global_component_name)
 
-        result.append(f"total := {' + '.join(components_global_total)}")
+        global_name = make_effect_name("total", dummy_level, None)
+        result.append(f"{global_name} := {' + '.join(components_global_total)}")
 
         return result
 
@@ -439,9 +486,6 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
         return self
 
     def with_x(self, x: VariableDefinition, *, lag_structure: list[int] | None = None) -> Self:
-        if x.dummy_levels is not None:
-            raise NotImplementedError("Dummy x-variables are not implemented yet")
-
         self._x = x
 
         if lag_structure is not None:
@@ -520,10 +564,10 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
                 VariableWithNamedParameter(self._y.name, wave=wave - lag, parameter=f"rho{lag}")
                 for lag in self._y_lag_structure
             ]
-            x_lags = [
-                VariableWithNamedParameter(self._x.name, wave=wave - lag, parameter=f"beta{lag}")
-                for lag in self._x_lag_structure
-            ]
+
+            x_lags: list[Variable] = []
+            for lag in self._x_lag_structure:
+                x_lags.extend(self._compile_regressors([self._x], f"beta{lag}", wave - lag, drop_first_dummy))
 
             mediators = self._compile_regressors(self._mediators, "zeta", wave, drop_first_dummy)
 
@@ -590,8 +634,8 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
     def _add_mediator_regressions(
         self,
         mediators: Sequence[Variable],
-        y_lags: Sequence[VariableWithNamedParameter],
-        x_lags: Sequence[VariableWithNamedParameter],
+        y_lags: Sequence[Variable],
+        x_lags: Sequence[Variable],
         controls: Sequence[Variable],
     ):
         for mediator in [mediator.to_unnamed() for mediator in mediators]:
@@ -695,9 +739,6 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
         return self
 
     def with_x(self, x: VariableDefinition) -> Self:
-        if x.dummy_levels is not None:
-            raise NotImplementedError("Dummy x-variables are not implemented yet")
-
         self._x = x
 
         return self
@@ -723,12 +764,12 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
         # Majorly copy-pasta'd from PanelModelDefinitionBuilder._build_regressions
 
         y = Variable(self._y.name)
-        x = VariableWithNamedParameter(self._x.name, parameter="beta0")
+        x = self._compile_regressors([self._x], drop_first_dummy, "beta0")
 
         mediators = self._compile_regressors(self._mediators, drop_first_dummy, "zeta")
 
         controls = self._compile_regressors(self._controls, drop_first_dummy)
-        rvals: list[Variable] = [x, *mediators, *controls]
+        rvals: list[Variable] = [*x, *mediators, *controls]
 
         rvals = self._filter_excluded_regressors(rvals)
 
@@ -747,7 +788,7 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
         if self._do_add_dummy_covariances:
             self._add_dummy_covariances(rvals)
 
-        self._define_ordinals([y], [x], mediators, controls)
+        self._define_ordinals([y], x, mediators, controls)
 
     def _compile_regressors(
         self,
@@ -792,28 +833,31 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
     def _add_mediator_regressions(
         self,
         mediators: Sequence[Variable],
-        x: Variable,
+        x_levels: Sequence[Variable],
         controls: Sequence[Variable],
     ):
         for mediator in mediators:
-            current_rvals: list[VariableWithNamedParameter] = []
+            current_rvals: list[Variable] = []
 
-            current_rvals.append(x.with_named_parameter(f"eta_{mediator.as_parameter_name()}_x"))
-
-            for control in controls:
+            for level in x_levels:
                 current_rvals.append(  # noqa: PERF401
-                    control.with_named_parameter(f"eta_{mediator.as_parameter_name()}_{control.as_parameter_name()}")
+                    level.with_named_parameter(f"eta_{mediator.as_parameter_name()}_x_{level.dummy_level}")
                 )
 
             current_rvals.extend(controls)
 
             self._regressions.append(Regression(mediator.to_unnamed(), current_rvals, self._include_time_dummy))
-            self._mediator_pathways.append(
-                MediatorPathway(
-                    mediator,
-                    f"zeta_{mediator.as_parameter_name()}",
-                    [f"eta_{mediator.as_parameter_name()}_x"],
-                )
+
+            self._mediator_pathways.extend(
+                [
+                    MediatorPathway(
+                        mediator,
+                        f"zeta_{mediator.as_parameter_name()}",
+                        [f"eta_{mediator.as_parameter_name()}_x_{level.dummy_level}"],
+                        level.dummy_level,
+                    )
+                    for level in x_levels
+                ]
             )
 
     def _add_dummy_covariances(self, rvals: list[Variable]):
