@@ -714,6 +714,12 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
         all_regressors = self._all_regressors()
 
         for regression in self._regressions:
+            # Skip mediator regressions.
+            # Since mediator regressions don't include x (to avoid simultaneity),
+            # it's meaningless to define them as predetermined
+            if regression.lval.name != self._y.name:
+                continue
+
             y_current = regression.lval
             x_future = [
                 VariableWithNamedParameter(
