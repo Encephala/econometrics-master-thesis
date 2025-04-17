@@ -511,6 +511,8 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
         self._fix_variances_across_time()
 
+        self._free_regressor_correlations_across_time()
+
         self._make_x_predetermined()
 
         if self._do_PD_check:
@@ -709,6 +711,35 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
             ]
         )
 
+    def _free_regressor_correlations_across_time(self):
+        """Sets the correlations between the same variable for different waves as a free parameter.
+
+        NOTE: Not done for y because y's autocorrelation should be captured by the AR lags."""
+        all_regressors = self._all_regressors()
+        # Sort by name because groupby eagerly makes new groups
+        all_regressors = sorted(
+            all_regressors,
+            key=lambda regressor: (
+                regressor.name,
+                regressor.wave,
+                regressor.dummy_level,
+            ),
+        )
+
+        for _, variables in groupby(all_regressors, lambda regressor: regressor.name):
+            variables = list(variables)  # noqa: PLW2901
+            for i in range(len(variables) - 1):
+                lval = variables[i]
+                rvals = [
+                    rval.with_named_parameter(
+                        f"gamma{rval.wave - lval.wave}_{lval.as_parameter_name()}_{rval.as_parameter_name()}"  # type: ignore[reportOperatorIssue]
+                    )
+                    for rval in variables[i + 1 :]
+                ]
+
+                if len(rvals) != 0:
+                    self._covariances.append(Covariance(lval, rvals))
+
     # Allow for pre-determined variables, i.e. arbitrary correlation between x and previous values of y
     def _make_x_predetermined(self):
         all_regressors = self._all_regressors()
@@ -722,7 +753,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
             y_current = regression.lval
             x_future = [
-                variable.with_named_parameter(f"gamma{variable.wave - regression.lval.wave}")  # pyright: ignore[reportOperatorIssue]
+                variable.with_named_parameter(f"gamma{variable.wave - regression.lval.wave}_y_x")  # pyright: ignore[reportOperatorIssue]
                 for variable in all_regressors
                 if variable.name == self._x.name and variable.wave > regression.lval.wave  # pyright: ignore[reportOperatorIssue]
             ]
