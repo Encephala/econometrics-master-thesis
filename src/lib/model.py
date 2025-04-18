@@ -100,6 +100,9 @@ class Regression:
             + (" + ".join(rval.build() for rval in self.rvals))
         )
 
+    def __post_init__(self):
+        assert not isinstance(self.lval, VariableWithNamedParameter)
+
 
 @dataclass(frozen=True)
 class Covariance:
@@ -108,6 +111,9 @@ class Covariance:
 
     def build(self) -> str:
         return f"{self.lval.build()} ~~ {' + '.join(rval.build() for rval in self.rvals)}"
+
+    def __post_init__(self):
+        assert not isinstance(self.lval, VariableWithNamedParameter)
 
 
 class OrdinalVariableSet(set[Variable]):
@@ -129,6 +135,15 @@ class MediatorPathway:
 
     def build(self) -> str:
         return " + ".join([f"{self.main_param}*{mediator_param}" for mediator_param in self.mediator_params])
+
+
+@dataclass(frozen=True)
+class ParameterDefinition:
+    lval: str
+    rvals: list[str]
+
+    def build(self) -> str:
+        return f"{self.lval} := {' + '.join(self.rvals)}"
 
 
 class _ModelDefinitionBuilder(ABC):
@@ -155,6 +170,7 @@ class _ModelDefinitionBuilder(ABC):
     _covariances: list[Covariance]
     _ordinals: OrdinalVariableSet
     _mediator_pathways: list[MediatorPathway]
+    _parameter_definitions: list[ParameterDefinition]
 
     def __init__(self):
         self._mediators = []
@@ -165,6 +181,7 @@ class _ModelDefinitionBuilder(ABC):
         self._covariances = []
         self._ordinals = OrdinalVariableSet()
         self._mediator_pathways = []
+        self._parameter_definitions = []
 
     def with_mediators(self, mediators: list[VariableDefinition]) -> Self:
         self._mediators = mediators
@@ -333,6 +350,58 @@ class _ModelDefinitionBuilder(ABC):
 
         return None
 
+    def _define_total_effects(self, xs: list[Variable]):
+        logger.debug(f"Defining total effects: {xs=}")
+
+        # NOTE/TODO: Not sure how to handle multiple x_lags, only implemented for x_lag_structure = [0] for now.
+        for x in xs:
+            relevant_pathways = list(
+                filter(lambda pathway: pathway.for_dummy_level == x.dummy_level, self._mediator_pathways)
+            )
+
+            if len(relevant_pathways) == 0:
+                logger.debug(f"No relevant mediator pathways found for {x=}, not defining contribution to total effect")
+                # This is a dummy level that was dropped for identification
+                continue
+
+            self._define_total_for_x_dummy_level(x, relevant_pathways)
+
+    def _define_total_for_x_dummy_level(self, x: Variable, relevant_pathways: Sequence[MediatorPathway]):
+        def make_parameter_name(prefix: str, dummy_level: str | None, suffix: str | None) -> str:
+            result = prefix
+
+            if dummy_level is not None:
+                result += f"_{dummy_level}"
+
+            if suffix is not None:
+                result += f"_{suffix}"
+
+            return result
+
+        direct_effect = make_parameter_name("effect", x.dummy_level, "direct")
+        self._parameter_definitions.append(ParameterDefinition(direct_effect, [f"beta0_{x.as_parameter_name()}"]))
+
+        rvals_total_x: list[str] = [direct_effect]
+
+        for variable_name, pathways in groupby(relevant_pathways, lambda pathway: pathway.mediator.name):
+            # Total contributions to mediation through this entire variable
+            rvals_total_mediator: list[str] = []
+
+            for pathway in pathways:
+                local_name = make_parameter_name("effect", x.dummy_level, pathway.mediator.as_parameter_name())
+
+                contributions = [f"{pathway.main_param}*{mediator_param}" for mediator_param in pathway.mediator_params]
+
+                self._parameter_definitions.append(ParameterDefinition(local_name, contributions))
+                rvals_total_mediator.append(local_name)
+
+            global_component = make_parameter_name("total", x.dummy_level, variable_name)
+            self._parameter_definitions.append(ParameterDefinition(global_component, rvals_total_mediator))
+            rvals_total_x.append(global_component)
+
+        global_name = make_parameter_name("total", x.dummy_level, None)
+        self._parameter_definitions.append(ParameterDefinition(global_name, rvals_total_x))
+
     def _define_ordinals(
         self,
         y: Sequence[Variable],
@@ -382,7 +451,7 @@ class _ModelDefinitionBuilder(ABC):
 {"\n".join(map(Regression.build, self._regressions))}
 
 # Total effect
-{"\n".join(self._make_total_effects())}
+{"\n".join(map(ParameterDefinition.build, self._parameter_definitions))}
 
 # Additional covariances
 {"\n".join(map(Covariance.build, self._covariances))}
@@ -390,78 +459,6 @@ class _ModelDefinitionBuilder(ABC):
 # Operations/constraints
 {self._ordinals.build()}
 """
-
-    def _make_total_effects(self) -> list[str]:
-        if self._x.dummy_levels is None:
-            return self._make_total_for_dummy_level(self._mediator_pathways, None)
-
-        result: list[str] = []
-
-        for x_dummy_level in self._x.dummy_levels:
-            relevant_pathways = list(
-                filter(lambda pathway: pathway.for_dummy_level == x_dummy_level, self._mediator_pathways)
-            )
-
-            if len(relevant_pathways) == 0:
-                # This is a dummy level that was dropped for identification
-                continue
-
-            result.extend(self._make_total_for_dummy_level(relevant_pathways, x_dummy_level))
-
-        return result
-
-    def _make_total_for_dummy_level(
-        self,
-        relevant_pathways: Sequence[MediatorPathway],
-        dummy_level: str | None,
-    ) -> list[str]:
-        def make_effect_name(prefix: str, dummy_level: str | None, suffix: str | None) -> str:
-            result = prefix
-
-            if dummy_level is not None:
-                result += f"_{dummy_level}"
-
-            if suffix is not None:
-                result += f"_{suffix}"
-
-            return result
-
-        result: list[str] = []
-
-        # TODO: Only valid for x_lag_structure = [0] right now
-        # Not sure yet how to generalise to multiple x-lags
-        direct_effect_name = make_effect_name("effect", dummy_level, "direct")
-
-        # NOTE: Mimicking `Variable.as_parameter_name`
-        # Could avoid the duplication when including x in a MediatorPathway, but not sure how
-        # to handle multiple lags yet so that's a TODO
-        if dummy_level is not None:
-            result.append(f"{direct_effect_name} := beta0_{self._x.name}.{dummy_level}")
-        else:
-            result.append(f"{direct_effect_name} := beta0_{self._x.name}")
-
-        components_global_total: list[str] = [direct_effect_name]
-
-        for variable_name, pathways in groupby(relevant_pathways, lambda pathway: pathway.mediator.name):
-            # Contributions to mediation through this entire variable
-            components_local_total: list[str] = []
-
-            for pathway in pathways:
-                local_name = make_effect_name("effect", dummy_level, pathway.mediator.as_parameter_name())
-
-                contributions = [f"{pathway.main_param}*{mediator_param}" for mediator_param in pathway.mediator_params]
-
-                result.append(f"{local_name} := {' + '.join(contributions)}")
-                components_local_total.append(local_name)
-
-            global_component_name = make_effect_name("total", dummy_level, variable_name)
-            result.append(f"{global_component_name} := {' + '.join(components_local_total)}")
-            components_global_total.append(global_component_name)
-
-        global_name = make_effect_name("total", dummy_level, None)
-        result.append(f"{global_name} := {' + '.join(components_global_total)}")
-
-        return result
 
 
 class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
@@ -617,6 +614,9 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
             if self._do_add_dummy_covariances:
                 self._add_dummy_covariances(rvals)
+
+            # TODO: not just non-lagged x
+            self._define_total_effects([x for x in x_lags if x.wave == wave - self._x_lag_structure[0]])
 
             self._define_ordinals([y, *y_lags], [*x_lags], mediators, controls)
 
@@ -857,6 +857,8 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
 
         if self._do_add_dummy_covariances:
             self._add_dummy_covariances(rvals)
+
+        self._define_total_effects(x)
 
         self._define_ordinals([y], x, mediators, controls)
 
