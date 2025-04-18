@@ -96,7 +96,7 @@ class Regression:
         return (
             f"{self.lval.build()}"
             + " ~ "
-            + (f"alpha_t{self.lval.wave}*1 + " if self.include_time_dummy else "")
+            + (f"alpha_{self.lval.as_parameter_name()}_t{self.lval.wave}*1 + " if self.include_time_dummy else "")
             + (" + ".join(rval.build() for rval in self.rvals))
         )
 
