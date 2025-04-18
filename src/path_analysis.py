@@ -5,7 +5,6 @@ from pathlib import Path
 
 from lib import save_for_R
 from lib.data import (
-    Column,
     make_all_data,
     select_variable,
     available_dummy_levels,
@@ -35,21 +34,37 @@ model_definition = (
         [
             VariableDefinition(variable, dummy_levels=available_dummy_levels(all_data, variable))
             for variable in [
-                AGE,
+                # AGE,
                 ETHNICITY,
-                GENDER,
-                BMI,
-                MARITAL_STATUS,
-                INCOME,
-                EDUCATION_LEVEL,
-                EMPLOYMENT,
-                PHYSICAL_HEALTH,
+                # GENDER,
+                # BMI,
+                # MARITAL_STATUS,
+                # INCOME,
+                # EDUCATION_LEVEL,
+                # EMPLOYMENT,
+                # PHYSICAL_HEALTH,
             ]
         ]
-        + [VariableDefinition(variable) for variable in [PREVIOUS_DEPRESSION]]
+        # + [VariableDefinition(variable) for variable in [PREVIOUS_DEPRESSION]]
+    )
+    .with_time_invariant_controls(
+        [
+            VariableDefinition(variable, dummy_levels=available_dummy_levels(all_data, variable))
+            for variable in [
+                # AGE,
+                # ETHNICITY,
+                GENDER,
+                # BMI,
+                # MARITAL_STATUS,
+                # INCOME,
+                # EDUCATION_LEVEL,
+                # EMPLOYMENT,
+                # PHYSICAL_HEALTH,
+            ]
+        ]
+        # + [VariableDefinition(variable) for variable in [PREVIOUS_DEPRESSION]]
     )
     .with_time_dummy()
-    .with_excluded_regressors([Column(PREVIOUS_DEPRESSION, wave=13)])
     .build(all_data)
 )
 

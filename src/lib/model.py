@@ -7,7 +7,13 @@ from itertools import groupby
 import pandas as pd
 
 from .data import Column
-from .data.util import assert_column_type_correct, cleanup_dummy, find_non_PD_suspicious_columns
+from .data.util import (
+    assert_column_type_correct,
+    available_years,
+    cleanup_dummy,
+    find_non_PD_suspicious_columns,
+    select_variable,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -465,6 +471,8 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
     _y_lag_structure: list[int]
     _x_lag_structure: list[int]
 
+    _time_invariant_controls: list[VariableDefinition]
+
     # To make epsilon fixed
     _fix_regressand_variance: bool = True
 
@@ -502,6 +510,10 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
         else:
             self._x_lag_structure = [0]
 
+        return self
+
+    def with_time_invariant_controls(self, controls: list[VariableDefinition]) -> Self:
+        self._time_invariant_controls = controls
         return self
 
     def with_additional_covariances(
@@ -595,8 +607,13 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
             mediators = self._compile_regressors(self._mediators, "zeta", wave, drop_first_dummy)
 
-            controls = self._compile_regressors(self._controls, "delta0", wave, drop_first_dummy)
-            rvals: list[Variable] = [*y_lags, *x_lags, *mediators, *controls]
+            controls = self._compile_regressors(self._controls, "omega0", wave, drop_first_dummy)
+
+            time_invariant_controls = self._compile_regressors(
+                self._time_invariant_controls, "delta", None, drop_first_dummy
+            )
+
+            rvals: list[Variable] = [*y_lags, *x_lags, *mediators, *controls, *time_invariant_controls]
 
             rvals = self._filter_excluded_regressors(rvals)
 
@@ -610,13 +627,15 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
                 rvals = self._filter_constant_rvals(y, rvals, data)
 
             self._regressions.append(Regression(y, rvals, self._include_time_dummy))
-            self._add_mediator_regressions(mediators, y_lags, x_lags, controls)
+            self._add_mediator_regressions(mediators, y_lags, x_lags, [*controls, *time_invariant_controls])
 
             if self._do_add_dummy_covariances:
                 self._add_dummy_covariances(rvals)
 
             # TODO: not just non-lagged x
-            self._define_total_effects([x for x in x_lags if x.wave == wave - self._x_lag_structure[0]])
+            # TODO: This is not right yet, it's redefining the same effects for each regression, need only
+            # be defined once because the parameters are reused across the regression.
+            # self._define_total_effects([x for x in x_lags if x.wave == wave - self._x_lag_structure[0]])
 
             self._define_ordinals([y, *y_lags], [*x_lags], mediators, controls)
 
@@ -624,7 +643,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
         self,
         regressors: list[VariableDefinition],
         parameter_name: str,
-        wave_y: int,
+        wave_y: int | None,
         drop_first_dummy: bool,  # noqa: FBT001
     ) -> list[Variable]:
         result = []
