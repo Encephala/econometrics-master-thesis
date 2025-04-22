@@ -671,7 +671,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
             dummy_levels = definition.dummy_levels
 
-            if drop_first_dummy:
+            if drop_first_dummy and len(dummy_levels) > 1:
                 dropped, *dummy_levels = dummy_levels
                 logger.debug(f"Dropped first dummy level '{dropped}' for {definition.name}")
 
@@ -922,7 +922,7 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
 
             dummy_levels = regressor.dummy_levels
 
-            if drop_first_dummy:
+            if drop_first_dummy and len(dummy_levels) > 1:
                 dropped, *dummy_levels = dummy_levels
                 logger.debug(f"Dropped first dummy level '{dropped}' for {regressor.name}")
 
