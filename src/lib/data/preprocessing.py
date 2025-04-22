@@ -1,5 +1,6 @@
 from dataclasses import replace
 from pathlib import Path
+import logging
 
 import pandas as pd
 import numpy as np
@@ -8,6 +9,8 @@ import numpy as np
 from .loading import Column, load_wide_panel_cached
 from .util import assert_column_type_correct, available_years, select_variable, cleanup_dummy
 from .variables import *
+
+logger = logging.getLogger(__name__)
 
 
 # All variable names
@@ -266,13 +269,61 @@ def make_ethnicity(background_vars: pd.DataFrame) -> pd.DataFrame:
     return ethnicity.apply(lambda column: column.cat.rename_categories(category_map))
 
 
+# Finding the first non-NA value of each variable within each column
+def find_first_non_na(data: pd.DataFrame) -> pd.Series:
+    """Makes a series that contains the first (temporally) non-NA value in the data for each individual.
+    Should be called with only one variable in `data`."""
+    assert_column_type_correct(data)
+
+    # Empty df
+    if data.shape[1] == 0:
+        logger.debug("first non-NA value of empty df, returning empty Series")
+        return pd.Series(index=data.index)
+
+    # Variable is constant
+    if data.shape[1] == 1:
+        logger.debug("first non-NA value of df with one column, returning column")
+        return data.iloc[:, 0]
+
+    variables = list({column.name for column in data.columns})  # pyright: ignore[reportAttributeAccessIssue]
+    assert len(variables) == 1, (
+        "Should be called with just the data for one variable across time, not multiple different variables,"
+        f" but got {variables}"
+    )
+
+    variable_sorted = data[sorted(data.columns, key=lambda column: column.wave)]  # pyright: ignore[reportAttributeAccessIssue]
+
+    # Already asserted all columns are same variable, so same dtype
+    name = Column(f"{variables[0]}_first")
+    result = pd.Series(index=data.index, name=name, dtype=data.dtypes.iloc[0])
+
+    # Have to loop because df.first_valid_index() not vectorised, returns index of first row containing any valid value
+    for individual in variable_sorted.index:
+        index = variable_sorted.loc[individual, :].first_valid_index()
+
+        value = pd.NA if index is None else variable_sorted.loc[individual, index]
+
+        result.loc[individual] = value
+
+    return result
+
+
+def add_first_non_na(variable: pd.DataFrame) -> pd.DataFrame:
+    """Makes a series that contains the first (temporally) non-NA value in the data for each individual.
+    Returns a new dataframe with this series added."""
+
+    new_series = find_first_non_na(variable)
+
+    return pd.concat([variable, new_series], axis=1)
+
+
 # The big merge
 def make_dummies(df: pd.DataFrame) -> pd.DataFrame:
     return pd.concat([series_to_dummies(df[column]) for column in df], axis=1)
 
 
 def series_to_dummies(series: pd.Series) -> pd.DataFrame:
-    assert isinstance(series, pd.Series), f"Expected a pd.Series, got {type(series)}\n{series}"
+    assert isinstance(series, pd.Series), f"Expected a pd.Series, got {type(series)}:\n{series}"
 
     result = pd.get_dummies(series, prefix_sep=".", dtype="boolean")
 
@@ -312,22 +363,22 @@ def make_all_data(*, cache: bool, respect_load_cache: bool = True) -> pd.DataFra
     bmi = make_bmi(health_panel)
     previous_depression = make_previous_depression(health_panel)
 
-    result = pd.DataFrame(index=background_vars.index).join(
-        [
-            mhi5,
-            sports,
-            make_dummies(age),
-            make_dummies(ethnicity),
-            make_dummies(gender),
-            make_dummies(marital_status),
-            make_dummies(income),
-            make_dummies(education),
-            make_dummies(employment),
-            make_dummies(physical_health),
-            make_dummies(bmi),
-            previous_depression,
-        ]
-    )
+    all_data = [
+        mhi5,
+        sports,
+        make_dummies(age),
+        make_dummies(ethnicity),
+        make_dummies(gender),
+        make_dummies(marital_status),
+        make_dummies(income),
+        make_dummies(education),
+        make_dummies(employment),
+        make_dummies(physical_health),
+        make_dummies(bmi),
+        previous_depression,
+    ]
+
+    result = pd.DataFrame(index=background_vars.index).join([add_first_non_na(variable) for variable in all_data])
 
     result.to_pickle(path)
 

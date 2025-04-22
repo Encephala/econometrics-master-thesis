@@ -70,7 +70,7 @@ def assemble_wide_panel(prefix: str) -> pd.DataFrame:
 
     for file in Path("../data").glob(prefix + "*"):
         if file.suffix == ".pkl":
-            logger.warning(f"Assembling panel for {prefix=} but pickle file already exists ({file})")
+            logger.info(f"Assembling panel for {prefix=} when pickle file already exists ({file}), overwriting pickle")
             continue
 
         new_df = load_df(file)
@@ -98,7 +98,7 @@ def assemble_background_panel() -> pd.DataFrame:
 
     for file in Path("../data").glob("avars*"):
         if file.suffix == ".pkl":
-            logger.warning(f"Assembling panel for avars but pickle file already exists ({file}), overwriting pickle")
+            logger.info(f"Assembling panel for avars when pickle file already exists ({file}), overwriting pickle")
             continue
 
         new_df = load_df(file)
