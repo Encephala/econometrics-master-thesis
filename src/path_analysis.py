@@ -11,6 +11,7 @@ from lib.data import (
 )
 
 # ruff: noqa: F403, F405
+from lib.data import Column
 from lib.data.variables import *
 from lib.model import PanelModelDefinitionBuilder, VariableDefinition
 
@@ -34,35 +35,43 @@ model_definition = (
         [
             VariableDefinition(variable, dummy_levels=available_dummy_levels(all_data, variable))
             for variable in [
-                # AGE,
-                ETHNICITY,
-                # GENDER,
-                # BMI,
-                # MARITAL_STATUS,
-                # INCOME,
-                # EDUCATION_LEVEL,
-                # EMPLOYMENT,
-                # PHYSICAL_HEALTH,
+                BMI,
+                PHYSICAL_HEALTH,
             ]
         ]
-        # + [VariableDefinition(variable) for variable in [PREVIOUS_DEPRESSION]]
+        + [VariableDefinition(variable) for variable in []]
     )
     .with_time_invariant_controls(
         [
             VariableDefinition(variable, dummy_levels=available_dummy_levels(all_data, variable))
             for variable in [
-                # AGE,
-                # ETHNICITY,
+                AGE,
+                INCOME,
+                ETHNICITY,
                 GENDER,
-                # BMI,
-                # MARITAL_STATUS,
-                # INCOME,
-                # EDUCATION_LEVEL,
-                # EMPLOYMENT,
-                # PHYSICAL_HEALTH,
+                MARITAL_STATUS,
+                EDUCATION_LEVEL,
+                EMPLOYMENT,
             ]
         ]
-        # + [VariableDefinition(variable) for variable in [PREVIOUS_DEPRESSION]]
+        + [
+            VariableDefinition(variable)
+            for variable in [
+                PREVIOUS_DEPRESSION,
+            ]
+        ]
+    )
+    .with_additional_covariances(
+        fix_variance_across_time=True,
+        free_covariance_across_time=False,
+        within_dummy_covariance=False,
+        x_predetermined=True,
+    )
+    .with_excluded_regressors(
+        [
+            Column(f"{GENDER}_first", dummy_level="other"),  # Makes stuff unstable, it's only 10 True
+            Column(f"{INCOME}_first", dummy_level="15k.50k"),  # Also unstable, only 9 True
+        ]
     )
     .with_time_dummy()
     .build(all_data)
@@ -72,4 +81,4 @@ model_definition = (
 print(model_definition)
 
 # %% save for lavaan in R.
-save_for_R(model_definition, all_data, Path("/tmp/panel_data.dta"))  # noqa: S108
+save_for_R(model_definition, all_data, Path("/tmp/panel_data.feather"))  # noqa: S108

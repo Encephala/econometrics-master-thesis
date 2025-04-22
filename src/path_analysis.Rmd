@@ -6,16 +6,16 @@ Takes a model and the preprocessed data from the python script and runs the mode
 if (!requireNamespace("lavaan")) {
     install.packages("lavaan")
 }
-if (!requireNamespace("haven")) {
-    install.packages("haven")
+if (!requireNamespace("arrow")) {
+    install.packages("arrow")
 }
 
 library(lavaan)
-library(haven)
+library(arrow)
 ```
 
 ```{r Load data}
-all_relevant_data <- read_dta("/tmp/panel_data.dta")
+all_relevant_data <- read_feather("/tmp/panel_data.feather")
 head(all_relevant_data)
 
 options(max.print = 2500)
@@ -24,22 +24,147 @@ options(max.print = 2500)
 ```{r}
 sem_model <- "
 # Regressions (structural part)
-mhi5_12 ~ alpha_mhi5_t12*1 + beta0_cs104*cs104_12 + delta0_leeftijd_18_24*leeftijd_12_18_24 + delta0_leeftijd_25_39*leeftijd_12_25_39 + delta0_leeftijd_40_66*leeftijd_12_40_66 + delta0_leeftijd_over_67*leeftijd_12_over_67
-mhi5_13 ~ alpha_mhi5_t13*1 + beta0_cs104*cs104_13 + delta0_leeftijd_18_24*leeftijd_13_18_24 + delta0_leeftijd_25_39*leeftijd_13_25_39 + delta0_leeftijd_40_66*leeftijd_13_40_66 + delta0_leeftijd_over_67*leeftijd_13_over_67
-mhi5_15 ~ alpha_mhi5_t15*1 + beta0_cs104*cs104_15 + delta0_leeftijd_18_24*leeftijd_15_18_24 + delta0_leeftijd_25_39*leeftijd_15_25_39 + delta0_leeftijd_40_66*leeftijd_15_40_66 + delta0_leeftijd_over_67*leeftijd_15_over_67
-mhi5_16 ~ alpha_mhi5_t16*1 + beta0_cs104*cs104_16 + delta0_leeftijd_18_24*leeftijd_16_18_24 + delta0_leeftijd_25_39*leeftijd_16_25_39 + delta0_leeftijd_40_66*leeftijd_16_40_66 + delta0_leeftijd_over_67*leeftijd_16_over_67
-mhi5_17 ~ alpha_mhi5_t17*1 + beta0_cs104*cs104_17 + delta0_leeftijd_18_24*leeftijd_17_18_24 + delta0_leeftijd_25_39*leeftijd_17_25_39 + delta0_leeftijd_40_66*leeftijd_17_40_66 + delta0_leeftijd_over_67*leeftijd_17_over_67
-mhi5_18 ~ alpha_mhi5_t18*1 + beta0_cs104*cs104_18 + delta0_leeftijd_18_24*leeftijd_18_18_24 + delta0_leeftijd_25_39*leeftijd_18_25_39 + delta0_leeftijd_40_66*leeftijd_18_40_66 + delta0_leeftijd_over_67*leeftijd_18_over_67
-mhi5_19 ~ alpha_mhi5_t19*1 + beta0_cs104*cs104_19 + delta0_leeftijd_18_24*leeftijd_19_18_24 + delta0_leeftijd_25_39*leeftijd_19_25_39 + delta0_leeftijd_40_66*leeftijd_19_40_66 + delta0_leeftijd_over_67*leeftijd_19_over_67
-mhi5_20 ~ alpha_mhi5_t20*1 + beta0_cs104*cs104_20 + delta0_leeftijd_18_24*leeftijd_20_18_24 + delta0_leeftijd_25_39*leeftijd_20_25_39 + delta0_leeftijd_40_66*leeftijd_20_40_66 + delta0_leeftijd_over_67*leeftijd_20_over_67
-mhi5_21 ~ alpha_mhi5_t21*1 + beta0_cs104*cs104_21 + delta0_leeftijd_18_24*leeftijd_21_18_24 + delta0_leeftijd_25_39*leeftijd_21_25_39 + delta0_leeftijd_40_66*leeftijd_21_40_66 + delta0_leeftijd_over_67*leeftijd_21_over_67
-mhi5_22 ~ alpha_mhi5_t22*1 + beta0_cs104*cs104_22 + delta0_leeftijd_18_24*leeftijd_22_18_24 + delta0_leeftijd_25_39*leeftijd_22_25_39 + delta0_leeftijd_40_66*leeftijd_22_40_66 + delta0_leeftijd_over_67*leeftijd_22_over_67
-mhi5_23 ~ alpha_mhi5_t23*1 + beta0_cs104*cs104_23 + delta0_leeftijd_18_24*leeftijd_23_18_24 + delta0_leeftijd_25_39*leeftijd_23_25_39 + delta0_leeftijd_40_66*leeftijd_23_40_66 + delta0_leeftijd_over_67*leeftijd_23_over_67
+mhi5_12 ~ alpha_mhi5_t12*1 + beta0_cs104*cs104_12 + omega0_bmi.normal.weight*bmi_12.normal.weight + omega0_bmi.overweight*bmi_12.overweight + omega0_bmi.obese*bmi_12.obese + omega0_ch4.good*ch4_12.good + omega0_ch4.moderate*ch4_12.moderate + omega0_ch4.poor*ch4_12.poor + omega0_ch4.very.good*ch4_12.very.good + delta_leeftijd.18.24*leeftijd_first.18.24 + delta_leeftijd.25.39*leeftijd_first.25.39 + delta_leeftijd.40.66*leeftijd_first.40.66 + delta_leeftijd.over.67*leeftijd_first.over.67 + delta_nettohh_f.under.15k*nettohh_f_first.under.15k + delta_nettohh_f.over.50k*nettohh_f_first.over.50k + delta_herkomstgroep.first.w*herkomstgroep_first.first.w + delta_herkomstgroep.first.nonw*herkomstgroep_first.first.nonw + delta_herkomstgroep.second.w*herkomstgroep_first.second.w + delta_herkomstgroep.second.nonw*herkomstgroep_first.second.nonw + delta_geslacht.male*geslacht_first.male + delta_burgstat.married*burgstat_first.married + delta_burgstat.never.been.married*burgstat_first.never.been.married + delta_burgstat.separated*burgstat_first.separated + delta_burgstat.widow.or.widower*burgstat_first.widow.or.widower + delta_oplcat.hbo*oplcat_first.hbo + delta_oplcat.mbo*oplcat_first.mbo + delta_oplcat.primary.school*oplcat_first.primary.school + delta_oplcat.vmbo*oplcat_first.vmbo + delta_oplcat.wo*oplcat_first.wo + delta_employment.homemaker*employment_first.homemaker + delta_employment.retired*employment_first.retired + delta_employment.student*employment_first.student + delta_employment.unable.to.work*employment_first.unable.to.work + delta_employment.unemployed*employment_first.unemployed + delta_prev_depr*prev_depr_first
+mhi5_13 ~ alpha_mhi5_t13*1 + beta0_cs104*cs104_13 + omega0_bmi.normal.weight*bmi_13.normal.weight + omega0_bmi.overweight*bmi_13.overweight + omega0_bmi.obese*bmi_13.obese + omega0_ch4.good*ch4_13.good + omega0_ch4.moderate*ch4_13.moderate + omega0_ch4.poor*ch4_13.poor + omega0_ch4.very.good*ch4_13.very.good + delta_leeftijd.18.24*leeftijd_first.18.24 + delta_leeftijd.25.39*leeftijd_first.25.39 + delta_leeftijd.40.66*leeftijd_first.40.66 + delta_leeftijd.over.67*leeftijd_first.over.67 + delta_nettohh_f.under.15k*nettohh_f_first.under.15k + delta_nettohh_f.over.50k*nettohh_f_first.over.50k + delta_herkomstgroep.first.w*herkomstgroep_first.first.w + delta_herkomstgroep.first.nonw*herkomstgroep_first.first.nonw + delta_herkomstgroep.second.w*herkomstgroep_first.second.w + delta_herkomstgroep.second.nonw*herkomstgroep_first.second.nonw + delta_geslacht.male*geslacht_first.male + delta_burgstat.married*burgstat_first.married + delta_burgstat.never.been.married*burgstat_first.never.been.married + delta_burgstat.separated*burgstat_first.separated + delta_burgstat.widow.or.widower*burgstat_first.widow.or.widower + delta_oplcat.hbo*oplcat_first.hbo + delta_oplcat.mbo*oplcat_first.mbo + delta_oplcat.primary.school*oplcat_first.primary.school + delta_oplcat.vmbo*oplcat_first.vmbo + delta_oplcat.wo*oplcat_first.wo + delta_employment.homemaker*employment_first.homemaker + delta_employment.retired*employment_first.retired + delta_employment.student*employment_first.student + delta_employment.unable.to.work*employment_first.unable.to.work + delta_employment.unemployed*employment_first.unemployed + delta_prev_depr*prev_depr_first
+mhi5_15 ~ alpha_mhi5_t15*1 + beta0_cs104*cs104_15 + omega0_bmi.normal.weight*bmi_15.normal.weight + omega0_bmi.overweight*bmi_15.overweight + omega0_bmi.obese*bmi_15.obese + omega0_ch4.good*ch4_15.good + omega0_ch4.moderate*ch4_15.moderate + omega0_ch4.poor*ch4_15.poor + omega0_ch4.very.good*ch4_15.very.good + delta_leeftijd.18.24*leeftijd_first.18.24 + delta_leeftijd.25.39*leeftijd_first.25.39 + delta_leeftijd.40.66*leeftijd_first.40.66 + delta_leeftijd.over.67*leeftijd_first.over.67 + delta_nettohh_f.under.15k*nettohh_f_first.under.15k + delta_nettohh_f.over.50k*nettohh_f_first.over.50k + delta_herkomstgroep.first.w*herkomstgroep_first.first.w + delta_herkomstgroep.first.nonw*herkomstgroep_first.first.nonw + delta_herkomstgroep.second.w*herkomstgroep_first.second.w + delta_herkomstgroep.second.nonw*herkomstgroep_first.second.nonw + delta_geslacht.male*geslacht_first.male + delta_burgstat.married*burgstat_first.married + delta_burgstat.never.been.married*burgstat_first.never.been.married + delta_burgstat.separated*burgstat_first.separated + delta_burgstat.widow.or.widower*burgstat_first.widow.or.widower + delta_oplcat.hbo*oplcat_first.hbo + delta_oplcat.mbo*oplcat_first.mbo + delta_oplcat.primary.school*oplcat_first.primary.school + delta_oplcat.vmbo*oplcat_first.vmbo + delta_oplcat.wo*oplcat_first.wo + delta_employment.homemaker*employment_first.homemaker + delta_employment.retired*employment_first.retired + delta_employment.student*employment_first.student + delta_employment.unable.to.work*employment_first.unable.to.work + delta_employment.unemployed*employment_first.unemployed + delta_prev_depr*prev_depr_first
+mhi5_16 ~ alpha_mhi5_t16*1 + beta0_cs104*cs104_16 + omega0_bmi.normal.weight*bmi_16.normal.weight + omega0_bmi.overweight*bmi_16.overweight + omega0_bmi.obese*bmi_16.obese + omega0_ch4.good*ch4_16.good + omega0_ch4.moderate*ch4_16.moderate + omega0_ch4.poor*ch4_16.poor + omega0_ch4.very.good*ch4_16.very.good + delta_leeftijd.18.24*leeftijd_first.18.24 + delta_leeftijd.25.39*leeftijd_first.25.39 + delta_leeftijd.40.66*leeftijd_first.40.66 + delta_leeftijd.over.67*leeftijd_first.over.67 + delta_nettohh_f.under.15k*nettohh_f_first.under.15k + delta_nettohh_f.over.50k*nettohh_f_first.over.50k + delta_herkomstgroep.first.w*herkomstgroep_first.first.w + delta_herkomstgroep.first.nonw*herkomstgroep_first.first.nonw + delta_herkomstgroep.second.w*herkomstgroep_first.second.w + delta_herkomstgroep.second.nonw*herkomstgroep_first.second.nonw + delta_geslacht.male*geslacht_first.male + delta_burgstat.married*burgstat_first.married + delta_burgstat.never.been.married*burgstat_first.never.been.married + delta_burgstat.separated*burgstat_first.separated + delta_burgstat.widow.or.widower*burgstat_first.widow.or.widower + delta_oplcat.hbo*oplcat_first.hbo + delta_oplcat.mbo*oplcat_first.mbo + delta_oplcat.primary.school*oplcat_first.primary.school + delta_oplcat.vmbo*oplcat_first.vmbo + delta_oplcat.wo*oplcat_first.wo + delta_employment.homemaker*employment_first.homemaker + delta_employment.retired*employment_first.retired + delta_employment.student*employment_first.student + delta_employment.unable.to.work*employment_first.unable.to.work + delta_employment.unemployed*employment_first.unemployed + delta_prev_depr*prev_depr_first
+mhi5_17 ~ alpha_mhi5_t17*1 + beta0_cs104*cs104_17 + omega0_bmi.normal.weight*bmi_17.normal.weight + omega0_bmi.overweight*bmi_17.overweight + omega0_bmi.obese*bmi_17.obese + omega0_ch4.good*ch4_17.good + omega0_ch4.moderate*ch4_17.moderate + omega0_ch4.poor*ch4_17.poor + omega0_ch4.very.good*ch4_17.very.good + delta_leeftijd.18.24*leeftijd_first.18.24 + delta_leeftijd.25.39*leeftijd_first.25.39 + delta_leeftijd.40.66*leeftijd_first.40.66 + delta_leeftijd.over.67*leeftijd_first.over.67 + delta_nettohh_f.under.15k*nettohh_f_first.under.15k + delta_nettohh_f.over.50k*nettohh_f_first.over.50k + delta_herkomstgroep.first.w*herkomstgroep_first.first.w + delta_herkomstgroep.first.nonw*herkomstgroep_first.first.nonw + delta_herkomstgroep.second.w*herkomstgroep_first.second.w + delta_herkomstgroep.second.nonw*herkomstgroep_first.second.nonw + delta_geslacht.male*geslacht_first.male + delta_burgstat.married*burgstat_first.married + delta_burgstat.never.been.married*burgstat_first.never.been.married + delta_burgstat.separated*burgstat_first.separated + delta_burgstat.widow.or.widower*burgstat_first.widow.or.widower + delta_oplcat.hbo*oplcat_first.hbo + delta_oplcat.mbo*oplcat_first.mbo + delta_oplcat.primary.school*oplcat_first.primary.school + delta_oplcat.vmbo*oplcat_first.vmbo + delta_oplcat.wo*oplcat_first.wo + delta_employment.homemaker*employment_first.homemaker + delta_employment.retired*employment_first.retired + delta_employment.student*employment_first.student + delta_employment.unable.to.work*employment_first.unable.to.work + delta_employment.unemployed*employment_first.unemployed + delta_prev_depr*prev_depr_first
+mhi5_18 ~ alpha_mhi5_t18*1 + beta0_cs104*cs104_18 + omega0_bmi.normal.weight*bmi_18.normal.weight + omega0_bmi.overweight*bmi_18.overweight + omega0_bmi.obese*bmi_18.obese + omega0_ch4.good*ch4_18.good + omega0_ch4.moderate*ch4_18.moderate + omega0_ch4.poor*ch4_18.poor + omega0_ch4.very.good*ch4_18.very.good + delta_leeftijd.18.24*leeftijd_first.18.24 + delta_leeftijd.25.39*leeftijd_first.25.39 + delta_leeftijd.40.66*leeftijd_first.40.66 + delta_leeftijd.over.67*leeftijd_first.over.67 + delta_nettohh_f.under.15k*nettohh_f_first.under.15k + delta_nettohh_f.over.50k*nettohh_f_first.over.50k + delta_herkomstgroep.first.w*herkomstgroep_first.first.w + delta_herkomstgroep.first.nonw*herkomstgroep_first.first.nonw + delta_herkomstgroep.second.w*herkomstgroep_first.second.w + delta_herkomstgroep.second.nonw*herkomstgroep_first.second.nonw + delta_geslacht.male*geslacht_first.male + delta_burgstat.married*burgstat_first.married + delta_burgstat.never.been.married*burgstat_first.never.been.married + delta_burgstat.separated*burgstat_first.separated + delta_burgstat.widow.or.widower*burgstat_first.widow.or.widower + delta_oplcat.hbo*oplcat_first.hbo + delta_oplcat.mbo*oplcat_first.mbo + delta_oplcat.primary.school*oplcat_first.primary.school + delta_oplcat.vmbo*oplcat_first.vmbo + delta_oplcat.wo*oplcat_first.wo + delta_employment.homemaker*employment_first.homemaker + delta_employment.retired*employment_first.retired + delta_employment.student*employment_first.student + delta_employment.unable.to.work*employment_first.unable.to.work + delta_employment.unemployed*employment_first.unemployed + delta_prev_depr*prev_depr_first
+mhi5_19 ~ alpha_mhi5_t19*1 + beta0_cs104*cs104_19 + omega0_bmi.normal.weight*bmi_19.normal.weight + omega0_bmi.overweight*bmi_19.overweight + omega0_bmi.obese*bmi_19.obese + omega0_ch4.good*ch4_19.good + omega0_ch4.moderate*ch4_19.moderate + omega0_ch4.poor*ch4_19.poor + omega0_ch4.very.good*ch4_19.very.good + delta_leeftijd.18.24*leeftijd_first.18.24 + delta_leeftijd.25.39*leeftijd_first.25.39 + delta_leeftijd.40.66*leeftijd_first.40.66 + delta_leeftijd.over.67*leeftijd_first.over.67 + delta_nettohh_f.under.15k*nettohh_f_first.under.15k + delta_nettohh_f.over.50k*nettohh_f_first.over.50k + delta_herkomstgroep.first.w*herkomstgroep_first.first.w + delta_herkomstgroep.first.nonw*herkomstgroep_first.first.nonw + delta_herkomstgroep.second.w*herkomstgroep_first.second.w + delta_herkomstgroep.second.nonw*herkomstgroep_first.second.nonw + delta_geslacht.male*geslacht_first.male + delta_burgstat.married*burgstat_first.married + delta_burgstat.never.been.married*burgstat_first.never.been.married + delta_burgstat.separated*burgstat_first.separated + delta_burgstat.widow.or.widower*burgstat_first.widow.or.widower + delta_oplcat.hbo*oplcat_first.hbo + delta_oplcat.mbo*oplcat_first.mbo + delta_oplcat.primary.school*oplcat_first.primary.school + delta_oplcat.vmbo*oplcat_first.vmbo + delta_oplcat.wo*oplcat_first.wo + delta_employment.homemaker*employment_first.homemaker + delta_employment.retired*employment_first.retired + delta_employment.student*employment_first.student + delta_employment.unable.to.work*employment_first.unable.to.work + delta_employment.unemployed*employment_first.unemployed + delta_prev_depr*prev_depr_first
+mhi5_20 ~ alpha_mhi5_t20*1 + beta0_cs104*cs104_20 + omega0_bmi.normal.weight*bmi_20.normal.weight + omega0_bmi.overweight*bmi_20.overweight + omega0_bmi.obese*bmi_20.obese + omega0_ch4.good*ch4_20.good + omega0_ch4.moderate*ch4_20.moderate + omega0_ch4.poor*ch4_20.poor + omega0_ch4.very.good*ch4_20.very.good + delta_leeftijd.18.24*leeftijd_first.18.24 + delta_leeftijd.25.39*leeftijd_first.25.39 + delta_leeftijd.40.66*leeftijd_first.40.66 + delta_leeftijd.over.67*leeftijd_first.over.67 + delta_nettohh_f.under.15k*nettohh_f_first.under.15k + delta_nettohh_f.over.50k*nettohh_f_first.over.50k + delta_herkomstgroep.first.w*herkomstgroep_first.first.w + delta_herkomstgroep.first.nonw*herkomstgroep_first.first.nonw + delta_herkomstgroep.second.w*herkomstgroep_first.second.w + delta_herkomstgroep.second.nonw*herkomstgroep_first.second.nonw + delta_geslacht.male*geslacht_first.male + delta_burgstat.married*burgstat_first.married + delta_burgstat.never.been.married*burgstat_first.never.been.married + delta_burgstat.separated*burgstat_first.separated + delta_burgstat.widow.or.widower*burgstat_first.widow.or.widower + delta_oplcat.hbo*oplcat_first.hbo + delta_oplcat.mbo*oplcat_first.mbo + delta_oplcat.primary.school*oplcat_first.primary.school + delta_oplcat.vmbo*oplcat_first.vmbo + delta_oplcat.wo*oplcat_first.wo + delta_employment.homemaker*employment_first.homemaker + delta_employment.retired*employment_first.retired + delta_employment.student*employment_first.student + delta_employment.unable.to.work*employment_first.unable.to.work + delta_employment.unemployed*employment_first.unemployed + delta_prev_depr*prev_depr_first
+mhi5_21 ~ alpha_mhi5_t21*1 + beta0_cs104*cs104_21 + omega0_bmi.normal.weight*bmi_21.normal.weight + omega0_bmi.overweight*bmi_21.overweight + omega0_bmi.obese*bmi_21.obese + omega0_ch4.good*ch4_21.good + omega0_ch4.moderate*ch4_21.moderate + omega0_ch4.poor*ch4_21.poor + omega0_ch4.very.good*ch4_21.very.good + delta_leeftijd.18.24*leeftijd_first.18.24 + delta_leeftijd.25.39*leeftijd_first.25.39 + delta_leeftijd.40.66*leeftijd_first.40.66 + delta_leeftijd.over.67*leeftijd_first.over.67 + delta_nettohh_f.under.15k*nettohh_f_first.under.15k + delta_nettohh_f.over.50k*nettohh_f_first.over.50k + delta_herkomstgroep.first.w*herkomstgroep_first.first.w + delta_herkomstgroep.first.nonw*herkomstgroep_first.first.nonw + delta_herkomstgroep.second.w*herkomstgroep_first.second.w + delta_herkomstgroep.second.nonw*herkomstgroep_first.second.nonw + delta_geslacht.male*geslacht_first.male + delta_burgstat.married*burgstat_first.married + delta_burgstat.never.been.married*burgstat_first.never.been.married + delta_burgstat.separated*burgstat_first.separated + delta_burgstat.widow.or.widower*burgstat_first.widow.or.widower + delta_oplcat.hbo*oplcat_first.hbo + delta_oplcat.mbo*oplcat_first.mbo + delta_oplcat.primary.school*oplcat_first.primary.school + delta_oplcat.vmbo*oplcat_first.vmbo + delta_oplcat.wo*oplcat_first.wo + delta_employment.homemaker*employment_first.homemaker + delta_employment.retired*employment_first.retired + delta_employment.student*employment_first.student + delta_employment.unable.to.work*employment_first.unable.to.work + delta_employment.unemployed*employment_first.unemployed + delta_prev_depr*prev_depr_first
+mhi5_22 ~ alpha_mhi5_t22*1 + beta0_cs104*cs104_22 + omega0_bmi.normal.weight*bmi_22.normal.weight + omega0_bmi.overweight*bmi_22.overweight + omega0_bmi.obese*bmi_22.obese + omega0_ch4.good*ch4_22.good + omega0_ch4.moderate*ch4_22.moderate + omega0_ch4.poor*ch4_22.poor + omega0_ch4.very.good*ch4_22.very.good + delta_leeftijd.18.24*leeftijd_first.18.24 + delta_leeftijd.25.39*leeftijd_first.25.39 + delta_leeftijd.40.66*leeftijd_first.40.66 + delta_leeftijd.over.67*leeftijd_first.over.67 + delta_nettohh_f.under.15k*nettohh_f_first.under.15k + delta_nettohh_f.over.50k*nettohh_f_first.over.50k + delta_herkomstgroep.first.w*herkomstgroep_first.first.w + delta_herkomstgroep.first.nonw*herkomstgroep_first.first.nonw + delta_herkomstgroep.second.w*herkomstgroep_first.second.w + delta_herkomstgroep.second.nonw*herkomstgroep_first.second.nonw + delta_geslacht.male*geslacht_first.male + delta_burgstat.married*burgstat_first.married + delta_burgstat.never.been.married*burgstat_first.never.been.married + delta_burgstat.separated*burgstat_first.separated + delta_burgstat.widow.or.widower*burgstat_first.widow.or.widower + delta_oplcat.hbo*oplcat_first.hbo + delta_oplcat.mbo*oplcat_first.mbo + delta_oplcat.primary.school*oplcat_first.primary.school + delta_oplcat.vmbo*oplcat_first.vmbo + delta_oplcat.wo*oplcat_first.wo + delta_employment.homemaker*employment_first.homemaker + delta_employment.retired*employment_first.retired + delta_employment.student*employment_first.student + delta_employment.unable.to.work*employment_first.unable.to.work + delta_employment.unemployed*employment_first.unemployed + delta_prev_depr*prev_depr_first
+mhi5_23 ~ alpha_mhi5_t23*1 + beta0_cs104*cs104_23 + omega0_bmi.normal.weight*bmi_23.normal.weight + omega0_bmi.overweight*bmi_23.overweight + omega0_bmi.obese*bmi_23.obese + omega0_ch4.good*ch4_23.good + omega0_ch4.moderate*ch4_23.moderate + omega0_ch4.poor*ch4_23.poor + omega0_ch4.very.good*ch4_23.very.good + delta_leeftijd.18.24*leeftijd_first.18.24 + delta_leeftijd.25.39*leeftijd_first.25.39 + delta_leeftijd.40.66*leeftijd_first.40.66 + delta_leeftijd.over.67*leeftijd_first.over.67 + delta_nettohh_f.under.15k*nettohh_f_first.under.15k + delta_nettohh_f.over.50k*nettohh_f_first.over.50k + delta_herkomstgroep.first.w*herkomstgroep_first.first.w + delta_herkomstgroep.first.nonw*herkomstgroep_first.first.nonw + delta_herkomstgroep.second.w*herkomstgroep_first.second.w + delta_herkomstgroep.second.nonw*herkomstgroep_first.second.nonw + delta_geslacht.male*geslacht_first.male + delta_burgstat.married*burgstat_first.married + delta_burgstat.never.been.married*burgstat_first.never.been.married + delta_burgstat.separated*burgstat_first.separated + delta_burgstat.widow.or.widower*burgstat_first.widow.or.widower + delta_oplcat.hbo*oplcat_first.hbo + delta_oplcat.mbo*oplcat_first.mbo + delta_oplcat.primary.school*oplcat_first.primary.school + delta_oplcat.vmbo*oplcat_first.vmbo + delta_oplcat.wo*oplcat_first.wo + delta_employment.homemaker*employment_first.homemaker + delta_employment.retired*employment_first.retired + delta_employment.student*employment_first.student + delta_employment.unable.to.work*employment_first.unable.to.work + delta_employment.unemployed*employment_first.unemployed + delta_prev_depr*prev_depr_first
 
 # Total effect
 
 
 # Additional covariances
+mhi5_12 ~~ sigma_mhi5*mhi5_12
+cs104_12 ~~ sigma_cs104*cs104_12
+bmi_12.normal.weight ~~ sigma_bmi.normal.weight*bmi_12.normal.weight
+bmi_12.overweight ~~ sigma_bmi.overweight*bmi_12.overweight
+bmi_12.obese ~~ sigma_bmi.obese*bmi_12.obese
+ch4_12.good ~~ sigma_ch4.good*ch4_12.good
+ch4_12.moderate ~~ sigma_ch4.moderate*ch4_12.moderate
+ch4_12.poor ~~ sigma_ch4.poor*ch4_12.poor
+ch4_12.very.good ~~ sigma_ch4.very.good*ch4_12.very.good
+leeftijd_first.18.24 ~~ sigma_leeftijd_first.18.24*leeftijd_first.18.24
+leeftijd_first.25.39 ~~ sigma_leeftijd_first.25.39*leeftijd_first.25.39
+leeftijd_first.40.66 ~~ sigma_leeftijd_first.40.66*leeftijd_first.40.66
+leeftijd_first.over.67 ~~ sigma_leeftijd_first.over.67*leeftijd_first.over.67
+nettohh_f_first.under.15k ~~ sigma_nettohh_f_first.under.15k*nettohh_f_first.under.15k
+nettohh_f_first.over.50k ~~ sigma_nettohh_f_first.over.50k*nettohh_f_first.over.50k
+herkomstgroep_first.first.w ~~ sigma_herkomstgroep_first.first.w*herkomstgroep_first.first.w
+herkomstgroep_first.first.nonw ~~ sigma_herkomstgroep_first.first.nonw*herkomstgroep_first.first.nonw
+herkomstgroep_first.second.w ~~ sigma_herkomstgroep_first.second.w*herkomstgroep_first.second.w
+herkomstgroep_first.second.nonw ~~ sigma_herkomstgroep_first.second.nonw*herkomstgroep_first.second.nonw
+geslacht_first.male ~~ sigma_geslacht_first.male*geslacht_first.male
+burgstat_first.married ~~ sigma_burgstat_first.married*burgstat_first.married
+burgstat_first.never.been.married ~~ sigma_burgstat_first.never.been.married*burgstat_first.never.been.married
+burgstat_first.separated ~~ sigma_burgstat_first.separated*burgstat_first.separated
+burgstat_first.widow.or.widower ~~ sigma_burgstat_first.widow.or.widower*burgstat_first.widow.or.widower
+oplcat_first.hbo ~~ sigma_oplcat_first.hbo*oplcat_first.hbo
+oplcat_first.mbo ~~ sigma_oplcat_first.mbo*oplcat_first.mbo
+oplcat_first.primary.school ~~ sigma_oplcat_first.primary.school*oplcat_first.primary.school
+oplcat_first.vmbo ~~ sigma_oplcat_first.vmbo*oplcat_first.vmbo
+oplcat_first.wo ~~ sigma_oplcat_first.wo*oplcat_first.wo
+employment_first.homemaker ~~ sigma_employment_first.homemaker*employment_first.homemaker
+employment_first.retired ~~ sigma_employment_first.retired*employment_first.retired
+employment_first.student ~~ sigma_employment_first.student*employment_first.student
+employment_first.unable.to.work ~~ sigma_employment_first.unable.to.work*employment_first.unable.to.work
+employment_first.unemployed ~~ sigma_employment_first.unemployed*employment_first.unemployed
+prev_depr_first ~~ sigma_prev_depr_first*prev_depr_first
+mhi5_13 ~~ sigma_mhi5*mhi5_13
+cs104_13 ~~ sigma_cs104*cs104_13
+bmi_13.normal.weight ~~ sigma_bmi.normal.weight*bmi_13.normal.weight
+bmi_13.overweight ~~ sigma_bmi.overweight*bmi_13.overweight
+bmi_13.obese ~~ sigma_bmi.obese*bmi_13.obese
+ch4_13.good ~~ sigma_ch4.good*ch4_13.good
+ch4_13.moderate ~~ sigma_ch4.moderate*ch4_13.moderate
+ch4_13.poor ~~ sigma_ch4.poor*ch4_13.poor
+ch4_13.very.good ~~ sigma_ch4.very.good*ch4_13.very.good
+mhi5_15 ~~ sigma_mhi5*mhi5_15
+cs104_15 ~~ sigma_cs104*cs104_15
+bmi_15.normal.weight ~~ sigma_bmi.normal.weight*bmi_15.normal.weight
+bmi_15.overweight ~~ sigma_bmi.overweight*bmi_15.overweight
+bmi_15.obese ~~ sigma_bmi.obese*bmi_15.obese
+ch4_15.good ~~ sigma_ch4.good*ch4_15.good
+ch4_15.moderate ~~ sigma_ch4.moderate*ch4_15.moderate
+ch4_15.poor ~~ sigma_ch4.poor*ch4_15.poor
+ch4_15.very.good ~~ sigma_ch4.very.good*ch4_15.very.good
+mhi5_16 ~~ sigma_mhi5*mhi5_16
+cs104_16 ~~ sigma_cs104*cs104_16
+bmi_16.normal.weight ~~ sigma_bmi.normal.weight*bmi_16.normal.weight
+bmi_16.overweight ~~ sigma_bmi.overweight*bmi_16.overweight
+bmi_16.obese ~~ sigma_bmi.obese*bmi_16.obese
+ch4_16.good ~~ sigma_ch4.good*ch4_16.good
+ch4_16.moderate ~~ sigma_ch4.moderate*ch4_16.moderate
+ch4_16.poor ~~ sigma_ch4.poor*ch4_16.poor
+ch4_16.very.good ~~ sigma_ch4.very.good*ch4_16.very.good
+mhi5_17 ~~ sigma_mhi5*mhi5_17
+cs104_17 ~~ sigma_cs104*cs104_17
+bmi_17.normal.weight ~~ sigma_bmi.normal.weight*bmi_17.normal.weight
+bmi_17.overweight ~~ sigma_bmi.overweight*bmi_17.overweight
+bmi_17.obese ~~ sigma_bmi.obese*bmi_17.obese
+ch4_17.good ~~ sigma_ch4.good*ch4_17.good
+ch4_17.moderate ~~ sigma_ch4.moderate*ch4_17.moderate
+ch4_17.poor ~~ sigma_ch4.poor*ch4_17.poor
+ch4_17.very.good ~~ sigma_ch4.very.good*ch4_17.very.good
+mhi5_18 ~~ sigma_mhi5*mhi5_18
+cs104_18 ~~ sigma_cs104*cs104_18
+bmi_18.normal.weight ~~ sigma_bmi.normal.weight*bmi_18.normal.weight
+bmi_18.overweight ~~ sigma_bmi.overweight*bmi_18.overweight
+bmi_18.obese ~~ sigma_bmi.obese*bmi_18.obese
+ch4_18.good ~~ sigma_ch4.good*ch4_18.good
+ch4_18.moderate ~~ sigma_ch4.moderate*ch4_18.moderate
+ch4_18.poor ~~ sigma_ch4.poor*ch4_18.poor
+ch4_18.very.good ~~ sigma_ch4.very.good*ch4_18.very.good
+mhi5_19 ~~ sigma_mhi5*mhi5_19
+cs104_19 ~~ sigma_cs104*cs104_19
+bmi_19.normal.weight ~~ sigma_bmi.normal.weight*bmi_19.normal.weight
+bmi_19.overweight ~~ sigma_bmi.overweight*bmi_19.overweight
+bmi_19.obese ~~ sigma_bmi.obese*bmi_19.obese
+ch4_19.good ~~ sigma_ch4.good*ch4_19.good
+ch4_19.moderate ~~ sigma_ch4.moderate*ch4_19.moderate
+ch4_19.poor ~~ sigma_ch4.poor*ch4_19.poor
+ch4_19.very.good ~~ sigma_ch4.very.good*ch4_19.very.good
+mhi5_20 ~~ sigma_mhi5*mhi5_20
+cs104_20 ~~ sigma_cs104*cs104_20
+bmi_20.normal.weight ~~ sigma_bmi.normal.weight*bmi_20.normal.weight
+bmi_20.overweight ~~ sigma_bmi.overweight*bmi_20.overweight
+bmi_20.obese ~~ sigma_bmi.obese*bmi_20.obese
+ch4_20.good ~~ sigma_ch4.good*ch4_20.good
+ch4_20.moderate ~~ sigma_ch4.moderate*ch4_20.moderate
+ch4_20.poor ~~ sigma_ch4.poor*ch4_20.poor
+ch4_20.very.good ~~ sigma_ch4.very.good*ch4_20.very.good
+mhi5_21 ~~ sigma_mhi5*mhi5_21
+cs104_21 ~~ sigma_cs104*cs104_21
+bmi_21.normal.weight ~~ sigma_bmi.normal.weight*bmi_21.normal.weight
+bmi_21.overweight ~~ sigma_bmi.overweight*bmi_21.overweight
+bmi_21.obese ~~ sigma_bmi.obese*bmi_21.obese
+ch4_21.good ~~ sigma_ch4.good*ch4_21.good
+ch4_21.moderate ~~ sigma_ch4.moderate*ch4_21.moderate
+ch4_21.poor ~~ sigma_ch4.poor*ch4_21.poor
+ch4_21.very.good ~~ sigma_ch4.very.good*ch4_21.very.good
+mhi5_22 ~~ sigma_mhi5*mhi5_22
+cs104_22 ~~ sigma_cs104*cs104_22
+bmi_22.normal.weight ~~ sigma_bmi.normal.weight*bmi_22.normal.weight
+bmi_22.overweight ~~ sigma_bmi.overweight*bmi_22.overweight
+bmi_22.obese ~~ sigma_bmi.obese*bmi_22.obese
+ch4_22.good ~~ sigma_ch4.good*ch4_22.good
+ch4_22.moderate ~~ sigma_ch4.moderate*ch4_22.moderate
+ch4_22.poor ~~ sigma_ch4.poor*ch4_22.poor
+ch4_22.very.good ~~ sigma_ch4.very.good*ch4_22.very.good
+mhi5_23 ~~ sigma_mhi5*mhi5_23
+cs104_23 ~~ sigma_cs104*cs104_23
+bmi_23.normal.weight ~~ sigma_bmi.normal.weight*bmi_23.normal.weight
+bmi_23.overweight ~~ sigma_bmi.overweight*bmi_23.overweight
+bmi_23.obese ~~ sigma_bmi.obese*bmi_23.obese
+ch4_23.good ~~ sigma_ch4.good*ch4_23.good
+ch4_23.moderate ~~ sigma_ch4.moderate*ch4_23.moderate
+ch4_23.poor ~~ sigma_ch4.poor*ch4_23.poor
+ch4_23.very.good ~~ sigma_ch4.very.good*ch4_23.very.good
 mhi5_12 ~~ gamma1_y_x*cs104_13 + gamma3_y_x*cs104_15 + gamma4_y_x*cs104_16 + gamma5_y_x*cs104_17 + gamma6_y_x*cs104_18 + gamma7_y_x*cs104_19 + gamma8_y_x*cs104_20 + gamma9_y_x*cs104_21 + gamma10_y_x*cs104_22 + gamma11_y_x*cs104_23
 mhi5_13 ~~ gamma2_y_x*cs104_15 + gamma3_y_x*cs104_16 + gamma4_y_x*cs104_17 + gamma5_y_x*cs104_18 + gamma6_y_x*cs104_19 + gamma7_y_x*cs104_20 + gamma8_y_x*cs104_21 + gamma9_y_x*cs104_22 + gamma10_y_x*cs104_23
 mhi5_15 ~~ gamma1_y_x*cs104_16 + gamma2_y_x*cs104_17 + gamma3_y_x*cs104_18 + gamma4_y_x*cs104_19 + gamma5_y_x*cs104_20 + gamma6_y_x*cs104_21 + gamma7_y_x*cs104_22 + gamma8_y_x*cs104_23
