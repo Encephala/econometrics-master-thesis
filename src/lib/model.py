@@ -485,6 +485,11 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
     _do_make_x_predetermined: bool = True
 
+    def __init__(self):
+        super().__init__()
+
+        self._time_invariant_controls = []
+
     def with_y(self, y: VariableDefinition, *, lag_structure: list[int] | None = None) -> Self:
         if y.dummy_levels is not None:
             raise ValueError("Cannot have dependent variable be a dummy variable, must be interval scale.")  # noqa: TRY003
@@ -520,6 +525,9 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
         self._time_invariant_controls = [
             TimeInvariantVariableDefinition.from_definition(control) for control in controls
         ]
+
+        self._check_duplicate_definition()
+
         return self
 
     def with_additional_covariances(
@@ -535,6 +543,17 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
         self._do_add_dummy_covariances = within_dummy_covariance
         self._do_make_x_predetermined = x_predetermined
         return self
+
+    def _check_duplicate_definition(self):
+        all_regressors = [self._x, *self._mediators, *self._controls, *self._time_invariant_controls]
+
+        seen_regressors: set[str] = set()
+
+        for regressor in all_regressors:
+            if regressor.name in seen_regressors:
+                raise ValueError(f"Duplicate use of {regressor} as rval")  # noqa: TRY003
+
+            seen_regressors.add(regressor.name)
 
     def build(self, data: pd.DataFrame, *, drop_first_dummy: bool = True) -> str:
         assert_column_type_correct(data)
