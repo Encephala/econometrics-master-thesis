@@ -9,10 +9,8 @@ import pandas as pd
 from .data import Column
 from .data.util import (
     assert_column_type_correct,
-    available_years,
     cleanup_dummy,
     find_non_PD_suspicious_columns,
-    select_variable,
 )
 
 logger = logging.getLogger(__name__)
@@ -31,6 +29,12 @@ class VariableDefinition:
             assert len(self.dummy_levels) != 0, "If VariableDefinition.dummy_levels is not None, it must not be empty."
 
             self.dummy_levels = [cleanup_dummy(level) for level in self.dummy_levels]
+
+
+class TimeInvariantVariableDefinition(VariableDefinition):
+    @classmethod
+    def from_definition(cls, definition: VariableDefinition) -> Self:
+        return cls(definition.name, is_ordinal=definition.is_ordinal, dummy_levels=definition.dummy_levels)
 
 
 @dataclass(frozen=True)
@@ -471,7 +475,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
     _y_lag_structure: list[int]
     _x_lag_structure: list[int]
 
-    _time_invariant_controls: list[VariableDefinition]
+    _time_invariant_controls: list[TimeInvariantVariableDefinition]
 
     # To make epsilon fixed
     _fix_regressand_variance: bool = True
@@ -512,8 +516,10 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
         return self
 
-    def with_time_invariant_controls(self, controls: list[VariableDefinition]) -> Self:
-        self._time_invariant_controls = controls
+    def with_time_invariant_controls(self, controls: Sequence[VariableDefinition]) -> Self:
+        self._time_invariant_controls = [
+            TimeInvariantVariableDefinition.from_definition(control) for control in controls
+        ]
         return self
 
     def with_additional_covariances(
@@ -641,34 +647,40 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
     def _compile_regressors(
         self,
-        regressors: list[VariableDefinition],
+        regressors: Sequence[VariableDefinition],
         parameter_name: str,
         wave_y: int | None,
         drop_first_dummy: bool,  # noqa: FBT001
     ) -> list[Variable]:
         result = []
 
-        for variable in regressors:
-            if variable.dummy_levels is None:
+        def to_variable_name(definition: VariableDefinition) -> str:
+            if isinstance(definition, TimeInvariantVariableDefinition):
+                return f"{definition.name}_first"
+
+            return definition.name
+
+        for definition in regressors:
+            if definition.dummy_levels is None:
                 result.append(
                     VariableWithNamedParameter(
-                        variable.name, wave=wave_y, parameter=f"{parameter_name}_{variable.name}"
+                        to_variable_name(definition), wave=wave_y, parameter=f"{parameter_name}_{definition.name}"
                     )
                 )
                 continue
 
-            dummy_levels = variable.dummy_levels
+            dummy_levels = definition.dummy_levels
 
             if drop_first_dummy:
                 dropped, *dummy_levels = dummy_levels
-                logger.debug(f"Dropped first dummy level '{dropped}' for {variable.name}")
+                logger.debug(f"Dropped first dummy level '{dropped}' for {definition.name}")
 
             result.extend(
                 [
                     VariableWithNamedParameter(
-                        variable.name,
+                        to_variable_name(definition),
                         wave=wave_y,
-                        parameter=f"{parameter_name}_{variable.name}.{level}",
+                        parameter=f"{parameter_name}_{definition.name}.{level}",
                         dummy_level=level,
                     )
                     for level in dummy_levels
