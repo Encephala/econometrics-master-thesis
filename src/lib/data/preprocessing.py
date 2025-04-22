@@ -363,22 +363,35 @@ def make_all_data(*, cache: bool, respect_load_cache: bool = True) -> pd.DataFra
     bmi = make_bmi(health_panel)
     previous_depression = make_previous_depression(health_panel)
 
-    all_data = [
-        mhi5,
-        sports,
-        make_dummies(age),
-        make_dummies(ethnicity),
-        make_dummies(gender),
-        make_dummies(marital_status),
-        make_dummies(income),
-        make_dummies(education),
-        make_dummies(employment),
-        make_dummies(physical_health),
-        make_dummies(bmi),
-        previous_depression,
-    ]
+    mhi5 = add_first_non_na(mhi5)
+    sports = add_first_non_na(sports)
+    age = add_first_non_na(age)
+    ethnicity = add_first_non_na(ethnicity)
+    gender = add_first_non_na(gender)
+    marital_status = add_first_non_na(marital_status)
+    income = add_first_non_na(income)
+    education = add_first_non_na(education)
+    employment = add_first_non_na(employment)
+    physical_health = add_first_non_na(physical_health)
+    bmi = add_first_non_na(bmi)
+    previous_depression = add_first_non_na(previous_depression)
 
-    result = pd.DataFrame(index=background_vars.index).join([add_first_non_na(variable) for variable in all_data])
+    result = pd.DataFrame(index=background_vars.index).join(
+        [
+            mhi5,
+            sports,
+            make_dummies(age),
+            make_dummies(ethnicity),
+            make_dummies(gender),
+            make_dummies(marital_status),
+            make_dummies(income),
+            make_dummies(education),
+            make_dummies(employment),
+            make_dummies(physical_health),
+            make_dummies(bmi),
+            previous_depression,
+        ]
+    )
 
     result.to_pickle(path)
 
