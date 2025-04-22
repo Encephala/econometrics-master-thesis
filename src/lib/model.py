@@ -478,7 +478,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
     _time_invariant_controls: list[TimeInvariantVariableDefinition]
 
     # To make epsilon fixed
-    _fix_regressand_variance: bool = True
+    _do_fix_variances_across_time: bool = True
 
     # To set covariance between current value and future value of a regressor as a free value
     _free_covariance_across_time: bool = True
@@ -533,12 +533,12 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
     def with_additional_covariances(
         self,
         *,
-        fixed_regressand_variance: bool = True,
+        fix_variance_across_time: bool = True,
         free_covariance_across_time: bool = True,
         within_dummy_covariance: bool = True,
         x_predetermined: bool = True,
     ) -> Self:
-        self._fix_regressand_variance = fixed_regressand_variance
+        self._do_fix_variances_across_time = fix_variance_across_time
         self._free_covariance_across_time = free_covariance_across_time
         self._do_add_dummy_covariances = within_dummy_covariance
         self._do_make_x_predetermined = x_predetermined
@@ -564,7 +564,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
         self._build_regressions(waves, available_variables, data, drop_first_dummy)
 
-        if self._fix_regressand_variance:
+        if self._do_fix_variances_across_time:
             self._fix_variances_across_time()
 
         if self._free_covariance_across_time:
