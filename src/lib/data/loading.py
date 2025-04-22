@@ -1,6 +1,7 @@
 from pathlib import Path
 import logging
 from dataclasses import dataclass
+from typing import Self
 
 import pandas as pd
 
@@ -24,21 +25,21 @@ class Column:
 
         return result
 
-    @staticmethod
-    def from_liss_variable_name(variable_name: str) -> "Column":
+    @classmethod
+    def from_liss_variable_name(cls, variable_name: str) -> Self:
         if not variable_name[-3:].isnumeric():
-            # It's not a standard question (e.g. user id)
-            return Column(variable_name)
+            # It's not a standard question (f.i. "nomem_encr")
+            return cls(variable_name)
 
         prefix = variable_name[:2]
         year = int(variable_name[2:4])
         question = int(variable_name[-3:])
 
-        return Column(f"{prefix}{question}", year)
+        return cls(f"{prefix}{question}", year)
 
-    @staticmethod
-    def from_background_variable(variable_name: str, year: int) -> "Column":
-        return Column(variable_name, year)
+    @classmethod
+    def from_background_variable(cls, variable_name: str, year: int) -> Self:
+        return cls(variable_name, year)
 
 
 def load_df(path: Path) -> pd.DataFrame:
