@@ -22,7 +22,7 @@ class VariableDefinition:
 
     name: str
     is_ordinal: bool = field(default=False, kw_only=True)
-    dummy_levels: Sequence[str] | None = field(default=None, kw_only=True)
+    dummy_levels: list[str] | None = field(default=None, kw_only=True)
 
     def __post_init__(self):
         if self.dummy_levels is not None:
