@@ -781,6 +781,11 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
             ),
         )
 
+        # Skip time-invariants
+        # NOTE: Not entirely sure if this is the cleanest solution?
+        # It kinda makes sense idk
+        all_regressors = [regressor for regressor in all_regressors if regressor.wave is not None]
+
         for _, variables in groupby(all_regressors, lambda regressor: regressor.name):
             variables = list(variables)  # noqa: PLW2901
 
