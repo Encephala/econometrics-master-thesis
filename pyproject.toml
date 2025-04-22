@@ -11,10 +11,11 @@ dependencies = [
     "scipy",
 
     "pyreadstat",
+    "pyarrow",
 
     "semopy @ git+https://github.com/Encephala/semopy.git@master",
 
-    "pyperclip", 
+    "pyperclip",
 ]
 
 [tool.ruff]
