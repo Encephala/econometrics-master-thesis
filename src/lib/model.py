@@ -100,13 +100,19 @@ class VariableWithNamedParameter(Variable):
 class Regression:
     lval: Variable
     rvals: Sequence[Variable]
+
+    # Whether to make the intercept time-invariant or time-variant
     include_time_dummy: bool
 
     def build(self) -> str:
         return (
             f"{self.lval.build()}"
             + " ~ "
-            + (f"alpha_{self.lval.as_parameter_name()}_t{self.lval.wave}*1 + " if self.include_time_dummy else "")
+            + (
+                f"alpha_{self.lval.as_parameter_name()}_{self.lval.wave}*1 + "
+                if self.include_time_dummy
+                else f"alpha_{self.lval.as_parameter_name()}*1"
+            )
             + (" + ".join(rval.build() for rval in self.rvals))
         )
 
