@@ -63,8 +63,8 @@ model_definition = (
     )
     .with_additional_covariances(
         fix_variance_across_time=True,
-        free_covariance_across_time=False,
-        within_dummy_covariance=False,
+        free_covariance_across_time=True,
+        within_dummy_covariance=True,
         x_predetermined=True,
     )
     .with_excluded_regressors(
