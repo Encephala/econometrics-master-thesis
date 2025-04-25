@@ -43,7 +43,9 @@ model_definition = (
     )
     .with_time_invariant_controls(
         [
-            VariableDefinition(variable, dummy_levels=available_dummy_levels(all_data, variable))
+            VariableDefinition(
+                variable, is_time_invariant=True, dummy_levels=available_dummy_levels(all_data, variable)
+            )
             for variable in [
                 AGE,
                 INCOME,

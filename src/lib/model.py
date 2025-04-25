@@ -22,6 +22,7 @@ class VariableDefinition:
 
     name: str
     is_ordinal: bool = field(default=False, kw_only=True)
+    is_time_invariant: bool = field(default=False, kw_only=True)
     dummy_levels: list[str] | None = field(default=None, kw_only=True)
 
     def __post_init__(self):
@@ -29,12 +30,6 @@ class VariableDefinition:
             assert len(self.dummy_levels) != 0, "If VariableDefinition.dummy_levels is not None, it must not be empty."
 
             self.dummy_levels = [cleanup_dummy(level) for level in self.dummy_levels]
-
-
-class TimeInvariantVariableDefinition(VariableDefinition):
-    @classmethod
-    def from_definition(cls, definition: VariableDefinition) -> Self:
-        return cls(definition.name, is_ordinal=definition.is_ordinal, dummy_levels=definition.dummy_levels)
 
 
 @dataclass(frozen=True)
@@ -481,7 +476,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
     _y_lag_structure: list[int]
     _x_lag_structure: list[int]
 
-    _time_invariant_controls: list[TimeInvariantVariableDefinition]
+    _time_invariant_controls: list[VariableDefinition]
 
     # To make epsilon fixed
     _do_fix_variances_across_time: bool = True
@@ -527,10 +522,12 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
         return self
 
-    def with_time_invariant_controls(self, controls: Sequence[VariableDefinition]) -> Self:
-        self._time_invariant_controls = [
-            TimeInvariantVariableDefinition.from_definition(control) for control in controls
-        ]
+    def with_time_invariant_controls(self, controls: list[VariableDefinition]) -> Self:
+        assert all(control.is_time_invariant for control in controls), (
+            f"Time invariant controls weren't all defined as such: {controls}"
+        )
+
+        self._time_invariant_controls = controls
 
         self._check_duplicate_definition()
 
@@ -680,7 +677,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
         result = []
 
         def to_variable_name(definition: VariableDefinition) -> str:
-            if isinstance(definition, TimeInvariantVariableDefinition):
+            if definition.is_time_invariant:
                 return f"{definition.name}_first"
 
             return definition.name
