@@ -11,8 +11,8 @@ library(arrow)
 ```
 
 ```{r Load data}
-all_relevant_data <- read_feather("/tmp/panel_data.feather")
-head(all_relevant_data)
+all_data <- read_feather("/tmp/panel_data.feather")
+head(all_data)
 
 options(max.print = 2500)
 ```
@@ -516,7 +516,7 @@ mhi5_22 ~~ gamma1_y_x*cs104_23
 ```
 
 ```{r}
-sem_fit <- sem(sem_model, data = all_relevant_data)
+sem_fit <- sem(sem_model, data = all_data)
 
 summary(sem_fit, fit.measures = TRUE)
 ```
