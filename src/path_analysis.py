@@ -13,9 +13,9 @@ from lib.data import (
 # ruff: noqa: F403, F405
 from lib.data import Column
 from lib.data.variables import *
-from lib.model import PanelModelDefinitionBuilder, VariableDefinition
+from lib.model import PanelModelDefinitionBuilder, VariableDefinition, CovarianceDefinition
 
-logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger().setLevel(logging.INFO)
 
 # %% Get data
 all_data = make_all_data(cache=True)
@@ -57,7 +57,7 @@ model_definition = (
             ]
         ]
         + [
-            VariableDefinition(variable)
+            VariableDefinition(variable, is_time_invariant=True)
             for variable in [
                 PREVIOUS_DEPRESSION,
             ]
@@ -68,6 +68,16 @@ model_definition = (
         free_covariance_across_time=True,
         within_dummy_covariance=True,
         x_predetermined=True,
+        between_regressors=[
+            CovarianceDefinition(
+                VariableDefinition(AGE, is_time_invariant=True, dummy_levels=available_dummy_levels(all_data, AGE)),
+                [
+                    VariableDefinition(
+                        EMPLOYMENT, is_time_invariant=True, dummy_levels=available_dummy_levels(all_data, EMPLOYMENT)
+                    ),
+                ],
+            ),
+        ],
     )
     .with_excluded_regressors(
         [

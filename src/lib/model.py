@@ -33,6 +33,12 @@ class VariableDefinition:
 
 
 @dataclass(frozen=True)
+class CovarianceDefinition:
+    lval: VariableDefinition
+    rvals: list[VariableDefinition]
+
+
+@dataclass(frozen=True)
 class Variable:
     "A variable in the dataset, that is, a specific (level of a) variable in a specific wave."
 
@@ -51,7 +57,40 @@ class Variable:
 
         return result
 
-    def equals(self, other: "Column") -> bool:
+    def matches_definition(self, definition: "VariableDefinition", *, for_panel: bool) -> bool:
+        result = self.name.removesuffix("_first") == definition.name
+
+        if self.name.endswith("_first"):
+            # If variable is time invariant, so must definition be
+            result = result and definition.is_time_invariant
+
+        if self.dummy_level is not None:
+            if definition.dummy_levels is None:
+                # self dummy level not None, but definition's are
+                result = False
+
+            result = result and self.dummy_level in definition.dummy_levels  # pyright: ignore[reportOperatorIssue]
+
+        elif definition.dummy_levels is not None:
+            # self dummy level None, but definition's levels aren't
+            result = False
+
+        if for_panel:
+            self_wave_defined = self.wave is not None
+
+            result = result and self_wave_defined != definition.is_time_invariant
+
+        else:
+            assert self.wave is None, (
+                f"Checking if Variable matches definition for panel regression, but variable had wave specified: {self}"
+            )
+
+        return result
+
+    def is_in_definitions(self, available_variables: Sequence["VariableDefinition"], *, for_panel: bool) -> bool:
+        return any(self.matches_definition(variable, for_panel=for_panel) for variable in available_variables)
+
+    def matches_column(self, other: "Column") -> bool:
         result = self.name == other.name
 
         if self.wave is not None:
@@ -62,8 +101,8 @@ class Variable:
 
         return result
 
-    def is_in(self, available_variables: Sequence["Column"]) -> bool:
-        return any(self.equals(variable) for variable in available_variables)
+    def is_in_columns(self, available_variables: Sequence["Column"]) -> bool:
+        return any(self.matches_column(variable) for variable in available_variables)
 
     def has_zero_variance_in(self, data: pd.DataFrame) -> bool:
         return data[Column(self.name, self.wave, self.dummy_level)].var() == 0
@@ -176,6 +215,8 @@ class _ModelDefinitionBuilder(ABC):
     # To set covariances between dummy levels of the same variable as free parameters
     _do_add_dummy_covariances: bool = False
 
+    _between_regressor_covariances: list[CovarianceDefinition]
+
     # Internals
     _regressions: list[Regression]
     _covariances: list[Covariance]
@@ -187,6 +228,7 @@ class _ModelDefinitionBuilder(ABC):
         self._mediators = []
         self._controls = []
         self._excluded_regressors = []
+        self._between_regressor_covariances = []
 
         self._regressions = []
         self._covariances = []
@@ -246,7 +288,7 @@ class _ModelDefinitionBuilder(ABC):
         removed_variables: list[Variable] = []
 
         for rval in rvals:
-            if not rval.is_in(self._excluded_regressors):
+            if not rval.is_in_columns(self._excluded_regressors):
                 result.append(rval)
 
             else:
@@ -255,7 +297,7 @@ class _ModelDefinitionBuilder(ABC):
 
         for regressor in self._excluded_regressors:
             for variable in removed_variables:
-                if variable.equals(regressor):
+                if variable.matches_column(regressor):
                     # It was removed, continue outer loop
                     break
 
@@ -307,7 +349,7 @@ class _ModelDefinitionBuilder(ABC):
         all_missing_dummies: list[Variable] = []
 
         for variable in model_variables:
-            if not variable.is_in(available_variables):
+            if not variable.is_in_columns(available_variables):
                 if variable.dummy_level is None:
                     return [variable], False
 
@@ -484,12 +526,15 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
     # To set covariance between current value and future value of a regressor as a free value
     _free_covariance_across_time: bool = True
 
+    _between_regressor_covariances: list[CovarianceDefinition]
+
     _do_make_x_predetermined: bool = True
 
     def __init__(self):
         super().__init__()
 
         self._time_invariant_controls = []
+        self._between_regressor_covariances = []
 
     def with_y(self, y: VariableDefinition, *, lag_structure: list[int] | None = None) -> Self:
         if y.dummy_levels is not None:
@@ -540,11 +585,21 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
         free_covariance_across_time: bool = True,
         within_dummy_covariance: bool = True,
         x_predetermined: bool = True,
+        between_regressors: list[CovarianceDefinition] | None = None,
     ) -> Self:
         self._do_fix_variances_across_time = fix_variance_across_time
         self._free_covariance_across_time = free_covariance_across_time
         self._do_add_dummy_covariances = within_dummy_covariance
         self._do_make_x_predetermined = x_predetermined
+
+        if between_regressors is None:
+            self._between_regressor_covariances = []
+        else:
+            assert len({definition.lval.name for definition in between_regressors}) == len(between_regressors), (
+                f"Duplicate lvals in between regressor covariance definitions: {between_regressors}"
+            )
+            self._between_regressor_covariances = between_regressors
+
         return self
 
     def _check_duplicate_definition(self):
@@ -567,17 +622,10 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
         self._build_regressions(waves, available_variables, data, drop_first_dummy)
 
-        if self._do_fix_variances_across_time:
-            self._fix_variances_across_time()
-
-        if self._free_covariance_across_time:
-            self._free_regressor_correlations_across_time()
-
-        if self._do_make_x_predetermined:
-            self._make_x_predetermined()
-
         if self._do_PD_check:
             self._check_covariance_matrix_PD(data)
+
+        self._handle_additional_covariances()
 
         return self._make_result()
 
@@ -619,6 +667,8 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
         data: pd.DataFrame,
         drop_first_dummy: bool,  # noqa: FBT001
     ):
+        is_first_wave = True
+
         for variable in dependent_vars:
             y = Variable(variable.name, wave=variable.wave)
 
@@ -660,12 +710,16 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
             if self._do_add_dummy_covariances:
                 self._add_dummy_covariances(rvals)
 
+            self._add_between_regressor_covariances(rvals, is_first_wave)
+
             # TODO: not just non-lagged x
             # TODO: This is not right yet, it's redefining the same effects for each regression, need only
             # be defined once because the parameters are reused across the regression.
             # self._define_total_effects([x for x in x_lags if x.wave == wave - self._x_lag_structure[0]])
 
             self._define_ordinals([y, *y_lags], [*x_lags], mediators, controls)
+
+            is_first_wave = False
 
     def _compile_regressors(
         self,
@@ -765,6 +819,59 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
                 ]
 
                 self._covariances.append(Covariance(lval, rvals))
+
+    def _add_between_regressor_covariances(self, rvals: list[Variable], is_first_wave: bool):  # noqa: FBT001
+        rvals = [rval.to_unnamed() for rval in rvals]
+
+        for covariance_definition in self._between_regressor_covariances:
+            lvals = [
+                variable
+                for variable in rvals
+                if variable.matches_definition(covariance_definition.lval, for_panel=True)
+            ]
+            if len(lvals) == 0:
+                logger.warning(f"No matching lval found for between-regressor covariance {covariance_definition}")
+                continue
+
+            for lval in lvals:
+                # Ensure no duplicates in the covariance definitions
+                if lval.wave is None and not is_first_wave:
+                    continue
+
+                covariance_rvals = []
+                for rval in rvals:
+                    if not rval.is_in_definitions(covariance_definition.rvals, for_panel=True):
+                        continue
+
+                    parameter_name = "gamma"
+
+                    match (lval.wave, rval.wave):
+                        case (None, None):
+                            pass
+                        case (lval_wave, None):
+                            parameter_name += f"{lval_wave}"
+                        case (None, rval_wave):
+                            parameter_name += f"{rval_wave}"
+                        case (lval_wave, rval_wave):
+                            parameter_name += f"{abs(rval_wave - lval_wave)}"
+
+                    parameter_name += f"_{lval.as_parameter_name()}_{rval.as_parameter_name()}"
+
+                    covariance_rvals.append(rval.with_named_parameter(parameter_name))
+
+                self._covariances.append(Covariance(lval, covariance_rvals))
+
+    def _handle_additional_covariances(self):
+        """Defines all the extra covariances, except between dummy levels and between regressors,
+        as those use the set of rvals in each regression explicitly."""
+        if self._do_fix_variances_across_time:
+            self._fix_variances_across_time()
+
+        if self._free_covariance_across_time:
+            self._free_regressor_correlations_across_time()
+
+        if self._do_make_x_predetermined:
+            self._make_x_predetermined()
 
     def _fix_variances_across_time(self):
         "Fix the variance of all the variables in self._regressions to be constant in time."
@@ -867,8 +974,18 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
         self,
         *,
         within_dummy_covariance: bool = True,
+        between_regressors: list[CovarianceDefinition] | None = None,
     ) -> Self:
         self._do_add_dummy_covariances = within_dummy_covariance
+
+        if between_regressors is None:
+            self._between_regressor_covariances = []
+        else:
+            assert len({definition.lval.name for definition in between_regressors}) == len(between_regressors), (
+                f"Duplicate lvals in between regressor covariance definitions: {between_regressors}"
+            )
+            self._between_regressor_covariances = between_regressors
+
         return self
 
     def build(self, data: pd.DataFrame, *, drop_first_dummy: bool = True) -> str:
@@ -915,6 +1032,8 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
 
         if self._do_add_dummy_covariances:
             self._add_dummy_covariances(rvals)
+
+        self._add_between_regressor_covariances(rvals)
 
         self._define_total_effects(x)
 
@@ -1011,3 +1130,28 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
                 rvals = [dummy_level.to_unnamed() for dummy_level in dummy_levels[i + 1 :]]
 
                 self._covariances.append(Covariance(lval, rvals))
+
+    def _add_between_regressor_covariances(self, rvals: list[Variable]):
+        rvals = [rval.to_unnamed() for rval in rvals]
+
+        for covariance_definition in self._between_regressor_covariances:
+            lvals = [
+                variable
+                for variable in rvals
+                if variable.matches_definition(covariance_definition.lval, for_panel=False)
+            ]
+            if len(lvals) == 0:
+                logger.warning(f"No matching lval found for between-regressor covariance {covariance_definition}")
+                continue
+
+            for lval in lvals:
+                covariance_rvals = []
+                for rval in rvals:
+                    if not rval.is_in_definitions(covariance_definition.rvals, for_panel=False):
+                        continue
+
+                    covariance_rvals.append(
+                        rval.with_named_parameter(f"gamma_{lval.as_parameter_name()}_{rval.as_parameter_name()}")
+                    )
+
+                self._covariances.append(Covariance(lval, covariance_rvals))
