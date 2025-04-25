@@ -708,7 +708,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
             self._add_mediator_regressions(mediators, y_lags, x_lags, [*controls, *time_invariant_controls])
 
             if self._do_add_dummy_covariances:
-                self._add_dummy_covariances(rvals)
+                self._add_dummy_covariances(rvals, is_first_wave)
 
             self._add_between_regressor_covariances(rvals, is_first_wave)
 
@@ -795,7 +795,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
                 )
             )
 
-    def _add_dummy_covariances(self, rvals: list[Variable]):
+    def _add_dummy_covariances(self, rvals: list[Variable], is_first_wave: bool):  # noqa: FBT001
         """Adds the covariances between dummy levels for the given rvals (lvals must be interval scale).
 
         Should thus be called once for each regression."""
@@ -803,9 +803,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
         # it does not include a covariance for the dummy level that is excluded for identification.
         # I'm not 100% that is correct behaviour.
 
-        variables = groupby(rvals, lambda rval: rval.name)
-
-        for name, values in variables:
+        for name, values in groupby(rvals, lambda rval: rval.name):
             dummy_levels = [rval for rval in values if rval.name == name and rval.dummy_level is not None]
 
             if len(dummy_levels) == 0:
@@ -813,6 +811,10 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
             for i in range(len(dummy_levels) - 1):
                 lval = dummy_levels[i].to_unnamed()
+
+                if lval.wave is None and not is_first_wave:
+                    continue
+
                 rvals = [
                     rval.with_named_parameter(f"sigma_{lval.as_parameter_name()}_{rval.as_parameter_name()}")
                     for rval in dummy_levels[i + 1 :]

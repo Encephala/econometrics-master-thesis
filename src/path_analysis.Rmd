@@ -68,231 +68,51 @@ bmi_13.overweight ~~ sigma_bmi.overweight_bmi.obese*bmi_13.obese
 ch4_13.good ~~ sigma_ch4.good_ch4.moderate*ch4_13.moderate + sigma_ch4.good_ch4.poor*ch4_13.poor + sigma_ch4.good_ch4.very.good*ch4_13.very.good
 ch4_13.moderate ~~ sigma_ch4.moderate_ch4.poor*ch4_13.poor + sigma_ch4.moderate_ch4.very.good*ch4_13.very.good
 ch4_13.poor ~~ sigma_ch4.poor_ch4.very.good*ch4_13.very.good
-leeftijd_first.18.24 ~~ sigma_leeftijd_first.18.24_leeftijd_first.25.39*leeftijd_first.25.39 + sigma_leeftijd_first.18.24_leeftijd_first.40.66*leeftijd_first.40.66 + sigma_leeftijd_first.18.24_leeftijd_first.over.67*leeftijd_first.over.67
-leeftijd_first.25.39 ~~ sigma_leeftijd_first.25.39_leeftijd_first.40.66*leeftijd_first.40.66 + sigma_leeftijd_first.25.39_leeftijd_first.over.67*leeftijd_first.over.67
-leeftijd_first.40.66 ~~ sigma_leeftijd_first.40.66_leeftijd_first.over.67*leeftijd_first.over.67
-nettohh_f_first.under.15k ~~ sigma_nettohh_f_first.under.15k_nettohh_f_first.over.50k*nettohh_f_first.over.50k
-herkomstgroep_first.first.w ~~ sigma_herkomstgroep_first.first.w_herkomstgroep_first.first.nonw*herkomstgroep_first.first.nonw + sigma_herkomstgroep_first.first.w_herkomstgroep_first.second.w*herkomstgroep_first.second.w + sigma_herkomstgroep_first.first.w_herkomstgroep_first.second.nonw*herkomstgroep_first.second.nonw
-herkomstgroep_first.first.nonw ~~ sigma_herkomstgroep_first.first.nonw_herkomstgroep_first.second.w*herkomstgroep_first.second.w + sigma_herkomstgroep_first.first.nonw_herkomstgroep_first.second.nonw*herkomstgroep_first.second.nonw
-herkomstgroep_first.second.w ~~ sigma_herkomstgroep_first.second.w_herkomstgroep_first.second.nonw*herkomstgroep_first.second.nonw
-burgstat_first.married ~~ sigma_burgstat_first.married_burgstat_first.never.been.married*burgstat_first.never.been.married + sigma_burgstat_first.married_burgstat_first.separated*burgstat_first.separated + sigma_burgstat_first.married_burgstat_first.widow.or.widower*burgstat_first.widow.or.widower
-burgstat_first.never.been.married ~~ sigma_burgstat_first.never.been.married_burgstat_first.separated*burgstat_first.separated + sigma_burgstat_first.never.been.married_burgstat_first.widow.or.widower*burgstat_first.widow.or.widower
-burgstat_first.separated ~~ sigma_burgstat_first.separated_burgstat_first.widow.or.widower*burgstat_first.widow.or.widower
-oplcat_first.hbo ~~ sigma_oplcat_first.hbo_oplcat_first.mbo*oplcat_first.mbo + sigma_oplcat_first.hbo_oplcat_first.primary.school*oplcat_first.primary.school + sigma_oplcat_first.hbo_oplcat_first.vmbo*oplcat_first.vmbo + sigma_oplcat_first.hbo_oplcat_first.wo*oplcat_first.wo
-oplcat_first.mbo ~~ sigma_oplcat_first.mbo_oplcat_first.primary.school*oplcat_first.primary.school + sigma_oplcat_first.mbo_oplcat_first.vmbo*oplcat_first.vmbo + sigma_oplcat_first.mbo_oplcat_first.wo*oplcat_first.wo
-oplcat_first.primary.school ~~ sigma_oplcat_first.primary.school_oplcat_first.vmbo*oplcat_first.vmbo + sigma_oplcat_first.primary.school_oplcat_first.wo*oplcat_first.wo
-oplcat_first.vmbo ~~ sigma_oplcat_first.vmbo_oplcat_first.wo*oplcat_first.wo
-employment_first.homemaker ~~ sigma_employment_first.homemaker_employment_first.retired*employment_first.retired + sigma_employment_first.homemaker_employment_first.student*employment_first.student + sigma_employment_first.homemaker_employment_first.unable.to.work*employment_first.unable.to.work + sigma_employment_first.homemaker_employment_first.unemployed*employment_first.unemployed
-employment_first.retired ~~ sigma_employment_first.retired_employment_first.student*employment_first.student + sigma_employment_first.retired_employment_first.unable.to.work*employment_first.unable.to.work + sigma_employment_first.retired_employment_first.unemployed*employment_first.unemployed
-employment_first.student ~~ sigma_employment_first.student_employment_first.unable.to.work*employment_first.unable.to.work + sigma_employment_first.student_employment_first.unemployed*employment_first.unemployed
-employment_first.unable.to.work ~~ sigma_employment_first.unable.to.work_employment_first.unemployed*employment_first.unemployed
 bmi_15.normal.weight ~~ sigma_bmi.normal.weight_bmi.overweight*bmi_15.overweight + sigma_bmi.normal.weight_bmi.obese*bmi_15.obese
 bmi_15.overweight ~~ sigma_bmi.overweight_bmi.obese*bmi_15.obese
 ch4_15.good ~~ sigma_ch4.good_ch4.moderate*ch4_15.moderate + sigma_ch4.good_ch4.poor*ch4_15.poor + sigma_ch4.good_ch4.very.good*ch4_15.very.good
 ch4_15.moderate ~~ sigma_ch4.moderate_ch4.poor*ch4_15.poor + sigma_ch4.moderate_ch4.very.good*ch4_15.very.good
 ch4_15.poor ~~ sigma_ch4.poor_ch4.very.good*ch4_15.very.good
-leeftijd_first.18.24 ~~ sigma_leeftijd_first.18.24_leeftijd_first.25.39*leeftijd_first.25.39 + sigma_leeftijd_first.18.24_leeftijd_first.40.66*leeftijd_first.40.66 + sigma_leeftijd_first.18.24_leeftijd_first.over.67*leeftijd_first.over.67
-leeftijd_first.25.39 ~~ sigma_leeftijd_first.25.39_leeftijd_first.40.66*leeftijd_first.40.66 + sigma_leeftijd_first.25.39_leeftijd_first.over.67*leeftijd_first.over.67
-leeftijd_first.40.66 ~~ sigma_leeftijd_first.40.66_leeftijd_first.over.67*leeftijd_first.over.67
-nettohh_f_first.under.15k ~~ sigma_nettohh_f_first.under.15k_nettohh_f_first.over.50k*nettohh_f_first.over.50k
-herkomstgroep_first.first.w ~~ sigma_herkomstgroep_first.first.w_herkomstgroep_first.first.nonw*herkomstgroep_first.first.nonw + sigma_herkomstgroep_first.first.w_herkomstgroep_first.second.w*herkomstgroep_first.second.w + sigma_herkomstgroep_first.first.w_herkomstgroep_first.second.nonw*herkomstgroep_first.second.nonw
-herkomstgroep_first.first.nonw ~~ sigma_herkomstgroep_first.first.nonw_herkomstgroep_first.second.w*herkomstgroep_first.second.w + sigma_herkomstgroep_first.first.nonw_herkomstgroep_first.second.nonw*herkomstgroep_first.second.nonw
-herkomstgroep_first.second.w ~~ sigma_herkomstgroep_first.second.w_herkomstgroep_first.second.nonw*herkomstgroep_first.second.nonw
-burgstat_first.married ~~ sigma_burgstat_first.married_burgstat_first.never.been.married*burgstat_first.never.been.married + sigma_burgstat_first.married_burgstat_first.separated*burgstat_first.separated + sigma_burgstat_first.married_burgstat_first.widow.or.widower*burgstat_first.widow.or.widower
-burgstat_first.never.been.married ~~ sigma_burgstat_first.never.been.married_burgstat_first.separated*burgstat_first.separated + sigma_burgstat_first.never.been.married_burgstat_first.widow.or.widower*burgstat_first.widow.or.widower
-burgstat_first.separated ~~ sigma_burgstat_first.separated_burgstat_first.widow.or.widower*burgstat_first.widow.or.widower
-oplcat_first.hbo ~~ sigma_oplcat_first.hbo_oplcat_first.mbo*oplcat_first.mbo + sigma_oplcat_first.hbo_oplcat_first.primary.school*oplcat_first.primary.school + sigma_oplcat_first.hbo_oplcat_first.vmbo*oplcat_first.vmbo + sigma_oplcat_first.hbo_oplcat_first.wo*oplcat_first.wo
-oplcat_first.mbo ~~ sigma_oplcat_first.mbo_oplcat_first.primary.school*oplcat_first.primary.school + sigma_oplcat_first.mbo_oplcat_first.vmbo*oplcat_first.vmbo + sigma_oplcat_first.mbo_oplcat_first.wo*oplcat_first.wo
-oplcat_first.primary.school ~~ sigma_oplcat_first.primary.school_oplcat_first.vmbo*oplcat_first.vmbo + sigma_oplcat_first.primary.school_oplcat_first.wo*oplcat_first.wo
-oplcat_first.vmbo ~~ sigma_oplcat_first.vmbo_oplcat_first.wo*oplcat_first.wo
-employment_first.homemaker ~~ sigma_employment_first.homemaker_employment_first.retired*employment_first.retired + sigma_employment_first.homemaker_employment_first.student*employment_first.student + sigma_employment_first.homemaker_employment_first.unable.to.work*employment_first.unable.to.work + sigma_employment_first.homemaker_employment_first.unemployed*employment_first.unemployed
-employment_first.retired ~~ sigma_employment_first.retired_employment_first.student*employment_first.student + sigma_employment_first.retired_employment_first.unable.to.work*employment_first.unable.to.work + sigma_employment_first.retired_employment_first.unemployed*employment_first.unemployed
-employment_first.student ~~ sigma_employment_first.student_employment_first.unable.to.work*employment_first.unable.to.work + sigma_employment_first.student_employment_first.unemployed*employment_first.unemployed
-employment_first.unable.to.work ~~ sigma_employment_first.unable.to.work_employment_first.unemployed*employment_first.unemployed
 bmi_16.normal.weight ~~ sigma_bmi.normal.weight_bmi.overweight*bmi_16.overweight + sigma_bmi.normal.weight_bmi.obese*bmi_16.obese
 bmi_16.overweight ~~ sigma_bmi.overweight_bmi.obese*bmi_16.obese
 ch4_16.good ~~ sigma_ch4.good_ch4.moderate*ch4_16.moderate + sigma_ch4.good_ch4.poor*ch4_16.poor + sigma_ch4.good_ch4.very.good*ch4_16.very.good
 ch4_16.moderate ~~ sigma_ch4.moderate_ch4.poor*ch4_16.poor + sigma_ch4.moderate_ch4.very.good*ch4_16.very.good
 ch4_16.poor ~~ sigma_ch4.poor_ch4.very.good*ch4_16.very.good
-leeftijd_first.18.24 ~~ sigma_leeftijd_first.18.24_leeftijd_first.25.39*leeftijd_first.25.39 + sigma_leeftijd_first.18.24_leeftijd_first.40.66*leeftijd_first.40.66 + sigma_leeftijd_first.18.24_leeftijd_first.over.67*leeftijd_first.over.67
-leeftijd_first.25.39 ~~ sigma_leeftijd_first.25.39_leeftijd_first.40.66*leeftijd_first.40.66 + sigma_leeftijd_first.25.39_leeftijd_first.over.67*leeftijd_first.over.67
-leeftijd_first.40.66 ~~ sigma_leeftijd_first.40.66_leeftijd_first.over.67*leeftijd_first.over.67
-nettohh_f_first.under.15k ~~ sigma_nettohh_f_first.under.15k_nettohh_f_first.over.50k*nettohh_f_first.over.50k
-herkomstgroep_first.first.w ~~ sigma_herkomstgroep_first.first.w_herkomstgroep_first.first.nonw*herkomstgroep_first.first.nonw + sigma_herkomstgroep_first.first.w_herkomstgroep_first.second.w*herkomstgroep_first.second.w + sigma_herkomstgroep_first.first.w_herkomstgroep_first.second.nonw*herkomstgroep_first.second.nonw
-herkomstgroep_first.first.nonw ~~ sigma_herkomstgroep_first.first.nonw_herkomstgroep_first.second.w*herkomstgroep_first.second.w + sigma_herkomstgroep_first.first.nonw_herkomstgroep_first.second.nonw*herkomstgroep_first.second.nonw
-herkomstgroep_first.second.w ~~ sigma_herkomstgroep_first.second.w_herkomstgroep_first.second.nonw*herkomstgroep_first.second.nonw
-burgstat_first.married ~~ sigma_burgstat_first.married_burgstat_first.never.been.married*burgstat_first.never.been.married + sigma_burgstat_first.married_burgstat_first.separated*burgstat_first.separated + sigma_burgstat_first.married_burgstat_first.widow.or.widower*burgstat_first.widow.or.widower
-burgstat_first.never.been.married ~~ sigma_burgstat_first.never.been.married_burgstat_first.separated*burgstat_first.separated + sigma_burgstat_first.never.been.married_burgstat_first.widow.or.widower*burgstat_first.widow.or.widower
-burgstat_first.separated ~~ sigma_burgstat_first.separated_burgstat_first.widow.or.widower*burgstat_first.widow.or.widower
-oplcat_first.hbo ~~ sigma_oplcat_first.hbo_oplcat_first.mbo*oplcat_first.mbo + sigma_oplcat_first.hbo_oplcat_first.primary.school*oplcat_first.primary.school + sigma_oplcat_first.hbo_oplcat_first.vmbo*oplcat_first.vmbo + sigma_oplcat_first.hbo_oplcat_first.wo*oplcat_first.wo
-oplcat_first.mbo ~~ sigma_oplcat_first.mbo_oplcat_first.primary.school*oplcat_first.primary.school + sigma_oplcat_first.mbo_oplcat_first.vmbo*oplcat_first.vmbo + sigma_oplcat_first.mbo_oplcat_first.wo*oplcat_first.wo
-oplcat_first.primary.school ~~ sigma_oplcat_first.primary.school_oplcat_first.vmbo*oplcat_first.vmbo + sigma_oplcat_first.primary.school_oplcat_first.wo*oplcat_first.wo
-oplcat_first.vmbo ~~ sigma_oplcat_first.vmbo_oplcat_first.wo*oplcat_first.wo
-employment_first.homemaker ~~ sigma_employment_first.homemaker_employment_first.retired*employment_first.retired + sigma_employment_first.homemaker_employment_first.student*employment_first.student + sigma_employment_first.homemaker_employment_first.unable.to.work*employment_first.unable.to.work + sigma_employment_first.homemaker_employment_first.unemployed*employment_first.unemployed
-employment_first.retired ~~ sigma_employment_first.retired_employment_first.student*employment_first.student + sigma_employment_first.retired_employment_first.unable.to.work*employment_first.unable.to.work + sigma_employment_first.retired_employment_first.unemployed*employment_first.unemployed
-employment_first.student ~~ sigma_employment_first.student_employment_first.unable.to.work*employment_first.unable.to.work + sigma_employment_first.student_employment_first.unemployed*employment_first.unemployed
-employment_first.unable.to.work ~~ sigma_employment_first.unable.to.work_employment_first.unemployed*employment_first.unemployed
 bmi_17.normal.weight ~~ sigma_bmi.normal.weight_bmi.overweight*bmi_17.overweight + sigma_bmi.normal.weight_bmi.obese*bmi_17.obese
 bmi_17.overweight ~~ sigma_bmi.overweight_bmi.obese*bmi_17.obese
 ch4_17.good ~~ sigma_ch4.good_ch4.moderate*ch4_17.moderate + sigma_ch4.good_ch4.poor*ch4_17.poor + sigma_ch4.good_ch4.very.good*ch4_17.very.good
 ch4_17.moderate ~~ sigma_ch4.moderate_ch4.poor*ch4_17.poor + sigma_ch4.moderate_ch4.very.good*ch4_17.very.good
 ch4_17.poor ~~ sigma_ch4.poor_ch4.very.good*ch4_17.very.good
-leeftijd_first.18.24 ~~ sigma_leeftijd_first.18.24_leeftijd_first.25.39*leeftijd_first.25.39 + sigma_leeftijd_first.18.24_leeftijd_first.40.66*leeftijd_first.40.66 + sigma_leeftijd_first.18.24_leeftijd_first.over.67*leeftijd_first.over.67
-leeftijd_first.25.39 ~~ sigma_leeftijd_first.25.39_leeftijd_first.40.66*leeftijd_first.40.66 + sigma_leeftijd_first.25.39_leeftijd_first.over.67*leeftijd_first.over.67
-leeftijd_first.40.66 ~~ sigma_leeftijd_first.40.66_leeftijd_first.over.67*leeftijd_first.over.67
-nettohh_f_first.under.15k ~~ sigma_nettohh_f_first.under.15k_nettohh_f_first.over.50k*nettohh_f_first.over.50k
-herkomstgroep_first.first.w ~~ sigma_herkomstgroep_first.first.w_herkomstgroep_first.first.nonw*herkomstgroep_first.first.nonw + sigma_herkomstgroep_first.first.w_herkomstgroep_first.second.w*herkomstgroep_first.second.w + sigma_herkomstgroep_first.first.w_herkomstgroep_first.second.nonw*herkomstgroep_first.second.nonw
-herkomstgroep_first.first.nonw ~~ sigma_herkomstgroep_first.first.nonw_herkomstgroep_first.second.w*herkomstgroep_first.second.w + sigma_herkomstgroep_first.first.nonw_herkomstgroep_first.second.nonw*herkomstgroep_first.second.nonw
-herkomstgroep_first.second.w ~~ sigma_herkomstgroep_first.second.w_herkomstgroep_first.second.nonw*herkomstgroep_first.second.nonw
-burgstat_first.married ~~ sigma_burgstat_first.married_burgstat_first.never.been.married*burgstat_first.never.been.married + sigma_burgstat_first.married_burgstat_first.separated*burgstat_first.separated + sigma_burgstat_first.married_burgstat_first.widow.or.widower*burgstat_first.widow.or.widower
-burgstat_first.never.been.married ~~ sigma_burgstat_first.never.been.married_burgstat_first.separated*burgstat_first.separated + sigma_burgstat_first.never.been.married_burgstat_first.widow.or.widower*burgstat_first.widow.or.widower
-burgstat_first.separated ~~ sigma_burgstat_first.separated_burgstat_first.widow.or.widower*burgstat_first.widow.or.widower
-oplcat_first.hbo ~~ sigma_oplcat_first.hbo_oplcat_first.mbo*oplcat_first.mbo + sigma_oplcat_first.hbo_oplcat_first.primary.school*oplcat_first.primary.school + sigma_oplcat_first.hbo_oplcat_first.vmbo*oplcat_first.vmbo + sigma_oplcat_first.hbo_oplcat_first.wo*oplcat_first.wo
-oplcat_first.mbo ~~ sigma_oplcat_first.mbo_oplcat_first.primary.school*oplcat_first.primary.school + sigma_oplcat_first.mbo_oplcat_first.vmbo*oplcat_first.vmbo + sigma_oplcat_first.mbo_oplcat_first.wo*oplcat_first.wo
-oplcat_first.primary.school ~~ sigma_oplcat_first.primary.school_oplcat_first.vmbo*oplcat_first.vmbo + sigma_oplcat_first.primary.school_oplcat_first.wo*oplcat_first.wo
-oplcat_first.vmbo ~~ sigma_oplcat_first.vmbo_oplcat_first.wo*oplcat_first.wo
-employment_first.homemaker ~~ sigma_employment_first.homemaker_employment_first.retired*employment_first.retired + sigma_employment_first.homemaker_employment_first.student*employment_first.student + sigma_employment_first.homemaker_employment_first.unable.to.work*employment_first.unable.to.work + sigma_employment_first.homemaker_employment_first.unemployed*employment_first.unemployed
-employment_first.retired ~~ sigma_employment_first.retired_employment_first.student*employment_first.student + sigma_employment_first.retired_employment_first.unable.to.work*employment_first.unable.to.work + sigma_employment_first.retired_employment_first.unemployed*employment_first.unemployed
-employment_first.student ~~ sigma_employment_first.student_employment_first.unable.to.work*employment_first.unable.to.work + sigma_employment_first.student_employment_first.unemployed*employment_first.unemployed
-employment_first.unable.to.work ~~ sigma_employment_first.unable.to.work_employment_first.unemployed*employment_first.unemployed
 bmi_18.normal.weight ~~ sigma_bmi.normal.weight_bmi.overweight*bmi_18.overweight + sigma_bmi.normal.weight_bmi.obese*bmi_18.obese
 bmi_18.overweight ~~ sigma_bmi.overweight_bmi.obese*bmi_18.obese
 ch4_18.good ~~ sigma_ch4.good_ch4.moderate*ch4_18.moderate + sigma_ch4.good_ch4.poor*ch4_18.poor + sigma_ch4.good_ch4.very.good*ch4_18.very.good
 ch4_18.moderate ~~ sigma_ch4.moderate_ch4.poor*ch4_18.poor + sigma_ch4.moderate_ch4.very.good*ch4_18.very.good
 ch4_18.poor ~~ sigma_ch4.poor_ch4.very.good*ch4_18.very.good
-leeftijd_first.18.24 ~~ sigma_leeftijd_first.18.24_leeftijd_first.25.39*leeftijd_first.25.39 + sigma_leeftijd_first.18.24_leeftijd_first.40.66*leeftijd_first.40.66 + sigma_leeftijd_first.18.24_leeftijd_first.over.67*leeftijd_first.over.67
-leeftijd_first.25.39 ~~ sigma_leeftijd_first.25.39_leeftijd_first.40.66*leeftijd_first.40.66 + sigma_leeftijd_first.25.39_leeftijd_first.over.67*leeftijd_first.over.67
-leeftijd_first.40.66 ~~ sigma_leeftijd_first.40.66_leeftijd_first.over.67*leeftijd_first.over.67
-nettohh_f_first.under.15k ~~ sigma_nettohh_f_first.under.15k_nettohh_f_first.over.50k*nettohh_f_first.over.50k
-herkomstgroep_first.first.w ~~ sigma_herkomstgroep_first.first.w_herkomstgroep_first.first.nonw*herkomstgroep_first.first.nonw + sigma_herkomstgroep_first.first.w_herkomstgroep_first.second.w*herkomstgroep_first.second.w + sigma_herkomstgroep_first.first.w_herkomstgroep_first.second.nonw*herkomstgroep_first.second.nonw
-herkomstgroep_first.first.nonw ~~ sigma_herkomstgroep_first.first.nonw_herkomstgroep_first.second.w*herkomstgroep_first.second.w + sigma_herkomstgroep_first.first.nonw_herkomstgroep_first.second.nonw*herkomstgroep_first.second.nonw
-herkomstgroep_first.second.w ~~ sigma_herkomstgroep_first.second.w_herkomstgroep_first.second.nonw*herkomstgroep_first.second.nonw
-burgstat_first.married ~~ sigma_burgstat_first.married_burgstat_first.never.been.married*burgstat_first.never.been.married + sigma_burgstat_first.married_burgstat_first.separated*burgstat_first.separated + sigma_burgstat_first.married_burgstat_first.widow.or.widower*burgstat_first.widow.or.widower
-burgstat_first.never.been.married ~~ sigma_burgstat_first.never.been.married_burgstat_first.separated*burgstat_first.separated + sigma_burgstat_first.never.been.married_burgstat_first.widow.or.widower*burgstat_first.widow.or.widower
-burgstat_first.separated ~~ sigma_burgstat_first.separated_burgstat_first.widow.or.widower*burgstat_first.widow.or.widower
-oplcat_first.hbo ~~ sigma_oplcat_first.hbo_oplcat_first.mbo*oplcat_first.mbo + sigma_oplcat_first.hbo_oplcat_first.primary.school*oplcat_first.primary.school + sigma_oplcat_first.hbo_oplcat_first.vmbo*oplcat_first.vmbo + sigma_oplcat_first.hbo_oplcat_first.wo*oplcat_first.wo
-oplcat_first.mbo ~~ sigma_oplcat_first.mbo_oplcat_first.primary.school*oplcat_first.primary.school + sigma_oplcat_first.mbo_oplcat_first.vmbo*oplcat_first.vmbo + sigma_oplcat_first.mbo_oplcat_first.wo*oplcat_first.wo
-oplcat_first.primary.school ~~ sigma_oplcat_first.primary.school_oplcat_first.vmbo*oplcat_first.vmbo + sigma_oplcat_first.primary.school_oplcat_first.wo*oplcat_first.wo
-oplcat_first.vmbo ~~ sigma_oplcat_first.vmbo_oplcat_first.wo*oplcat_first.wo
-employment_first.homemaker ~~ sigma_employment_first.homemaker_employment_first.retired*employment_first.retired + sigma_employment_first.homemaker_employment_first.student*employment_first.student + sigma_employment_first.homemaker_employment_first.unable.to.work*employment_first.unable.to.work + sigma_employment_first.homemaker_employment_first.unemployed*employment_first.unemployed
-employment_first.retired ~~ sigma_employment_first.retired_employment_first.student*employment_first.student + sigma_employment_first.retired_employment_first.unable.to.work*employment_first.unable.to.work + sigma_employment_first.retired_employment_first.unemployed*employment_first.unemployed
-employment_first.student ~~ sigma_employment_first.student_employment_first.unable.to.work*employment_first.unable.to.work + sigma_employment_first.student_employment_first.unemployed*employment_first.unemployed
-employment_first.unable.to.work ~~ sigma_employment_first.unable.to.work_employment_first.unemployed*employment_first.unemployed
 bmi_19.normal.weight ~~ sigma_bmi.normal.weight_bmi.overweight*bmi_19.overweight + sigma_bmi.normal.weight_bmi.obese*bmi_19.obese
 bmi_19.overweight ~~ sigma_bmi.overweight_bmi.obese*bmi_19.obese
 ch4_19.good ~~ sigma_ch4.good_ch4.moderate*ch4_19.moderate + sigma_ch4.good_ch4.poor*ch4_19.poor + sigma_ch4.good_ch4.very.good*ch4_19.very.good
 ch4_19.moderate ~~ sigma_ch4.moderate_ch4.poor*ch4_19.poor + sigma_ch4.moderate_ch4.very.good*ch4_19.very.good
 ch4_19.poor ~~ sigma_ch4.poor_ch4.very.good*ch4_19.very.good
-leeftijd_first.18.24 ~~ sigma_leeftijd_first.18.24_leeftijd_first.25.39*leeftijd_first.25.39 + sigma_leeftijd_first.18.24_leeftijd_first.40.66*leeftijd_first.40.66 + sigma_leeftijd_first.18.24_leeftijd_first.over.67*leeftijd_first.over.67
-leeftijd_first.25.39 ~~ sigma_leeftijd_first.25.39_leeftijd_first.40.66*leeftijd_first.40.66 + sigma_leeftijd_first.25.39_leeftijd_first.over.67*leeftijd_first.over.67
-leeftijd_first.40.66 ~~ sigma_leeftijd_first.40.66_leeftijd_first.over.67*leeftijd_first.over.67
-nettohh_f_first.under.15k ~~ sigma_nettohh_f_first.under.15k_nettohh_f_first.over.50k*nettohh_f_first.over.50k
-herkomstgroep_first.first.w ~~ sigma_herkomstgroep_first.first.w_herkomstgroep_first.first.nonw*herkomstgroep_first.first.nonw + sigma_herkomstgroep_first.first.w_herkomstgroep_first.second.w*herkomstgroep_first.second.w + sigma_herkomstgroep_first.first.w_herkomstgroep_first.second.nonw*herkomstgroep_first.second.nonw
-herkomstgroep_first.first.nonw ~~ sigma_herkomstgroep_first.first.nonw_herkomstgroep_first.second.w*herkomstgroep_first.second.w + sigma_herkomstgroep_first.first.nonw_herkomstgroep_first.second.nonw*herkomstgroep_first.second.nonw
-herkomstgroep_first.second.w ~~ sigma_herkomstgroep_first.second.w_herkomstgroep_first.second.nonw*herkomstgroep_first.second.nonw
-burgstat_first.married ~~ sigma_burgstat_first.married_burgstat_first.never.been.married*burgstat_first.never.been.married + sigma_burgstat_first.married_burgstat_first.separated*burgstat_first.separated + sigma_burgstat_first.married_burgstat_first.widow.or.widower*burgstat_first.widow.or.widower
-burgstat_first.never.been.married ~~ sigma_burgstat_first.never.been.married_burgstat_first.separated*burgstat_first.separated + sigma_burgstat_first.never.been.married_burgstat_first.widow.or.widower*burgstat_first.widow.or.widower
-burgstat_first.separated ~~ sigma_burgstat_first.separated_burgstat_first.widow.or.widower*burgstat_first.widow.or.widower
-oplcat_first.hbo ~~ sigma_oplcat_first.hbo_oplcat_first.mbo*oplcat_first.mbo + sigma_oplcat_first.hbo_oplcat_first.primary.school*oplcat_first.primary.school + sigma_oplcat_first.hbo_oplcat_first.vmbo*oplcat_first.vmbo + sigma_oplcat_first.hbo_oplcat_first.wo*oplcat_first.wo
-oplcat_first.mbo ~~ sigma_oplcat_first.mbo_oplcat_first.primary.school*oplcat_first.primary.school + sigma_oplcat_first.mbo_oplcat_first.vmbo*oplcat_first.vmbo + sigma_oplcat_first.mbo_oplcat_first.wo*oplcat_first.wo
-oplcat_first.primary.school ~~ sigma_oplcat_first.primary.school_oplcat_first.vmbo*oplcat_first.vmbo + sigma_oplcat_first.primary.school_oplcat_first.wo*oplcat_first.wo
-oplcat_first.vmbo ~~ sigma_oplcat_first.vmbo_oplcat_first.wo*oplcat_first.wo
-employment_first.homemaker ~~ sigma_employment_first.homemaker_employment_first.retired*employment_first.retired + sigma_employment_first.homemaker_employment_first.student*employment_first.student + sigma_employment_first.homemaker_employment_first.unable.to.work*employment_first.unable.to.work + sigma_employment_first.homemaker_employment_first.unemployed*employment_first.unemployed
-employment_first.retired ~~ sigma_employment_first.retired_employment_first.student*employment_first.student + sigma_employment_first.retired_employment_first.unable.to.work*employment_first.unable.to.work + sigma_employment_first.retired_employment_first.unemployed*employment_first.unemployed
-employment_first.student ~~ sigma_employment_first.student_employment_first.unable.to.work*employment_first.unable.to.work + sigma_employment_first.student_employment_first.unemployed*employment_first.unemployed
-employment_first.unable.to.work ~~ sigma_employment_first.unable.to.work_employment_first.unemployed*employment_first.unemployed
 bmi_20.normal.weight ~~ sigma_bmi.normal.weight_bmi.overweight*bmi_20.overweight + sigma_bmi.normal.weight_bmi.obese*bmi_20.obese
 bmi_20.overweight ~~ sigma_bmi.overweight_bmi.obese*bmi_20.obese
 ch4_20.good ~~ sigma_ch4.good_ch4.moderate*ch4_20.moderate + sigma_ch4.good_ch4.poor*ch4_20.poor + sigma_ch4.good_ch4.very.good*ch4_20.very.good
 ch4_20.moderate ~~ sigma_ch4.moderate_ch4.poor*ch4_20.poor + sigma_ch4.moderate_ch4.very.good*ch4_20.very.good
 ch4_20.poor ~~ sigma_ch4.poor_ch4.very.good*ch4_20.very.good
-leeftijd_first.18.24 ~~ sigma_leeftijd_first.18.24_leeftijd_first.25.39*leeftijd_first.25.39 + sigma_leeftijd_first.18.24_leeftijd_first.40.66*leeftijd_first.40.66 + sigma_leeftijd_first.18.24_leeftijd_first.over.67*leeftijd_first.over.67
-leeftijd_first.25.39 ~~ sigma_leeftijd_first.25.39_leeftijd_first.40.66*leeftijd_first.40.66 + sigma_leeftijd_first.25.39_leeftijd_first.over.67*leeftijd_first.over.67
-leeftijd_first.40.66 ~~ sigma_leeftijd_first.40.66_leeftijd_first.over.67*leeftijd_first.over.67
-nettohh_f_first.under.15k ~~ sigma_nettohh_f_first.under.15k_nettohh_f_first.over.50k*nettohh_f_first.over.50k
-herkomstgroep_first.first.w ~~ sigma_herkomstgroep_first.first.w_herkomstgroep_first.first.nonw*herkomstgroep_first.first.nonw + sigma_herkomstgroep_first.first.w_herkomstgroep_first.second.w*herkomstgroep_first.second.w + sigma_herkomstgroep_first.first.w_herkomstgroep_first.second.nonw*herkomstgroep_first.second.nonw
-herkomstgroep_first.first.nonw ~~ sigma_herkomstgroep_first.first.nonw_herkomstgroep_first.second.w*herkomstgroep_first.second.w + sigma_herkomstgroep_first.first.nonw_herkomstgroep_first.second.nonw*herkomstgroep_first.second.nonw
-herkomstgroep_first.second.w ~~ sigma_herkomstgroep_first.second.w_herkomstgroep_first.second.nonw*herkomstgroep_first.second.nonw
-burgstat_first.married ~~ sigma_burgstat_first.married_burgstat_first.never.been.married*burgstat_first.never.been.married + sigma_burgstat_first.married_burgstat_first.separated*burgstat_first.separated + sigma_burgstat_first.married_burgstat_first.widow.or.widower*burgstat_first.widow.or.widower
-burgstat_first.never.been.married ~~ sigma_burgstat_first.never.been.married_burgstat_first.separated*burgstat_first.separated + sigma_burgstat_first.never.been.married_burgstat_first.widow.or.widower*burgstat_first.widow.or.widower
-burgstat_first.separated ~~ sigma_burgstat_first.separated_burgstat_first.widow.or.widower*burgstat_first.widow.or.widower
-oplcat_first.hbo ~~ sigma_oplcat_first.hbo_oplcat_first.mbo*oplcat_first.mbo + sigma_oplcat_first.hbo_oplcat_first.primary.school*oplcat_first.primary.school + sigma_oplcat_first.hbo_oplcat_first.vmbo*oplcat_first.vmbo + sigma_oplcat_first.hbo_oplcat_first.wo*oplcat_first.wo
-oplcat_first.mbo ~~ sigma_oplcat_first.mbo_oplcat_first.primary.school*oplcat_first.primary.school + sigma_oplcat_first.mbo_oplcat_first.vmbo*oplcat_first.vmbo + sigma_oplcat_first.mbo_oplcat_first.wo*oplcat_first.wo
-oplcat_first.primary.school ~~ sigma_oplcat_first.primary.school_oplcat_first.vmbo*oplcat_first.vmbo + sigma_oplcat_first.primary.school_oplcat_first.wo*oplcat_first.wo
-oplcat_first.vmbo ~~ sigma_oplcat_first.vmbo_oplcat_first.wo*oplcat_first.wo
-employment_first.homemaker ~~ sigma_employment_first.homemaker_employment_first.retired*employment_first.retired + sigma_employment_first.homemaker_employment_first.student*employment_first.student + sigma_employment_first.homemaker_employment_first.unable.to.work*employment_first.unable.to.work + sigma_employment_first.homemaker_employment_first.unemployed*employment_first.unemployed
-employment_first.retired ~~ sigma_employment_first.retired_employment_first.student*employment_first.student + sigma_employment_first.retired_employment_first.unable.to.work*employment_first.unable.to.work + sigma_employment_first.retired_employment_first.unemployed*employment_first.unemployed
-employment_first.student ~~ sigma_employment_first.student_employment_first.unable.to.work*employment_first.unable.to.work + sigma_employment_first.student_employment_first.unemployed*employment_first.unemployed
-employment_first.unable.to.work ~~ sigma_employment_first.unable.to.work_employment_first.unemployed*employment_first.unemployed
 bmi_21.normal.weight ~~ sigma_bmi.normal.weight_bmi.overweight*bmi_21.overweight + sigma_bmi.normal.weight_bmi.obese*bmi_21.obese
 bmi_21.overweight ~~ sigma_bmi.overweight_bmi.obese*bmi_21.obese
 ch4_21.good ~~ sigma_ch4.good_ch4.moderate*ch4_21.moderate + sigma_ch4.good_ch4.poor*ch4_21.poor + sigma_ch4.good_ch4.very.good*ch4_21.very.good
 ch4_21.moderate ~~ sigma_ch4.moderate_ch4.poor*ch4_21.poor + sigma_ch4.moderate_ch4.very.good*ch4_21.very.good
 ch4_21.poor ~~ sigma_ch4.poor_ch4.very.good*ch4_21.very.good
-leeftijd_first.18.24 ~~ sigma_leeftijd_first.18.24_leeftijd_first.25.39*leeftijd_first.25.39 + sigma_leeftijd_first.18.24_leeftijd_first.40.66*leeftijd_first.40.66 + sigma_leeftijd_first.18.24_leeftijd_first.over.67*leeftijd_first.over.67
-leeftijd_first.25.39 ~~ sigma_leeftijd_first.25.39_leeftijd_first.40.66*leeftijd_first.40.66 + sigma_leeftijd_first.25.39_leeftijd_first.over.67*leeftijd_first.over.67
-leeftijd_first.40.66 ~~ sigma_leeftijd_first.40.66_leeftijd_first.over.67*leeftijd_first.over.67
-nettohh_f_first.under.15k ~~ sigma_nettohh_f_first.under.15k_nettohh_f_first.over.50k*nettohh_f_first.over.50k
-herkomstgroep_first.first.w ~~ sigma_herkomstgroep_first.first.w_herkomstgroep_first.first.nonw*herkomstgroep_first.first.nonw + sigma_herkomstgroep_first.first.w_herkomstgroep_first.second.w*herkomstgroep_first.second.w + sigma_herkomstgroep_first.first.w_herkomstgroep_first.second.nonw*herkomstgroep_first.second.nonw
-herkomstgroep_first.first.nonw ~~ sigma_herkomstgroep_first.first.nonw_herkomstgroep_first.second.w*herkomstgroep_first.second.w + sigma_herkomstgroep_first.first.nonw_herkomstgroep_first.second.nonw*herkomstgroep_first.second.nonw
-herkomstgroep_first.second.w ~~ sigma_herkomstgroep_first.second.w_herkomstgroep_first.second.nonw*herkomstgroep_first.second.nonw
-burgstat_first.married ~~ sigma_burgstat_first.married_burgstat_first.never.been.married*burgstat_first.never.been.married + sigma_burgstat_first.married_burgstat_first.separated*burgstat_first.separated + sigma_burgstat_first.married_burgstat_first.widow.or.widower*burgstat_first.widow.or.widower
-burgstat_first.never.been.married ~~ sigma_burgstat_first.never.been.married_burgstat_first.separated*burgstat_first.separated + sigma_burgstat_first.never.been.married_burgstat_first.widow.or.widower*burgstat_first.widow.or.widower
-burgstat_first.separated ~~ sigma_burgstat_first.separated_burgstat_first.widow.or.widower*burgstat_first.widow.or.widower
-oplcat_first.hbo ~~ sigma_oplcat_first.hbo_oplcat_first.mbo*oplcat_first.mbo + sigma_oplcat_first.hbo_oplcat_first.primary.school*oplcat_first.primary.school + sigma_oplcat_first.hbo_oplcat_first.vmbo*oplcat_first.vmbo + sigma_oplcat_first.hbo_oplcat_first.wo*oplcat_first.wo
-oplcat_first.mbo ~~ sigma_oplcat_first.mbo_oplcat_first.primary.school*oplcat_first.primary.school + sigma_oplcat_first.mbo_oplcat_first.vmbo*oplcat_first.vmbo + sigma_oplcat_first.mbo_oplcat_first.wo*oplcat_first.wo
-oplcat_first.primary.school ~~ sigma_oplcat_first.primary.school_oplcat_first.vmbo*oplcat_first.vmbo + sigma_oplcat_first.primary.school_oplcat_first.wo*oplcat_first.wo
-oplcat_first.vmbo ~~ sigma_oplcat_first.vmbo_oplcat_first.wo*oplcat_first.wo
-employment_first.homemaker ~~ sigma_employment_first.homemaker_employment_first.retired*employment_first.retired + sigma_employment_first.homemaker_employment_first.student*employment_first.student + sigma_employment_first.homemaker_employment_first.unable.to.work*employment_first.unable.to.work + sigma_employment_first.homemaker_employment_first.unemployed*employment_first.unemployed
-employment_first.retired ~~ sigma_employment_first.retired_employment_first.student*employment_first.student + sigma_employment_first.retired_employment_first.unable.to.work*employment_first.unable.to.work + sigma_employment_first.retired_employment_first.unemployed*employment_first.unemployed
-employment_first.student ~~ sigma_employment_first.student_employment_first.unable.to.work*employment_first.unable.to.work + sigma_employment_first.student_employment_first.unemployed*employment_first.unemployed
-employment_first.unable.to.work ~~ sigma_employment_first.unable.to.work_employment_first.unemployed*employment_first.unemployed
 bmi_22.normal.weight ~~ sigma_bmi.normal.weight_bmi.overweight*bmi_22.overweight + sigma_bmi.normal.weight_bmi.obese*bmi_22.obese
 bmi_22.overweight ~~ sigma_bmi.overweight_bmi.obese*bmi_22.obese
 ch4_22.good ~~ sigma_ch4.good_ch4.moderate*ch4_22.moderate + sigma_ch4.good_ch4.poor*ch4_22.poor + sigma_ch4.good_ch4.very.good*ch4_22.very.good
 ch4_22.moderate ~~ sigma_ch4.moderate_ch4.poor*ch4_22.poor + sigma_ch4.moderate_ch4.very.good*ch4_22.very.good
 ch4_22.poor ~~ sigma_ch4.poor_ch4.very.good*ch4_22.very.good
-leeftijd_first.18.24 ~~ sigma_leeftijd_first.18.24_leeftijd_first.25.39*leeftijd_first.25.39 + sigma_leeftijd_first.18.24_leeftijd_first.40.66*leeftijd_first.40.66 + sigma_leeftijd_first.18.24_leeftijd_first.over.67*leeftijd_first.over.67
-leeftijd_first.25.39 ~~ sigma_leeftijd_first.25.39_leeftijd_first.40.66*leeftijd_first.40.66 + sigma_leeftijd_first.25.39_leeftijd_first.over.67*leeftijd_first.over.67
-leeftijd_first.40.66 ~~ sigma_leeftijd_first.40.66_leeftijd_first.over.67*leeftijd_first.over.67
-nettohh_f_first.under.15k ~~ sigma_nettohh_f_first.under.15k_nettohh_f_first.over.50k*nettohh_f_first.over.50k
-herkomstgroep_first.first.w ~~ sigma_herkomstgroep_first.first.w_herkomstgroep_first.first.nonw*herkomstgroep_first.first.nonw + sigma_herkomstgroep_first.first.w_herkomstgroep_first.second.w*herkomstgroep_first.second.w + sigma_herkomstgroep_first.first.w_herkomstgroep_first.second.nonw*herkomstgroep_first.second.nonw
-herkomstgroep_first.first.nonw ~~ sigma_herkomstgroep_first.first.nonw_herkomstgroep_first.second.w*herkomstgroep_first.second.w + sigma_herkomstgroep_first.first.nonw_herkomstgroep_first.second.nonw*herkomstgroep_first.second.nonw
-herkomstgroep_first.second.w ~~ sigma_herkomstgroep_first.second.w_herkomstgroep_first.second.nonw*herkomstgroep_first.second.nonw
-burgstat_first.married ~~ sigma_burgstat_first.married_burgstat_first.never.been.married*burgstat_first.never.been.married + sigma_burgstat_first.married_burgstat_first.separated*burgstat_first.separated + sigma_burgstat_first.married_burgstat_first.widow.or.widower*burgstat_first.widow.or.widower
-burgstat_first.never.been.married ~~ sigma_burgstat_first.never.been.married_burgstat_first.separated*burgstat_first.separated + sigma_burgstat_first.never.been.married_burgstat_first.widow.or.widower*burgstat_first.widow.or.widower
-burgstat_first.separated ~~ sigma_burgstat_first.separated_burgstat_first.widow.or.widower*burgstat_first.widow.or.widower
-oplcat_first.hbo ~~ sigma_oplcat_first.hbo_oplcat_first.mbo*oplcat_first.mbo + sigma_oplcat_first.hbo_oplcat_first.primary.school*oplcat_first.primary.school + sigma_oplcat_first.hbo_oplcat_first.vmbo*oplcat_first.vmbo + sigma_oplcat_first.hbo_oplcat_first.wo*oplcat_first.wo
-oplcat_first.mbo ~~ sigma_oplcat_first.mbo_oplcat_first.primary.school*oplcat_first.primary.school + sigma_oplcat_first.mbo_oplcat_first.vmbo*oplcat_first.vmbo + sigma_oplcat_first.mbo_oplcat_first.wo*oplcat_first.wo
-oplcat_first.primary.school ~~ sigma_oplcat_first.primary.school_oplcat_first.vmbo*oplcat_first.vmbo + sigma_oplcat_first.primary.school_oplcat_first.wo*oplcat_first.wo
-oplcat_first.vmbo ~~ sigma_oplcat_first.vmbo_oplcat_first.wo*oplcat_first.wo
-employment_first.homemaker ~~ sigma_employment_first.homemaker_employment_first.retired*employment_first.retired + sigma_employment_first.homemaker_employment_first.student*employment_first.student + sigma_employment_first.homemaker_employment_first.unable.to.work*employment_first.unable.to.work + sigma_employment_first.homemaker_employment_first.unemployed*employment_first.unemployed
-employment_first.retired ~~ sigma_employment_first.retired_employment_first.student*employment_first.student + sigma_employment_first.retired_employment_first.unable.to.work*employment_first.unable.to.work + sigma_employment_first.retired_employment_first.unemployed*employment_first.unemployed
-employment_first.student ~~ sigma_employment_first.student_employment_first.unable.to.work*employment_first.unable.to.work + sigma_employment_first.student_employment_first.unemployed*employment_first.unemployed
-employment_first.unable.to.work ~~ sigma_employment_first.unable.to.work_employment_first.unemployed*employment_first.unemployed
 bmi_23.normal.weight ~~ sigma_bmi.normal.weight_bmi.overweight*bmi_23.overweight + sigma_bmi.normal.weight_bmi.obese*bmi_23.obese
 bmi_23.overweight ~~ sigma_bmi.overweight_bmi.obese*bmi_23.obese
 ch4_23.good ~~ sigma_ch4.good_ch4.moderate*ch4_23.moderate + sigma_ch4.good_ch4.poor*ch4_23.poor + sigma_ch4.good_ch4.very.good*ch4_23.very.good
 ch4_23.moderate ~~ sigma_ch4.moderate_ch4.poor*ch4_23.poor + sigma_ch4.moderate_ch4.very.good*ch4_23.very.good
 ch4_23.poor ~~ sigma_ch4.poor_ch4.very.good*ch4_23.very.good
-leeftijd_first.18.24 ~~ sigma_leeftijd_first.18.24_leeftijd_first.25.39*leeftijd_first.25.39 + sigma_leeftijd_first.18.24_leeftijd_first.40.66*leeftijd_first.40.66 + sigma_leeftijd_first.18.24_leeftijd_first.over.67*leeftijd_first.over.67
-leeftijd_first.25.39 ~~ sigma_leeftijd_first.25.39_leeftijd_first.40.66*leeftijd_first.40.66 + sigma_leeftijd_first.25.39_leeftijd_first.over.67*leeftijd_first.over.67
-leeftijd_first.40.66 ~~ sigma_leeftijd_first.40.66_leeftijd_first.over.67*leeftijd_first.over.67
-nettohh_f_first.under.15k ~~ sigma_nettohh_f_first.under.15k_nettohh_f_first.over.50k*nettohh_f_first.over.50k
-herkomstgroep_first.first.w ~~ sigma_herkomstgroep_first.first.w_herkomstgroep_first.first.nonw*herkomstgroep_first.first.nonw + sigma_herkomstgroep_first.first.w_herkomstgroep_first.second.w*herkomstgroep_first.second.w + sigma_herkomstgroep_first.first.w_herkomstgroep_first.second.nonw*herkomstgroep_first.second.nonw
-herkomstgroep_first.first.nonw ~~ sigma_herkomstgroep_first.first.nonw_herkomstgroep_first.second.w*herkomstgroep_first.second.w + sigma_herkomstgroep_first.first.nonw_herkomstgroep_first.second.nonw*herkomstgroep_first.second.nonw
-herkomstgroep_first.second.w ~~ sigma_herkomstgroep_first.second.w_herkomstgroep_first.second.nonw*herkomstgroep_first.second.nonw
-burgstat_first.married ~~ sigma_burgstat_first.married_burgstat_first.never.been.married*burgstat_first.never.been.married + sigma_burgstat_first.married_burgstat_first.separated*burgstat_first.separated + sigma_burgstat_first.married_burgstat_first.widow.or.widower*burgstat_first.widow.or.widower
-burgstat_first.never.been.married ~~ sigma_burgstat_first.never.been.married_burgstat_first.separated*burgstat_first.separated + sigma_burgstat_first.never.been.married_burgstat_first.widow.or.widower*burgstat_first.widow.or.widower
-burgstat_first.separated ~~ sigma_burgstat_first.separated_burgstat_first.widow.or.widower*burgstat_first.widow.or.widower
-oplcat_first.hbo ~~ sigma_oplcat_first.hbo_oplcat_first.mbo*oplcat_first.mbo + sigma_oplcat_first.hbo_oplcat_first.primary.school*oplcat_first.primary.school + sigma_oplcat_first.hbo_oplcat_first.vmbo*oplcat_first.vmbo + sigma_oplcat_first.hbo_oplcat_first.wo*oplcat_first.wo
-oplcat_first.mbo ~~ sigma_oplcat_first.mbo_oplcat_first.primary.school*oplcat_first.primary.school + sigma_oplcat_first.mbo_oplcat_first.vmbo*oplcat_first.vmbo + sigma_oplcat_first.mbo_oplcat_first.wo*oplcat_first.wo
-oplcat_first.primary.school ~~ sigma_oplcat_first.primary.school_oplcat_first.vmbo*oplcat_first.vmbo + sigma_oplcat_first.primary.school_oplcat_first.wo*oplcat_first.wo
-oplcat_first.vmbo ~~ sigma_oplcat_first.vmbo_oplcat_first.wo*oplcat_first.wo
-employment_first.homemaker ~~ sigma_employment_first.homemaker_employment_first.retired*employment_first.retired + sigma_employment_first.homemaker_employment_first.student*employment_first.student + sigma_employment_first.homemaker_employment_first.unable.to.work*employment_first.unable.to.work + sigma_employment_first.homemaker_employment_first.unemployed*employment_first.unemployed
-employment_first.retired ~~ sigma_employment_first.retired_employment_first.student*employment_first.student + sigma_employment_first.retired_employment_first.unable.to.work*employment_first.unable.to.work + sigma_employment_first.retired_employment_first.unemployed*employment_first.unemployed
-employment_first.student ~~ sigma_employment_first.student_employment_first.unable.to.work*employment_first.unable.to.work + sigma_employment_first.student_employment_first.unemployed*employment_first.unemployed
-employment_first.unable.to.work ~~ sigma_employment_first.unable.to.work_employment_first.unemployed*employment_first.unemployed
 mhi5_12 ~~ sigma_mhi5*mhi5_12
 cs104_12 ~~ sigma_cs104*cs104_12
 bmi_12.normal.weight ~~ sigma_bmi.normal.weight*bmi_12.normal.weight
