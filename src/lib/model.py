@@ -717,7 +717,17 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
                 rvals = self._filter_constant_rvals(y, rvals, data)
 
             self._regressions.append(Regression(y, rvals, self._include_time_dummy))
-            self._add_mediator_regressions(mediators, y_lags, x_lags, [*controls, *time_invariant_controls])
+            self._add_mediator_regressions(
+                mediators,
+                y_lags,
+                x_lags,
+                list(
+                    filter(
+                        lambda rval: not rval.is_in_definitions([self._y, self._x, *self._mediators], for_panel=True),
+                        rvals,
+                    )
+                ),
+            )
 
             if self._do_add_dummy_covariances:
                 self._add_dummy_covariances(rvals, is_first_wave)
@@ -1042,7 +1052,11 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
             rvals = self._filter_constant_rvals(y, rvals, data)
 
         self._regressions.append(Regression(y, rvals, self._include_time_dummy))
-        self._add_mediator_regressions(mediators, x, controls)
+        self._add_mediator_regressions(
+            mediators,
+            x,
+            list(filter(lambda rval: not rval.is_in_definitions([self._x, *self._mediators], for_panel=False), rvals)),
+        )
 
         if self._do_add_dummy_covariances:
             self._add_dummy_covariances(rvals)
