@@ -343,5 +343,7 @@ summary(sem_fit, fit.measures = TRUE)
 
 ```{r}
 # Potential model improvements
-modindices(sem_fit)
+mi <- modificationindices(sem_fit)
+
+head(mi[order(-mi$mi), , ], 10)
 ```
