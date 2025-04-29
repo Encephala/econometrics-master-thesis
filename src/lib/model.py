@@ -567,6 +567,18 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
         return self
 
+    def with_mediators(self, mediators: list[VariableDefinition]) -> Self:
+        if self._x.dummy_levels is not None:
+            raise NotImplementedError(
+                "Mediators for categorical x (i.e. dummy_levels is not None) is not implemented yet."
+            )
+
+        self._mediators = mediators
+
+        self._check_duplicate_definition()
+
+        return self
+
     def with_time_invariant_controls(self, controls: list[VariableDefinition]) -> Self:
         assert all(control.is_time_invariant for control in controls), (
             f"Time invariant controls weren't all defined as such: {controls}"
