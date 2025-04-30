@@ -195,7 +195,7 @@ def make_bmi(health_panel: pd.DataFrame) -> pd.DataFrame:
     for year in available_years(weight):  # Can choose either weight or height, if one is missing answer is NA anyways
         bmi[Column(BMI, year)] = weight[Column(WEIGHT, year)] / (height[Column(HEIGHT, year)] / 100) ** 2
 
-    # BMI ranges from https://www.nhs.uk/conditions/obesity/
+    # BMI ranges from https://www.who.int/europe/news-room/fact-sheets/item/a-healthy-lifestyle---who-recommendations
     return bmi.apply(
         lambda column: pd.cut(
             column,
