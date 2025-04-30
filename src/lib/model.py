@@ -124,7 +124,7 @@ class Variable:
 class VariableWithNamedParameter(Variable):
     "A variable in the dataset that has an associated named parameter."
 
-    parameter: str = field(repr=False, kw_only=True)
+    parameter: str = field(kw_only=True)
 
     def build(self) -> str:
         return f"{self.parameter}*{super().build()}"
