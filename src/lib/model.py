@@ -420,18 +420,18 @@ class _ModelDefinitionBuilder(ABC):
             self._define_total_for_x_dummy_level(x, relevant_pathways)
 
     def _define_total_for_x_dummy_level(self, x: Variable, relevant_pathways: Sequence[MediatorPathway]):
-        def make_parameter_name(prefix: str, dummy_level: str | None, suffix: str | None) -> str:
+        def make_parameter_name(prefix: str, suffix: str | None) -> str:
             result = prefix
 
-            if dummy_level is not None:
-                result += f"_{dummy_level}"
+            if x.dummy_level is not None:
+                result += f"_{x.dummy_level}"
 
             if suffix is not None:
                 result += f"_{suffix}"
 
             return result
 
-        direct_effect = make_parameter_name("effect", x.dummy_level, "direct")
+        direct_effect = make_parameter_name("effect", "direct")
         self._parameter_definitions.append(ParameterDefinition(direct_effect, [f"beta0_{x.as_parameter_name()}"]))
 
         rvals_total_x: list[str] = [direct_effect]
@@ -441,18 +441,18 @@ class _ModelDefinitionBuilder(ABC):
             rvals_total_mediator: list[str] = []
 
             for pathway in pathways:
-                local_name = make_parameter_name("effect", x.dummy_level, pathway.mediator.as_parameter_name())
+                local_name = make_parameter_name("effect", pathway.mediator.as_parameter_name())
 
                 contributions = [f"{pathway.main_param}*{mediator_param}" for mediator_param in pathway.mediator_params]
 
                 self._parameter_definitions.append(ParameterDefinition(local_name, contributions))
                 rvals_total_mediator.append(local_name)
 
-            global_component = make_parameter_name("total", x.dummy_level, variable_name)
+            global_component = make_parameter_name("total", variable_name)
             self._parameter_definitions.append(ParameterDefinition(global_component, rvals_total_mediator))
             rvals_total_x.append(global_component)
 
-        global_name = make_parameter_name("total", x.dummy_level, None)
+        global_name = make_parameter_name("total", None)
         self._parameter_definitions.append(ParameterDefinition(global_name, rvals_total_x))
 
     def _define_ordinals(
