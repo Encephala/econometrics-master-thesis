@@ -221,7 +221,6 @@ class _ModelDefinitionBuilder(ABC):
     _regressions: list[Regression]
     _covariances: list[Covariance]
     _ordinals: OrdinalVariableSet
-    _mediator_pathways: list[MediatorPathway]
     _parameter_definitions: list[ParameterDefinition]
 
     def __init__(self):
@@ -233,7 +232,6 @@ class _ModelDefinitionBuilder(ABC):
         self._regressions = []
         self._covariances = []
         self._ordinals = OrdinalVariableSet()
-        self._mediator_pathways = []
         self._parameter_definitions = []
 
     def with_mediators(self, mediators: list[VariableDefinition]) -> Self:
@@ -403,13 +401,13 @@ class _ModelDefinitionBuilder(ABC):
 
         return None
 
-    def _define_total_effects(self, xs: list[Variable]):
+    def _define_total_effects(self, xs: list[Variable], mediator_pathways: list[MediatorPathway]):
         logger.debug(f"Defining total effects: {xs=}")
 
         # NOTE/TODO: Not sure how to handle multiple x_lags, only implemented for x_lag_structure = [0] for now.
         for x in xs:
             relevant_pathways = list(
-                filter(lambda pathway: pathway.for_dummy_level == x.dummy_level, self._mediator_pathways)
+                filter(lambda pathway: pathway.for_dummy_level == x.dummy_level, mediator_pathways)
             )
 
             if len(relevant_pathways) == 0:
@@ -717,7 +715,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
                 rvals = self._filter_constant_rvals(y, rvals, data)
 
             self._regressions.append(Regression(y, rvals, self._include_time_dummy))
-            self._add_mediator_regressions(
+            _mediator_pathways = self._add_mediator_regressions(
                 mediators,
                 y_lags,
                 x_lags,
@@ -737,7 +735,9 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
             # TODO: not just non-lagged x
             # TODO: This is not right yet, it's redefining the same effects for each regression, need only
             # be defined once because the parameters are reused across the regression.
-            # self._define_total_effects([x for x in x_lags if x.wave == wave - self._x_lag_structure[0]])
+            # self._define_total_effects(
+            #     [x for x in x_lags if x.wave == wave - self._x_lag_structure[0]], mediator_pathways
+            # )
 
             self._define_ordinals([y, *y_lags], [*x_lags], mediators, controls)
 
@@ -793,7 +793,9 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
         y_lags: Sequence[Variable],
         x_lags: Sequence[Variable],
         controls: Sequence[Variable],
-    ):
+    ) -> list[MediatorPathway]:
+        result: list[MediatorPathway] = []
+
         for mediator in [mediator.to_unnamed() for mediator in mediators]:
             current_rvals: list[VariableWithNamedParameter] = []
 
@@ -809,13 +811,15 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
                 )
 
             self._regressions.append(Regression(mediator, current_rvals, self._include_time_dummy))
-            self._mediator_pathways.append(
+            result.append(
                 MediatorPathway(
                     mediator,
                     f"zeta_{mediator.as_parameter_name()}",
                     [f"eta_{mediator.as_parameter_name()}_x{lag}" for lag in self._x_lag_structure],
                 )
             )
+
+        return result
 
     def _add_dummy_covariances(self, rvals: list[Variable], is_first_wave: bool):  # noqa: FBT001
         """Adds the covariances between dummy levels for the given rvals (lvals must be interval scale).
@@ -1052,7 +1056,7 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
             rvals = self._filter_constant_rvals(y, rvals, data)
 
         self._regressions.append(Regression(y, rvals, self._include_time_dummy))
-        self._add_mediator_regressions(
+        mediator_pathways = self._add_mediator_regressions(
             mediators,
             x,
             list(filter(lambda rval: not rval.is_in_definitions([self._x, *self._mediators], for_panel=False), rvals)),
@@ -1063,7 +1067,7 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
 
         self._add_between_regressor_covariances(rvals)
 
-        self._define_total_effects(x)
+        self._define_total_effects(x, mediator_pathways)
 
         self._define_ordinals([y], x, mediators, controls)
 
@@ -1112,7 +1116,9 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
         mediators: Sequence[Variable],
         x_levels: Sequence[Variable],
         controls: Sequence[Variable],
-    ):
+    ) -> list[MediatorPathway]:
+        result: list[MediatorPathway] = []
+
         for mediator in mediators:
             current_rvals: list[Variable] = []
 
@@ -1125,7 +1131,7 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
 
             self._regressions.append(Regression(mediator.to_unnamed(), current_rvals, self._include_time_dummy))
 
-            self._mediator_pathways.extend(
+            result.extend(
                 [
                     MediatorPathway(
                         mediator,
@@ -1136,6 +1142,8 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
                     for level in x_levels
                 ]
             )
+
+        return result
 
     def _add_dummy_covariances(self, rvals: list[Variable]):
         """Adds the covariances between dummy levels for the given rvals (lvals must be interval scale).
