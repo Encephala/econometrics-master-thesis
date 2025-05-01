@@ -206,6 +206,13 @@ def make_bmi(health_panel: pd.DataFrame) -> pd.DataFrame:
     )
 
 
+# Depression status
+def make_depression(health_panel: pd.DataFrame) -> pd.DataFrame:
+    depression = select_variable(health_panel, DEPRESSION_MEDICATION)
+
+    return depression.map(lambda x: x == "yes", na_action="ignore").astype("boolean")
+
+
 # Previous depression
 def make_previous_depression(health_panel: pd.DataFrame) -> pd.DataFrame:
     depression = select_variable(health_panel, DEPRESSION_MEDICATION)
@@ -217,21 +224,23 @@ def make_previous_depression(health_panel: pd.DataFrame) -> pd.DataFrame:
     PREVIOUS_DEPRESSION = "prev_depr"
 
     for person in previous_depression.index:
-        medication_status: pd.Series = depression.loc[person, names_depression].squeeze()
+        yearly_medication_status: pd.Series = depression.loc[person, names_depression].squeeze()
 
-        medication_status = medication_status.map(lambda x: x == "yes", na_action="ignore")
+        yearly_medication_status = yearly_medication_status.map(lambda x: x == "yes", na_action="ignore")
 
         cumulative_medication_status = pd.NA
         for year in years_depression[1:]:
             previous_year_name = Column(DEPRESSION_MEDICATION, year - 1)
 
-            is_previous_year_available = pd.isna(medication_status.get(previous_year_name))
+            is_previous_year_available = pd.isna(yearly_medication_status.get(previous_year_name))
 
             if not is_previous_year_available:
                 if pd.isna(cumulative_medication_status):
-                    cumulative_medication_status = medication_status[previous_year_name]  # pyright: ignore  # noqa: PGH003
+                    cumulative_medication_status = yearly_medication_status[previous_year_name]  # pyright: ignore  # noqa: PGH003
                 else:
-                    cumulative_medication_status = cumulative_medication_status or medication_status[previous_year_name]  # pyright: ignore  # noqa: PGH003
+                    cumulative_medication_status = (
+                        cumulative_medication_status or yearly_medication_status[previous_year_name]  # pyright: ignore  # noqa: PGH003
+                    )
 
             previous_depression.loc[person, Column(PREVIOUS_DEPRESSION, year)] = cumulative_medication_status
 
@@ -351,6 +360,7 @@ def make_all_data(*, cache: bool, respect_load_cache: bool = True) -> pd.DataFra
     leisure_panel = load_wide_panel_cached("cs", respect_cache=respect_load_cache)
     health_panel = load_wide_panel_cached("ch", respect_cache=respect_load_cache)
 
+    # All variables (potentially) used in modelling
     mhi5 = make_mhi5(health_panel)
     sports = make_sports(leisure_panel)
     age = make_age(background_vars)
@@ -362,8 +372,11 @@ def make_all_data(*, cache: bool, respect_load_cache: bool = True) -> pd.DataFra
     employment = make_employment(background_vars)
     physical_health = select_variable(health_panel, PHYSICAL_HEALTH)
     bmi = make_bmi(health_panel)
+    depression = make_depression(health_panel)
     previous_depression = make_previous_depression(health_panel)
 
+    # Add "*_first" version of each variable
+    # Can't find a nice DRY way to do this, whatever
     mhi5 = add_first_non_na(mhi5)
     sports = add_first_non_na(sports)
     age = add_first_non_na(age)
@@ -375,6 +388,7 @@ def make_all_data(*, cache: bool, respect_load_cache: bool = True) -> pd.DataFra
     employment = add_first_non_na(employment)
     physical_health = add_first_non_na(physical_health)
     bmi = add_first_non_na(bmi)
+    depression = add_first_non_na(depression)
     previous_depression = add_first_non_na(previous_depression)
 
     result = pd.DataFrame(index=background_vars.index).join(
@@ -390,6 +404,7 @@ def make_all_data(*, cache: bool, respect_load_cache: bool = True) -> pd.DataFra
             make_dummies(employment),
             make_dummies(physical_health),
             make_dummies(bmi),
+            depression,
             previous_depression,
         ]
     )
