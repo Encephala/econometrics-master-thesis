@@ -39,7 +39,12 @@ model_definition = (
                 PHYSICAL_HEALTH,
             ]
         ]
-        + [VariableDefinition(variable) for variable in []]
+        + [
+            VariableDefinition(variable)
+            for variable in [
+                DEPRESSION_MEDICATION,
+            ]
+        ]
     )
     .with_time_invariant_controls(
         [
@@ -56,12 +61,7 @@ model_definition = (
                 EMPLOYMENT,
             ]
         ]
-        + [
-            VariableDefinition(variable, is_time_invariant=True)
-            for variable in [
-                PREVIOUS_DEPRESSION,
-            ]
-        ]
+        + [VariableDefinition(variable, is_time_invariant=True) for variable in []]
     )
     .with_additional_covariances(
         fix_variance_across_time=True,
