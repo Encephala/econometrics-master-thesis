@@ -389,7 +389,6 @@ def make_all_data(*, cache: bool, respect_load_cache: bool = True) -> pd.DataFra
     physical_health = add_first_non_na(physical_health)
     bmi = add_first_non_na(bmi)
     depression = add_first_non_na(depression)
-    previous_depression = add_first_non_na(previous_depression)
 
     result = pd.DataFrame(index=background_vars.index).join(
         [
