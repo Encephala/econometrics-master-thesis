@@ -220,7 +220,7 @@ class _ModelDefinitionBuilder(ABC):
     _excluded_regressors: list[Column]
 
     # To set covariances between dummy levels of the same variable as free parameters
-    _do_add_dummy_covariances: bool = False
+    _do_add_dummy_covariances: bool = True
 
     _between_regressor_covariances: list[CovarianceDefinition]
 
