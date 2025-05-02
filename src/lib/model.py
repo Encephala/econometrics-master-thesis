@@ -43,11 +43,19 @@ class Variable:
     "A variable in the dataset, that is, a specific (level of a) variable in a specific wave."
 
     name: str
+    is_first: bool = field(default=False, kw_only=True)
     wave: int | None = field(default=None, kw_only=True)
     dummy_level: str | None = field(default=None, kw_only=True)
 
+    def __post_init__(self):
+        if self.is_first:
+            assert self.wave is None, f"Defined {self=} to be first value but wave is not None"
+
     def build(self) -> str:
         result = f"{self.name}"
+
+        if self.is_first:
+            result += "_first"
 
         if self.wave is not None:
             result += f"_{self.wave}"
@@ -58,9 +66,9 @@ class Variable:
         return result
 
     def matches_definition(self, definition: "VariableDefinition", *, for_panel: bool) -> bool:
-        result = self.name.removesuffix("_first") == definition.name
+        result = self.name == definition.name
 
-        if self.name.endswith("_first"):
+        if self.is_first:
             # If variable is time invariant, so must definition be
             result = result and definition.is_time_invariant
 
@@ -90,28 +98,27 @@ class Variable:
     def is_in_definitions(self, available_variables: Sequence["VariableDefinition"], *, for_panel: bool) -> bool:
         return any(self.matches_definition(variable, for_panel=for_panel) for variable in available_variables)
 
-    def matches_column(self, other: "Column") -> bool:
-        result = self.name == other.name
+    def to_column(self) -> Column:
+        name = self.name if not self.is_first else f"{self.name}_first"
 
-        if self.wave is not None:
-            result = result and self.wave == other.wave
+        return Column(name, self.wave, self.dummy_level)
 
-        if self.dummy_level is not None:
-            result = result and self.dummy_level == other.dummy_level
-
-        return result
+    def matches_column(self, other: Column) -> bool:
+        return self.to_column() == other
 
     def is_in_columns(self, available_variables: Sequence["Column"]) -> bool:
         return any(self.matches_column(variable) for variable in available_variables)
 
     def has_zero_variance_in(self, data: pd.DataFrame) -> bool:
-        return data[Column(self.name, self.wave, self.dummy_level)].var() == 0
+        return data[self.to_column()].var() == 0
 
     def with_named_parameter(self, parameter: str) -> "VariableWithNamedParameter":
-        return VariableWithNamedParameter(self.name, wave=self.wave, dummy_level=self.dummy_level, parameter=parameter)
+        return VariableWithNamedParameter(
+            self.name, is_first=self.is_first, wave=self.wave, dummy_level=self.dummy_level, parameter=parameter
+        )
 
     def to_unnamed(self) -> "Variable":
-        return Variable(self.name, wave=self.wave, dummy_level=self.dummy_level)
+        return Variable(self.name, is_first=self.is_first, wave=self.wave, dummy_level=self.dummy_level)
 
     def as_parameter_name(self) -> str:
         if self.dummy_level is None:
@@ -486,9 +493,7 @@ class _ModelDefinitionBuilder(ABC):
         return list(dict.fromkeys(all_regressors))
 
     def _check_covariance_matrix_PD(self, data: pd.DataFrame):
-        all_regressors = [
-            Column(variable.name, variable.wave, variable.dummy_level) for variable in self._all_regressors()
-        ]
+        all_regressors = [variable.to_column() for variable in self._all_regressors()]
 
         subset = data[all_regressors]
 
@@ -596,12 +601,12 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
         return self
 
-    def with_time_invariant_controls(self, controls: list[VariableDefinition]) -> Self:
-        assert all(control.is_time_invariant for control in controls), (
-            f"Time invariant controls weren't all defined as such: {controls}"
-        )
+    def with_controls(self, controls: list[VariableDefinition]) -> Self:
+        time_variants = [control for control in controls if not control.is_time_invariant]
+        time_invariants = [control for control in controls if control.is_time_invariant]
 
-        self._time_invariant_controls = controls
+        self._controls = time_variants
+        self._time_invariant_controls = time_invariants
 
         self._check_duplicate_definition()
 
@@ -772,16 +777,16 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
         result = []
 
         def to_variable_name(definition: VariableDefinition) -> str:
-            if definition.is_time_invariant:
-                return f"{definition.name}_first"
-
             return definition.name
 
         for definition in regressors:
             if definition.dummy_levels is None:
                 result.append(
                     VariableWithNamedParameter(
-                        to_variable_name(definition), wave=wave_y, parameter=f"{parameter_name}_{definition.name}"
+                        to_variable_name(definition),
+                        is_first=definition.is_time_invariant,
+                        wave=wave_y,
+                        parameter=f"{parameter_name}_{definition.name}",
                     )
                 )
                 continue
@@ -796,6 +801,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
                 [
                     VariableWithNamedParameter(
                         to_variable_name(definition),
+                        is_first=definition.is_time_invariant,
                         wave=wave_y,
                         parameter=f"{parameter_name}_{definition.name}.{level}",
                         dummy_level=level,

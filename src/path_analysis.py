@@ -45,9 +45,7 @@ model_definition = (
                 DEPRESSION_MEDICATION,
             ]
         ]
-    )
-    .with_time_invariant_controls(
-        [
+        + [
             VariableDefinition(
                 variable, is_time_invariant=True, dummy_levels=available_dummy_levels(all_data, variable)
             )
