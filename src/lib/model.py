@@ -210,6 +210,8 @@ class _ModelDefinitionBuilder(ABC):
     _mediators: list[VariableDefinition]
 
     _controls: list[VariableDefinition]
+    _controls_fixed: bool
+
     _include_time_dummy: bool = False
 
     _do_missing_check: bool = True
@@ -248,8 +250,9 @@ class _ModelDefinitionBuilder(ABC):
 
         return self
 
-    def with_controls(self, controls: list[VariableDefinition]) -> Self:
+    def with_controls(self, controls: list[VariableDefinition], *, fixed: bool = True) -> Self:
         self._controls = controls
+        self._controls_fixed = fixed
 
         self._check_duplicate_definition()
 
@@ -601,7 +604,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
         return self
 
-    def with_controls(self, controls: list[VariableDefinition]) -> Self:
+    def with_controls(self, controls: list[VariableDefinition], *, fixed: bool = True) -> Self:
         time_variants = [control for control in controls if not control.is_time_invariant]
         time_invariants = [control for control in controls if control.is_time_invariant]
 
@@ -609,6 +612,8 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
         self._time_invariant_controls = time_invariants
 
         self._check_duplicate_definition()
+
+        self._controls_fixed = fixed
 
         return self
 
@@ -705,6 +710,8 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
         for variable in dependent_vars:
             y = Variable(variable.name, wave=variable.wave)
+
+            logger.debug(f"Building regression for {y=}")
 
             wave: int = y.wave  # pyright: ignore[reportAssignmentType]
 
@@ -853,6 +860,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
         # NOTE/TODO: Because this function works on the rvals and not self._controls,
         # it does not include a covariance for the dummy level that is excluded for identification.
         # I'm not 100% that is correct behaviour.
+        rvals = self._filter_controls_from_variables_if_fixed(rvals)
 
         for name, values in groupby(rvals, lambda rval: rval.name):
             dummy_levels = [rval for rval in values if rval.name == name and rval.dummy_level is not None]
@@ -921,10 +929,19 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
             self._fix_variances_across_time()
 
         if self._free_covariance_across_time:
-            self._free_regressor_correlations_across_time()
+            self._free_regressor_covariances_across_time()
 
         if self._do_make_x_predetermined:
             self._make_x_predetermined()
+
+    def _filter_controls_from_variables_if_fixed(self, variables: list[Variable]) -> list[Variable]:
+        # Exclude controls if they're fixed
+        if self._controls_fixed:
+            controls_names = [definition.name for definition in [*self._controls, *self._time_invariant_controls]]
+
+            variables = [var for var in variables if var.name not in controls_names]
+
+        return variables
 
     def _fix_variances_across_time(self):
         "Fix the variance of all the variables in self._regressions to be constant in time."
@@ -938,6 +955,8 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
         # Remove duplicates
         all_variables = list(dict.fromkeys(all_variables))
 
+        all_variables = self._filter_controls_from_variables_if_fixed(all_variables)
+
         self._covariances.extend(
             [
                 Covariance(
@@ -948,7 +967,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
             ]
         )
 
-    def _free_regressor_correlations_across_time(self):
+    def _free_regressor_covariances_across_time(self):
         """Sets the correlations between the same variable for different waves as a free parameter.
 
         NOTE: Not done for y because y's autocorrelation should be captured by the AR lags."""
@@ -967,6 +986,8 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
         # NOTE: Not entirely sure if this is the cleanest solution?
         # It kinda makes sense idk
         all_regressors = [regressor for regressor in all_regressors if regressor.wave is not None]
+
+        all_regressors = self._filter_controls_from_variables_if_fixed(all_regressors)
 
         for _, variables in groupby(all_regressors, lambda regressor: regressor.name):
             variables = list(variables)  # noqa: PLW2901
@@ -1177,6 +1198,7 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
         # NOTE/TODO: Because this function works on the rvals and not self._controls,
         # it does not include a covariance for the dummy level that is excluded for identification.
         # I'm not 100% that is correct behaviour.
+        rvals = self._filter_controls_from_variables_if_fixed(rvals)
 
         variables = groupby(rvals, lambda rval: rval.name)
 
@@ -1216,3 +1238,12 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
                     )
 
                 self._covariances.append(Covariance(lval, covariance_rvals))
+
+    def _filter_controls_from_variables_if_fixed(self, variables: list[Variable]) -> list[Variable]:
+        # Exclude controls if they're fixed
+        if self._controls_fixed:
+            controls_names = [definition.name for definition in self._controls]
+
+            variables = [var for var in variables if var.name not in controls_names]
+
+        return variables

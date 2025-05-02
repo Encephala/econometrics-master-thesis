@@ -60,18 +60,12 @@ model_definition = (
     CSModelDefinitionBuilder()
     .with_y(VariableDefinition(MHI5))
     .with_x(VariableDefinition(SPORTS))
-    .with_mediators(
-        [
-            VariableDefinition(
-                PHYSICAL_HEALTH, dummy_levels=available_dummy_levels(all_data_flattened, PHYSICAL_HEALTH)
-            ),
-            VariableDefinition(BMI, dummy_levels=available_dummy_levels(all_data_flattened, BMI)),
-        ]
-    )
     .with_controls(
         [
             VariableDefinition(variable, dummy_levels=available_dummy_levels(all_data_flattened, variable))
             for variable in [
+                PHYSICAL_HEALTH,
+                BMI,
                 AGE,
                 ETHNICITY,
                 GENDER,

@@ -29,14 +29,17 @@ all_data = all_data.drop(y_missing)
 # %% model with single regression
 model_definition = (
     PanelModelDefinitionBuilder()
-    .with_y(VariableDefinition(MHI5))
-    .with_x(VariableDefinition(SPORTS))
+    .with_y(VariableDefinition(MHI5), lag_structure=[1])
+    .with_x(
+        VariableDefinition(SPORTS),
+        lag_structure=[1],
+    )
     .with_controls(
         [
             VariableDefinition(variable, dummy_levels=available_dummy_levels(all_data, variable))
             for variable in [
                 BMI,
-                PHYSICAL_HEALTH,
+                # PHYSICAL_HEALTH,
             ]
         ]
         + [
