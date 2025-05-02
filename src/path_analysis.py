@@ -65,7 +65,7 @@ model_definition = (
         + [VariableDefinition(variable, is_time_invariant=True) for variable in []]
     )
     .with_additional_covariances(
-        fix_variance_across_time=True,
+        fix_variance_across_time=False,
         free_covariance_across_time=True,
         within_dummy_covariance=True,
         x_predetermined=True,
