@@ -13,7 +13,7 @@ from lib.data import (
 # ruff: noqa: F403, F405
 from lib.data import Column
 from lib.data.variables import *
-from lib.model import PanelModelDefinitionBuilder, VariableDefinition, CovarianceDefinition
+from lib.model import PanelModelDefinitionBuilder, VariableDefinition
 
 logging.getLogger().setLevel(logging.INFO)
 
@@ -69,16 +69,6 @@ model_definition = (
         free_covariance_across_time=True,
         within_dummy_covariance=True,
         x_predetermined=True,
-        between_regressors=[
-            CovarianceDefinition(
-                VariableDefinition(AGE, is_time_invariant=True, dummy_levels=available_dummy_levels(all_data, AGE)),
-                [
-                    VariableDefinition(
-                        EMPLOYMENT, is_time_invariant=True, dummy_levels=available_dummy_levels(all_data, EMPLOYMENT)
-                    ),
-                ],
-            ),
-        ],
     )
     .with_excluded_regressors(
         [
