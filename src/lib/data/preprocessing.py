@@ -7,7 +7,7 @@ import numpy as np
 
 # ruff: noqa: F403, F405
 from .loading import Column, load_wide_panel_cached
-from .util import assert_column_type_correct, available_years, select_variable, cleanup_dummy
+from .util import assert_column_type_correct, available_waves, select_variable, cleanup_dummy, select_wave
 from .variables import *
 
 logger = logging.getLogger(__name__)
@@ -52,19 +52,19 @@ def make_mhi5(health_panel: pd.DataFrame) -> pd.DataFrame:
     # The epic calculation
     result = pd.DataFrame()
 
-    for year in available_years(health_panel):
-        # These contain the responses of all individuals for this `year`
-        anxious = map_mhi5_categories(health_panel[Column(ANXIOUS, year)])
-        cheer_up = map_mhi5_categories(health_panel[Column(CANT_CHEER_UP, year)])
-        calm = map_mhi5_categories(health_panel[Column(CALM_PEACEFUL, year)], is_positive=True)
-        depressed = map_mhi5_categories(health_panel[Column(DEPRESSED_GLOOMY, year)])
-        happy = map_mhi5_categories(health_panel[Column(HAPPY, year)], is_positive=True)
+    for wave in available_waves(health_panel):
+        # These contain the responses of all individuals for this `wave`
+        anxious = map_mhi5_categories(health_panel[Column(ANXIOUS, wave)])
+        cheer_up = map_mhi5_categories(health_panel[Column(CANT_CHEER_UP, wave)])
+        calm = map_mhi5_categories(health_panel[Column(CALM_PEACEFUL, wave)], is_positive=True)
+        depressed = map_mhi5_categories(health_panel[Column(DEPRESSED_GLOOMY, wave)])
+        happy = map_mhi5_categories(health_panel[Column(HAPPY, wave)], is_positive=True)
 
         # NOTE: There is no partial missingness, as in whenever one variable is missing,
         # all are missing. No need to f.i. impute NAs as the average of the other variables
         mhi = 4 * (anxious + cheer_up + calm + depressed + happy)
 
-        result[Column("mhi5", year)] = mhi
+        result[Column("mhi5", wave)] = mhi
 
     return result
 
@@ -192,8 +192,8 @@ def make_bmi(health_panel: pd.DataFrame) -> pd.DataFrame:
 
     BMI = "bmi"
 
-    for year in available_years(weight):  # Can choose either weight or height, if one is missing answer is NA anyways
-        bmi[Column(BMI, year)] = weight[Column(WEIGHT, year)] / (height[Column(HEIGHT, year)] / 100) ** 2
+    for wave in available_waves(weight):  # Can choose either weight or height, if one is missing answer is NA anyways
+        bmi[Column(BMI, wave)] = weight[Column(WEIGHT, wave)] / (height[Column(HEIGHT, wave)] / 100) ** 2
 
     # BMI ranges from https://www.who.int/europe/news-room/fact-sheets/item/a-healthy-lifestyle---who-recommendations
     return bmi.apply(
@@ -217,32 +217,32 @@ def make_depression(health_panel: pd.DataFrame) -> pd.DataFrame:
 def make_previous_depression(health_panel: pd.DataFrame) -> pd.DataFrame:
     depression = select_variable(health_panel, DEPRESSION_MEDICATION)
 
-    years_depression = sorted(available_years(depression))
-    names_depression = [Column(DEPRESSION_MEDICATION, year) for year in sorted(available_years(depression))]
+    waves_depression = sorted(available_waves(depression))
+    names_depression = [Column(DEPRESSION_MEDICATION, wave) for wave in sorted(available_waves(depression))]
 
     previous_depression = pd.DataFrame(index=health_panel.index)
     PREVIOUS_DEPRESSION = "prev_depr"
 
     for person in previous_depression.index:
-        yearly_medication_status: pd.Series = depression.loc[person, names_depression].squeeze()
+        wavely_medication_status: pd.Series = depression.loc[person, names_depression].squeeze()
 
-        yearly_medication_status = yearly_medication_status.map(lambda x: x == "yes", na_action="ignore")
+        wavely_medication_status = wavely_medication_status.map(lambda x: x == "yes", na_action="ignore")
 
         cumulative_medication_status = pd.NA
-        for year in years_depression[1:]:
-            previous_year_name = Column(DEPRESSION_MEDICATION, year - 1)
+        for wave in waves_depression[1:]:
+            previous_wave_name = Column(DEPRESSION_MEDICATION, wave - 1)
 
-            is_previous_year_available = pd.isna(yearly_medication_status.get(previous_year_name))
+            is_previous_wave_available = pd.isna(wavely_medication_status.get(previous_wave_name))
 
-            if not is_previous_year_available:
+            if not is_previous_wave_available:
                 if pd.isna(cumulative_medication_status):
-                    cumulative_medication_status = yearly_medication_status[previous_year_name]  # pyright: ignore  # noqa: PGH003
+                    cumulative_medication_status = wavely_medication_status[previous_wave_name]  # pyright: ignore  # noqa: PGH003
                 else:
                     cumulative_medication_status = (
-                        cumulative_medication_status or yearly_medication_status[previous_year_name]  # pyright: ignore  # noqa: PGH003
+                        cumulative_medication_status or wavely_medication_status[previous_wave_name]  # pyright: ignore  # noqa: PGH003
                     )
 
-            previous_depression.loc[person, Column(PREVIOUS_DEPRESSION, year)] = cumulative_medication_status
+            previous_depression.loc[person, Column(PREVIOUS_DEPRESSION, wave)] = cumulative_medication_status
 
     # Fix dtype, pandas doesn't automatically recognise a combination of NA and bool is just nullable boolean
     return previous_depression.astype("boolean")

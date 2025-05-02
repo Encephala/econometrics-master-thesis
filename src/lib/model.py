@@ -669,34 +669,34 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
         return self._make_result()
 
     def _available_dependent_variables(self, available_variables: list[Column]) -> list[Column]:
-        y_years = [variable.wave for variable in available_variables if variable.name == self._y.name]
+        y_waves = [variable.wave for variable in available_variables if variable.name == self._y.name]
 
-        assert not any(year is None for year in y_years)  # y is never time-invariant
+        assert not any(wave is None for wave in y_waves)  # y is never time-invariant
 
-        y_start = min(y_years)  # pyright: ignore[reportArgumentType]
-        y_end = max(y_years)  # pyright: ignore[reportArgumentType]
+        y_start = min(y_waves)  # pyright: ignore[reportArgumentType]
+        y_end = max(y_waves)  # pyright: ignore[reportArgumentType]
 
-        x_years = [variable.wave for variable in available_variables if variable.name == self._x.name]
+        x_waves = [variable.wave for variable in available_variables if variable.name == self._x.name]
 
-        assert not any(year is None for year in x_years)  # x is never time-invariant
+        assert not any(wave is None for wave in x_waves)  # x is never time-invariant
 
-        x_start = min(x_years)  # pyright: ignore[reportArgumentType]
-        x_end = max(x_years)  # pyright: ignore[reportArgumentType]
+        x_start = min(x_waves)  # pyright: ignore[reportArgumentType]
+        x_end = max(x_waves)  # pyright: ignore[reportArgumentType]
 
         # TODO?: When using FIML/handling missing data, perhaps the `max` and `min` in these two statements should swap,
         # but then we have to also add those columns to the df to prevent index errors.
         # If x goes far enough back, the first regression is when y starts
         # else, start as soon as we can due to x
         max_y_lag = max(self._y_lag_structure) if len(self._y_lag_structure) > 0 else 0
-        first_year_y = max(y_start + max_y_lag, x_start + max(self._x_lag_structure))
+        first_wave_y = max(y_start + max_y_lag, x_start + max(self._x_lag_structure))
         # If x does not go far enough forward, stop when x_stops
         # else, stop when y stops
-        last_year_y = min(x_end + min(self._x_lag_structure), y_end)
+        last_wave_y = min(x_end + min(self._x_lag_structure), y_end)
 
         return [
             variable
             for variable in available_variables
-            if variable.name == self._y.name and first_year_y <= variable.wave <= last_year_y
+            if variable.name == self._y.name and first_wave_y <= variable.wave <= last_wave_y
         ]
 
     def _build_regressions(

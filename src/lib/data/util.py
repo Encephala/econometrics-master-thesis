@@ -26,20 +26,20 @@ def select_variable(df: pd.DataFrame, variable: str) -> pd.DataFrame:
     return df[selected_columns]
 
 
-def select_wave(df: pd.DataFrame, year: int) -> pd.DataFrame:
+def select_wave(df: pd.DataFrame, wave: int) -> pd.DataFrame:
     assert_column_type_correct(df)
 
     columns: list[Column] = df.columns  # pyright: ignore[reportAssignmentType]
 
-    selected_columns = [column for column in columns if column.wave == year]
+    selected_columns = [column for column in columns if column.wave == wave]
 
     if len(selected_columns) == 0:
-        logger.warning(f"No columns selected for {year=}")
+        logger.warning(f"No columns selected for {wave=}")
 
     return df[selected_columns]
 
 
-def available_years(df: pd.DataFrame) -> set[int]:
+def available_waves(df: pd.DataFrame) -> set[int]:
     assert_column_type_correct(df)
 
     columns: list[Column] = df.columns  # pyright: ignore[reportAssignmentType]
