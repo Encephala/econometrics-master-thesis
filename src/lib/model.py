@@ -972,7 +972,11 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
         NOTE: Not done for y because y's autocorrelation should be captured by the AR lags."""
         all_regressors = self._all_regressors()
-        # Sort because groupby eagerly makes new groups
+
+        # Remove lagged values of the regressand
+        all_regressors = [var for var in all_regressors if var.name != self._y.name]
+
+        # Sort first, because groupby eagerly makes new groups
         all_regressors = sorted(
             all_regressors,
             key=lambda regressor: (
