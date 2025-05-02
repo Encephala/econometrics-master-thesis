@@ -1,6 +1,7 @@
 # Just to list all variable names for a glob import
 MHI5 = "mhi5"
 SPORTS = "cs104"
+CUMULATIVE_SPORTS = "cs104_cum"
 
 AGE = "leeftijd"
 ETHNICITY = "herkomstgroep"

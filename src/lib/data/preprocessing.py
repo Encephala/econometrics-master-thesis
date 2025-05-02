@@ -7,7 +7,7 @@ import numpy as np
 
 # ruff: noqa: F403, F405
 from .loading import Column, load_wide_panel_cached
-from .util import assert_column_type_correct, available_waves, select_variable, cleanup_dummy, select_wave
+from .util import assert_column_type_correct, available_waves, select_variable, cleanup_dummy
 from .variables import *
 
 logger = logging.getLogger(__name__)
@@ -75,6 +75,35 @@ def make_sports(leisure_panel: pd.DataFrame) -> pd.DataFrame:
     sports = select_variable(leisure_panel, SPORTS)
 
     return sports.apply(lambda column: column.map({"yes": True, "no": False}, na_action="ignore")).astype("boolean")
+
+
+def make_cumulative_sports(leisure_panel: pd.DataFrame) -> pd.DataFrame:
+    sports = make_sports(leisure_panel).astype(pd.Int64Dtype())
+
+    waves = sorted(available_waves(sports))
+
+    result = pd.DataFrame()
+
+    result[Column(CUMULATIVE_SPORTS, waves[0])] = sports[Column(SPORTS, waves[0])]
+
+    for wave in waves[1:]:
+        last_cumulative = result.iloc[:, -1]
+        current_sports = sports[Column(SPORTS, wave)]
+
+        current_cumulative_sports = pd.Series(
+            np.where(
+                last_cumulative.isna(),
+                current_sports,
+                last_cumulative + current_sports,
+            ),
+            name=Column(CUMULATIVE_SPORTS, wave),
+            index=result.index,
+            dtype=pd.Int64Dtype(),
+        )
+
+        result = result.join(current_cumulative_sports)
+
+    return result
 
 
 # Age
@@ -363,6 +392,7 @@ def make_all_data(*, cache: bool, respect_load_cache: bool = True) -> pd.DataFra
     # All variables (potentially) used in modelling
     mhi5 = make_mhi5(health_panel)
     sports = make_sports(leisure_panel)
+    cumulative_sports = make_cumulative_sports(leisure_panel)
     age = make_age(background_vars)
     ethnicity = make_ethnicity(background_vars)
     gender = select_variable(background_vars, GENDER)
@@ -394,6 +424,7 @@ def make_all_data(*, cache: bool, respect_load_cache: bool = True) -> pd.DataFra
         [
             mhi5,
             sports,
+            cumulative_sports,
             make_dummies(age),
             make_dummies(ethnicity),
             make_dummies(gender),
