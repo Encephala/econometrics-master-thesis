@@ -266,11 +266,11 @@ class _ModelDefinitionBuilder(ABC):
     def with_additional_covariances(self) -> Self: ...
 
     def _check_duplicate_definition(self):
-        all_regressors = [self._x, *self._mediators, *self._controls]
+        all_regressor_definitions = [self._x, *self._mediators, *self._controls]
 
         seen_regressors: set[str] = set()
 
-        for regressor in all_regressors:
+        for regressor in all_regressor_definitions:
             if regressor.name in seen_regressors:
                 raise ValueError(f"Duplicate use of {regressor} as rval")  # noqa: TRY003
 
@@ -498,18 +498,37 @@ class _ModelDefinitionBuilder(ABC):
             logger.warning(f"Data covariance matrix is not PD, culprits seem to be {suspicious_columns}")
 
     def _make_result(self) -> str:
-        return f"""# Regressions (structural part)
-{"\n".join(map(Regression.build, self._regressions))}
+        result: list[str] = []
 
-# Total effect
-{"\n".join(map(ParameterDefinition.build, self._parameter_definitions))}
+        if len(self._regressions) != 0:
+            result.append("# Regressions (structural part)")
 
-# Additional covariances
-{"\n".join(map(Covariance.build, self._covariances))}
+            result.extend(regression.build() for regression in self._regressions)
 
-# Operations/constraints
-{self._ordinals.build()}
-"""
+            result.append("")
+
+        if len(self._parameter_definitions) != 0:
+            result.append("# Total effect")
+
+            result.extend(definition.build() for definition in self._parameter_definitions)
+
+            result.append("")
+
+        if len(self._covariances) != 0:
+            result.append("# Additional covariances")
+
+            result.extend(covariance.build() for covariance in self._covariances)
+
+            result.append("")
+
+        if len(self._ordinals) != 0:
+            result.append("# Operations/constraints")
+
+            result.append(self._ordinals.build())
+
+            result.append("")
+
+        return "\n".join(result)
 
 
 class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
@@ -857,7 +876,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
                 for variable in rvals
                 if variable.matches_definition(covariance_definition.lval, for_panel=True)
             ]
-            if len(lvals) == 0:
+            if len(lvals) == 0:  # TODO: This fires for every regression in the panel.
                 logger.warning(f"No matching lval found for between-regressor covariance {covariance_definition}")
                 continue
 
