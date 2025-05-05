@@ -34,18 +34,18 @@ all_data = all_data.drop(y_missing)
 all_data_flattened = pd.DataFrame()
 
 
-def remove_wave(column: Column) -> Column:
+def remove_year(column: Column) -> Column:
     return Column(column.name, None, column.dummy_level)
 
 
-for wave in available_waves(all_data):
-    subset = select_wave(all_data, wave)
+for year in available_waves(all_data):
+    subset = select_wave(all_data, year)
 
     columns: list[Column] = subset.columns  # pyright: ignore[reportAssignmentType]
 
-    subset.columns = [remove_wave(column) for column in columns]
+    subset.columns = [remove_year(column) for column in columns]
 
-    subset.index = pd.Index([f"{idx}_{wave}" for idx in subset.index])
+    subset.index = pd.Index([f"{idx}_{year}" for idx in subset.index])
 
     all_data_flattened = pd.concat([all_data_flattened, subset])
 
