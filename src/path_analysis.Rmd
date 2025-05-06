@@ -71,7 +71,7 @@ cv <- function(model) {
 
         tryCatch(
             {
-                fold_fit <- suppressWarnings(sem(sem_model, train_split))
+                fold_fit <- suppressWarnings(sem(model, train_split))
 
                 predictions <- as.data.frame(lavPredictY(fold_fit, test_split, ynames = lavNames(fold_fit, "eqs.y")))
                 actual <- test_split[, names(predictions)]
@@ -99,7 +99,7 @@ cv <- function(model) {
         )
     }
 
-    c(mean = mean(results, na.rm = TRUE), sd = sd(results, na.rm = TRUE))
+    c(mean(results, na.rm = TRUE), sd(results, na.rm = TRUE))
 }
 ```
 
@@ -233,12 +233,14 @@ mhi5_23 ~ alpha_mhi5_23*1 + rho1*mhi5_22 + rho2*mhi5_21 + rho3*mhi5_20 + rho4*mh
 
 "
 )
+```
 
+```{r Do CV}
 for (i in seq_along(models)) {
     cat("Model", i, "\n")
 
-    result <- cv(model)
+    result <- cv(models[[i]])
 
-    cat(result$mean, "+/-", result$sd, "\n")
+    cat(result[[1]], "+/-", result[[2]], "\n")
 }
 ```
