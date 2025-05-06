@@ -68,6 +68,8 @@ cv <- function(model) {
         train_split <- analysis(split)
         test_split <- assessment(split)
 
+        fold_successful <- FALSE
+
         tryCatch(
             {
                 fold_fit <- suppressWarnings(sem(model, train_split))
@@ -89,13 +91,18 @@ cv <- function(model) {
                 cat("Fold", i, "RMSEs:", rmses, "\n")
 
                 results[[i]] <- mean(rmses)
+
+                fold_successful <- TRUE
             },
             error = function(error) {
+                warning(error)
                 cat("Fold", i, "estimation failed\n")
-
-                results[[i]] <- NA
             }
         )
+
+        if (!fold_successful) {
+            results[[i]] <- NA
+        }
     }
 
     c(mean(results, na.rm = TRUE), sd(results, na.rm = TRUE))
