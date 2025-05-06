@@ -56,7 +56,6 @@ head(mi[order(-mi$mi), , ], 10)
 ```
 
 ```{r Cross validation function}
-set.seed(69420)
 n_fold <- 5
 
 cv <- function(model) {
@@ -236,7 +235,8 @@ mhi5_23 ~ alpha_mhi5_23*1 + rho1*mhi5_22 + rho2*mhi5_21 + rho3*mhi5_20 + rho4*mh
 ```
 
 ```{r Do CV}
-for (i in seq_along(models)) {
+set.seed(69420)
+
     cat("Model", i, "\n")
 
     result <- cv(models[[i]])
