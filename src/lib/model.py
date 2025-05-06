@@ -206,6 +206,7 @@ class ParameterDefinition:
 class _ModelDefinitionBuilder(ABC):
     _y: VariableDefinition
     _x: VariableDefinition
+    _x_fixed: bool
 
     _mediators: list[VariableDefinition]
 
@@ -578,8 +579,9 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
         return self
 
-    def with_x(self, x: VariableDefinition, *, lag_structure: list[int] | None = None) -> Self:
+    def with_x(self, x: VariableDefinition, *, fixed: bool = True, lag_structure: list[int] | None = None) -> Self:
         self._x = x
+        self._x_fixed = fixed
 
         if lag_structure is not None:
             # Negative lags break the logic for when the first/last regressions are
@@ -860,7 +862,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
         # NOTE/TODO: Because this function works on the rvals and not self._controls,
         # it does not include a covariance for the dummy level that is excluded for identification.
         # I'm not 100% that is correct behaviour.
-        rvals = self._filter_controls_from_variables_if_fixed(rvals)
+        rvals = self._filter_regressors_from_variables_if_fixed(rvals)
 
         for name, values in groupby(rvals, lambda rval: rval.name):
             dummy_levels = [rval for rval in values if rval.name == name and rval.dummy_level is not None]
@@ -934,12 +936,15 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
         if self._do_make_x_predetermined:
             self._make_x_predetermined()
 
-    def _filter_controls_from_variables_if_fixed(self, variables: list[Variable]) -> list[Variable]:
+    def _filter_regressors_from_variables_if_fixed(self, variables: list[Variable]) -> list[Variable]:
         # Exclude controls if they're fixed
         if self._controls_fixed:
             controls_names = [definition.name for definition in [*self._controls, *self._time_invariant_controls]]
 
             variables = [var for var in variables if var.name not in controls_names]
+
+        if self._x_fixed:
+            variables = [var for var in variables if var.name != self._x.name]
 
         return variables
 
@@ -955,7 +960,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
         # Remove duplicates
         all_variables = list(dict.fromkeys(all_variables))
 
-        all_variables = self._filter_controls_from_variables_if_fixed(all_variables)
+        all_variables = self._filter_regressors_from_variables_if_fixed(all_variables)
 
         self._covariances.extend(
             [
@@ -991,7 +996,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
         # It kinda makes sense idk
         all_regressors = [regressor for regressor in all_regressors if regressor.wave is not None]
 
-        all_regressors = self._filter_controls_from_variables_if_fixed(all_regressors)
+        all_regressors = self._filter_regressors_from_variables_if_fixed(all_regressors)
 
         for _, variables in groupby(all_regressors, lambda regressor: regressor.name):
             variables = list(variables)  # noqa: PLW2901
@@ -1043,8 +1048,9 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
 
         return self
 
-    def with_x(self, x: VariableDefinition) -> Self:
+    def with_x(self, x: VariableDefinition, *, fixed: bool = True) -> Self:
         self._x = x
+        self._x_fixed = fixed
 
         return self
 
@@ -1202,7 +1208,7 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
         # NOTE/TODO: Because this function works on the rvals and not self._controls,
         # it does not include a covariance for the dummy level that is excluded for identification.
         # I'm not 100% that is correct behaviour.
-        rvals = self._filter_controls_from_variables_if_fixed(rvals)
+        rvals = self._filter_regressors_from_variables_if_fixed(rvals)
 
         variables = groupby(rvals, lambda rval: rval.name)
 
@@ -1243,11 +1249,14 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
 
                 self._covariances.append(Covariance(lval, covariance_rvals))
 
-    def _filter_controls_from_variables_if_fixed(self, variables: list[Variable]) -> list[Variable]:
+    def _filter_regressors_from_variables_if_fixed(self, variables: list[Variable]) -> list[Variable]:
         # Exclude controls if they're fixed
         if self._controls_fixed:
             controls_names = [definition.name for definition in self._controls]
 
             variables = [var for var in variables if var.name not in controls_names]
+
+        if self._x_fixed:
+            variables = [var for var in variables if var.name != self._x.name]
 
         return variables
