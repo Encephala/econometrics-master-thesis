@@ -95,7 +95,7 @@ cv <- function(model) {
                 cat("Fold", i, "estimation failed\n")
 
                 results[[i]] <- NA
-            },
+            }
         )
     }
 
