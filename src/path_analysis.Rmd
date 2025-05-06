@@ -58,7 +58,7 @@ head(mi[order(-mi$mi), , ], 10)
 ```{r Cross validation function}
 n_fold <- 5
 
-cv <- function(model) {
+cv <- function(model, do_print) {
     folds <- vfold_cv(all_data, v = n_fold)
 
     results <- numeric(n_fold)
@@ -77,20 +77,22 @@ cv <- function(model) {
                 predictions <- as.data.frame(lavPredictY(fold_fit, test_split, ynames = lavNames(fold_fit, "eqs.y")))
                 actual <- test_split[, names(predictions)]
 
-                if (i == 1) {
+                if (do_print && i == 1) {
                     cat("Regressands:", names(predictions), "\n")
                 }
 
                 differences <- actual - predictions
 
-                # The RMSE of each regressand
-                rmses <- sapply(differences, function(col) {
+                # The RMSPE of each regressand
+                rmspes <- sapply(differences, function(col) {
                     sqrt(mean(col^2, na.rm = TRUE))
                 })
 
-                cat("Fold", i, "RMSEs:", rmses, "\n")
+                if (do_print) {
+                    cat("Fold", i, "RMSPEs:", rmspes, "\n")
+                }
 
-                results[[i]] <- mean(rmses)
+                results[[i]] <- mean(rmspes)
 
                 fold_successful <- TRUE
             },
@@ -109,8 +111,8 @@ cv <- function(model) {
 }
 ```
 
-```{r Do CV}
-models <- c(
+```{r CV models}
+cv_models <- c(
     "# Regressions (structural part)
 mhi5_13 ~ alpha_mhi5_13*1 + rho1*mhi5_12 + beta1_cs104_cum*cs104_cum_12 + omega0_bmi.normal.weight*bmi_13.normal.weight + omega0_bmi.overweight*bmi_13.overweight + omega0_bmi.obese*bmi_13.obese + omega0_ch178*ch178_13 + delta_leeftijd.18.24*leeftijd_first.18.24 + delta_leeftijd.25.39*leeftijd_first.25.39 + delta_leeftijd.40.66*leeftijd_first.40.66 + delta_leeftijd.over.67*leeftijd_first.over.67 + delta_nettohh_f.under.15k*nettohh_f_first.under.15k + delta_nettohh_f.over.50k*nettohh_f_first.over.50k + delta_herkomstgroep.first.w*herkomstgroep_first.first.w + delta_herkomstgroep.first.nonw*herkomstgroep_first.first.nonw + delta_herkomstgroep.second.w*herkomstgroep_first.second.w + delta_herkomstgroep.second.nonw*herkomstgroep_first.second.nonw + delta_geslacht.male*geslacht_first.male + delta_burgstat.married*burgstat_first.married + delta_burgstat.never.been.married*burgstat_first.never.been.married + delta_burgstat.separated*burgstat_first.separated + delta_burgstat.widow.or.widower*burgstat_first.widow.or.widower + delta_oplcat.hbo*oplcat_first.hbo + delta_oplcat.mbo*oplcat_first.mbo + delta_oplcat.primary.school*oplcat_first.primary.school + delta_oplcat.vmbo*oplcat_first.vmbo + delta_oplcat.wo*oplcat_first.wo + delta_employment.homemaker*employment_first.homemaker + delta_employment.retired*employment_first.retired + delta_employment.student*employment_first.student + delta_employment.unable.to.work*employment_first.unable.to.work + delta_employment.unemployed*employment_first.unemployed
 mhi5_16 ~ alpha_mhi5_16*1 + rho1*mhi5_15 + beta1_cs104_cum*cs104_cum_15 + omega0_bmi.normal.weight*bmi_16.normal.weight + omega0_bmi.overweight*bmi_16.overweight + omega0_bmi.obese*bmi_16.obese + omega0_ch178*ch178_16 + delta_leeftijd.18.24*leeftijd_first.18.24 + delta_leeftijd.25.39*leeftijd_first.25.39 + delta_leeftijd.40.66*leeftijd_first.40.66 + delta_leeftijd.over.67*leeftijd_first.over.67 + delta_nettohh_f.under.15k*nettohh_f_first.under.15k + delta_nettohh_f.over.50k*nettohh_f_first.over.50k + delta_herkomstgroep.first.w*herkomstgroep_first.first.w + delta_herkomstgroep.first.nonw*herkomstgroep_first.first.nonw + delta_herkomstgroep.second.w*herkomstgroep_first.second.w + delta_herkomstgroep.second.nonw*herkomstgroep_first.second.nonw + delta_geslacht.male*geslacht_first.male + delta_burgstat.married*burgstat_first.married + delta_burgstat.never.been.married*burgstat_first.never.been.married + delta_burgstat.separated*burgstat_first.separated + delta_burgstat.widow.or.widower*burgstat_first.widow.or.widower + delta_oplcat.hbo*oplcat_first.hbo + delta_oplcat.mbo*oplcat_first.mbo + delta_oplcat.primary.school*oplcat_first.primary.school + delta_oplcat.vmbo*oplcat_first.vmbo + delta_oplcat.wo*oplcat_first.wo + delta_employment.homemaker*employment_first.homemaker + delta_employment.retired*employment_first.retired + delta_employment.student*employment_first.student + delta_employment.unable.to.work*employment_first.unable.to.work + delta_employment.unemployed*employment_first.unemployed
@@ -244,10 +246,34 @@ mhi5_23 ~ alpha_mhi5_23*1 + rho1*mhi5_22 + rho2*mhi5_21 + rho3*mhi5_20 + rho4*mh
 ```{r Do CV}
 set.seed(69420)
 
+for (i in seq_along(cv_models)) {
     cat("Model", i, "\n")
 
-    result <- cv(models[[i]])
+    result <- cv(cv_models[[i]], do_print = TRUE)
 
-    cat(result[[1]], "+/-", result[[2]], "\n")
+    cat(result[[1]], "+/-", result[[2]])
+}
+```
+
+```{r Repeated CV}
+set.seed(69420)
+
+n_repeat <- 25
+
+for (i in seq_along(cv_models)) {
+    cat("Model", i, "\n")
+
+    # Means and stds across the folds, for each repeat
+    results <- matrix(nrow = n_repeats, ncol = 2)
+
+    for (j in 1:n_repeat) {
+        result <- cv(cv_models[[i]], do_print = FALSE)
+
+        results[j, 1] <- result[[1]]
+        results[j, 2] <- result[[2]]
+    }
+
+    cat("               Estimated mean RMSPE:", mean(results[, 1]), "+/-", sd(results[, 1]) / sqrt(n_repeat), "\n")
+    cat("Estimated std of RMSPE across folds:", mean(results[, 2]), "+/-", sd(results[, 2]) / sqrt(n_repeat), "\n")
 }
 ```
