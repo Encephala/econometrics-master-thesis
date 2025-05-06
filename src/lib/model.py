@@ -633,6 +633,9 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
         self._do_add_dummy_covariances = within_dummy_covariance
         self._do_make_x_predetermined = x_predetermined
 
+        if self._x_fixed and x_predetermined:
+            logger.warning("x was specified as fixed but also treated as pre-determined, ignoring fixedness")
+
         if between_regressors is None:
             self._between_regressor_covariances = []
         else:
@@ -943,7 +946,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
             variables = [var for var in variables if var.name not in controls_names]
 
-        if self._x_fixed:
+        if self._x_fixed and not self._do_make_x_predetermined:
             variables = [var for var in variables if var.name != self._x.name]
 
         return variables
