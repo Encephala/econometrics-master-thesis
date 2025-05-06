@@ -99,7 +99,7 @@ cv <- function(model) {
         )
     }
 
-    c(mean = mean(results), sd = sd(results))
+    c(mean = mean(results, na.rm = TRUE), sd = sd(results, na.rm = TRUE))
 }
 ```
 
