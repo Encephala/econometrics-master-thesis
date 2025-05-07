@@ -925,6 +925,10 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
                     covariance_rvals.append(rval.with_named_parameter(parameter_name))
 
+                if len(rvals) == 0:  # TODO: This fires for every regression in the panel.
+                    logger.debug(f"No matching rvals found for between-regressor covariance with {lval=}.")
+                    continue
+
                 self._covariances.append(Covariance(lval, covariance_rvals))
 
     def _handle_additional_covariances(self):
@@ -1249,6 +1253,10 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
                     covariance_rvals.append(
                         rval.with_named_parameter(f"gamma_{lval.as_parameter_name()}_{rval.as_parameter_name()}")
                     )
+
+                if len(rvals) == 0:  # TODO: This fires for every regression in the panel.
+                    logger.debug(f"No matching rvals found for between-regressor covariance with {lval=}.")
+                    continue
 
                 self._covariances.append(Covariance(lval, covariance_rvals))
 
