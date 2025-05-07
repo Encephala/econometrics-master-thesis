@@ -21,6 +21,14 @@ head(all_data)
 options(max.print = 2500)
 ```
 
+```{r Potentially adjust y scale to make variances similar}
+mask <- grepl("mhi5", colnames(all_data), fixed = TRUE)
+
+all_data[mask] <- lapply(all_data[mask], function(column) column / 100)
+
+head(all_data)
+```
+
 ```{r}
 sem_model <- "
 # Regressions (structural part)
