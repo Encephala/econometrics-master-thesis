@@ -64,7 +64,7 @@ summary(fit, fit.measures = TRUE)
 
 ```{r Potential model improvements}
 # Adding paths/relaxing 0 constraints
-mi <- modificationindices(fit)
+mi <- suppressWarnings(modificationindices(fit))
 
 head(mi[order(-mi$mi), , ], 10)
 
