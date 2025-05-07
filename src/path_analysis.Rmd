@@ -54,11 +54,20 @@ fit <- sem(sem_model, data = all_data)
 summary(fit, fit.measures = TRUE)
 ```
 
-```{r}
-# Potential model improvements
+```{r Potential model improvements}
+# Adding paths/relaxing 0 constraints
 mi <- modificationindices(fit)
 
 head(mi[order(-mi$mi), , ], 10)
+
+# Relaxing equality constraints
+lts <- lavTestScore(fit)
+
+big_lts <- lts$uni[order(-lts$uni$X2), ][lts$uni$p.value <= 0.1, ]
+big_lts
+
+pt <- partable(fit)
+pt[pt$plabel %in% c(as.character(big_lts$lhs), as.character(big_lts$rhs)), ]
 ```
 
 ```{r Cross validation function}
