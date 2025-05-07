@@ -71,7 +71,8 @@ head(mi[order(-mi$mi), , ], 10)
 # Relaxing equality constraints
 lts <- lavTestScore(fit)
 
-big_lts <- lts$uni[order(-lts$uni$X2), ][lts$uni$p.value <= 0.1, ]
+big_lts <- lts$uni[order(-lts$uni$X2), ]
+big_lts <- big_lts[big_lts$p.value <= 0.1, ]
 big_lts
 
 pt <- partable(fit)
