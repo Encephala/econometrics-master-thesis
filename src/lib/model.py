@@ -211,7 +211,7 @@ class _ModelDefinitionBuilder(ABC):
     _mediators: list[VariableDefinition]
 
     _controls: list[VariableDefinition]
-    _controls_fixed: bool
+    _controls_fixed: bool = True
 
     _include_time_dummy: bool = False
 
