@@ -57,7 +57,7 @@ mhi5_22 ~~ cs104_cum_23
 ```
 
 ```{r}
-fit <- sem(sem_model, data = all_data)
+fit <- sem(sem_model, data = all_data, missing = "fiml.x")
 
 summary(fit, fit.measures = TRUE)
 ```
