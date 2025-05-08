@@ -6,16 +6,16 @@ Takes a model and the preprocessed data from the python script and runs the mode
 if (!requireNamespace("lavaan")) {
     install.packages("lavaan")
 }
-if (!requireNamespace("haven")) {
-    install.packages("haven")
+if (!requireNamespace("arrow")) {
+    install.packages("arrow")
 }
 
 library(lavaan)
-library(haven)
+library(arrow)
 ```
 
 ```{r Load data}
-all_relevant_data <- read_dta("/tmp/data.dta")
+all_relevant_data <- read_feather("/tmp/data.feather")
 head(all_relevant_data)
 
 options(max.print = 2500)

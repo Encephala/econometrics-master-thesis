@@ -84,4 +84,4 @@ model_definition = (
 print(model_definition)
 
 # %% save for lavaan in R.
-save_for_R(model_definition, all_data_flattened, Path("/tmp/data.dta"))  # noqa: S108
+save_for_R(model_definition, all_data_flattened, Path("/tmp/data.feather"))  # noqa: S108
