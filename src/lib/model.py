@@ -860,9 +860,6 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
         """Adds the covariances between dummy levels for the given rvals (lvals must be interval scale).
 
         Should thus be called once for each regression."""
-        # NOTE/TODO: Because this function works on the rvals and not self._controls,
-        # it does not include a covariance for the dummy level that is excluded for identification.
-        # I'm not 100% that is correct behaviour.
         rvals = self._filter_regressors_from_variables_if_fixed(rvals)
 
         for name, values in groupby(rvals, lambda rval: rval.name):
