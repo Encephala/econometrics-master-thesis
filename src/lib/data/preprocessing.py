@@ -81,6 +81,14 @@ def make_sports(leisure_panel: pd.DataFrame) -> pd.DataFrame:
 def make_sports_hours(leisure_panel: pd.DataFrame) -> pd.DataFrame:
     hours = select_variable(leisure_panel, SPORTS_WEEKLY_HOURS)
 
+    sports = make_sports(leisure_panel)
+    # Make column names align
+    sports.columns = hours.columns
+
+    # Stupid warnings for stupid legacy behaviour.
+    pd.options.mode.copy_on_write = True
+    hours[~sports] = 0
+
     hours_labels = [
         "none",
         "0-3",
