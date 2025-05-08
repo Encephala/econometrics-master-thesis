@@ -751,7 +751,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
                 rvals = self._filter_constant_rvals(y, rvals, data)
 
             self._regressions.append(Regression(y, rvals, self._include_time_dummy))
-            _mediator_pathways = self._add_mediator_regressions(
+            _ = self._add_mediator_regressions(
                 mediators,
                 y_lags,
                 x_lags,
@@ -768,12 +768,10 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
             self._add_between_regressor_covariances(rvals, is_first_wave)
 
-            # TODO: not just non-lagged x
-            # TODO: This is not right yet, it's redefining the same effects for each regression, need only
-            # be defined once because the parameters are reused across the regression.
-            # self._define_total_effects(
-            #     [x for x in x_lags if x.wave == wave - self._x_lag_structure[0]], mediator_pathways
-            # )
+            # TODO: Define total effect for panel regression.
+            # Easier said than done, because
+            # a) if the coefficients are constant in time, don't redefine the same effects for each regression,
+            # b) What is the total effect when AR lags and lags of x are considered?
 
             self._define_ordinals([y, *y_lags], [*x_lags], mediators, controls)
 
