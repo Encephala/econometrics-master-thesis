@@ -32,19 +32,8 @@ model_definition = (
     .with_y(VariableDefinition(MHI5), lag_structure=[1, 2, 3, 4, 5])
     .with_x(VariableDefinition(SPORTS), lag_structure=[1])
     .with_controls(
-        [
-            VariableDefinition(variable, dummy_levels=available_dummy_levels(all_data, variable))
-            for variable in [
-                BMI,
-                # PHYSICAL_HEALTH,
-            ]
-        ]
-        + [
-            VariableDefinition(variable)
-            for variable in [
-                DEPRESSION_MEDICATION,
-            ]
-        ]
+        [VariableDefinition(variable, dummy_levels=available_dummy_levels(all_data, variable)) for variable in []]
+        + [VariableDefinition(variable) for variable in []]
         + [
             VariableDefinition(
                 variable, is_time_invariant=True, dummy_levels=available_dummy_levels(all_data, variable)
