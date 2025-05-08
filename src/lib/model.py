@@ -872,17 +872,17 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
                 continue
 
             for i in range(len(dummy_levels) - 1):
-                lval = dummy_levels[i].to_unnamed()
+                covariance_lval = dummy_levels[i].to_unnamed()
 
-                if lval.wave is None and not is_first_wave:
+                if covariance_lval.wave is None and not is_first_wave:
                     continue
 
-                rvals = [
-                    rval.with_named_parameter(f"sigma_{lval.as_parameter_name()}_{rval.as_parameter_name()}")
+                covariance_rvals = [
+                    rval.with_named_parameter(f"sigma_{covariance_lval.as_parameter_name()}_{rval.as_parameter_name()}")
                     for rval in dummy_levels[i + 1 :]
                 ]
 
-                self._covariances.append(Covariance(lval, rvals))
+                self._covariances.append(Covariance(covariance_lval, covariance_rvals))
 
     def _add_between_regressor_covariances(self, rvals: list[Variable], is_first_wave: bool):  # noqa: FBT001
         rvals = [rval.to_unnamed() for rval in rvals]
@@ -1228,10 +1228,10 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
                 continue
 
             for i in range(len(dummy_levels) - 1):
-                lval = dummy_levels[i].to_unnamed()
-                rvals = [dummy_level.to_unnamed() for dummy_level in dummy_levels[i + 1 :]]
+                covariance_lval = dummy_levels[i].to_unnamed()
+                covariance_rvals = [dummy_level.to_unnamed() for dummy_level in dummy_levels[i + 1 :]]
 
-                self._covariances.append(Covariance(lval, rvals))
+                self._covariances.append(Covariance(covariance_lval, covariance_rvals))
 
     def _add_between_regressor_covariances(self, rvals: list[Variable]):
         rvals = [rval.to_unnamed() for rval in rvals]
