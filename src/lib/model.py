@@ -879,6 +879,8 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
                 covariance_rvals = [
                     rval.with_named_parameter(f"sigma_{covariance_lval.as_parameter_name()}_{rval.as_parameter_name()}")
+                    if self._do_fix_variances_across_time
+                    else rval.to_unnamed()
                     for rval in dummy_levels[i + 1 :]
                 ]
 
