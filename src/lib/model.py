@@ -152,7 +152,7 @@ class Regression:
             + (
                 f"alpha_{self.lval.as_parameter_name()}_{self.lval.wave}*1 + "
                 if self.include_time_dummy
-                else f"alpha_{self.lval.as_parameter_name()}*1"
+                else f"alpha_{self.lval.as_parameter_name()}*1 + "
             )
             + (" + ".join(rval.build() for rval in self.rvals))
         )
