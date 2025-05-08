@@ -71,10 +71,31 @@ def make_mhi5(health_panel: pd.DataFrame) -> pd.DataFrame:
 
 # Sports
 def make_sports(leisure_panel: pd.DataFrame) -> pd.DataFrame:
-    # Making it an actual boolean instead of "yes"/"no"
     sports = select_variable(leisure_panel, SPORTS)
 
+    # Making it an actual boolean instead of "yes"/"no"
     return sports.apply(lambda column: column.map({"yes": True, "no": False}, na_action="ignore")).astype("boolean")
+
+
+# Number of hours of sports
+def make_sports_hours(leisure_panel: pd.DataFrame) -> pd.DataFrame:
+    hours = select_variable(leisure_panel, SPORTS_WEEKLY_HOURS)
+
+    hours_labels = [
+        "none",
+        "0-3",
+        "3-6",
+        "6-10",
+        "over 10",
+    ]
+
+    return hours.apply(
+        lambda column: pd.cut(
+            column,
+            bins=[-np.inf, 0, 3, 6, 10, np.inf],
+            labels=hours_labels,
+        )
+    )
 
 
 def make_cumulative_sports(leisure_panel: pd.DataFrame) -> pd.DataFrame:
@@ -392,6 +413,7 @@ def make_all_data(*, cache: bool, respect_load_cache: bool = True) -> pd.DataFra
     # All variables (potentially) used in modelling
     mhi5 = make_mhi5(health_panel)
     sports = make_sports(leisure_panel)
+    sports_hours = make_sports_hours(leisure_panel)
     cumulative_sports = make_cumulative_sports(leisure_panel)
     age = make_age(background_vars)
     ethnicity = make_ethnicity(background_vars)
@@ -409,6 +431,7 @@ def make_all_data(*, cache: bool, respect_load_cache: bool = True) -> pd.DataFra
     # Can't find a nice DRY way to do this, whatever
     mhi5 = add_first_non_na(mhi5)
     sports = add_first_non_na(sports)
+    sports_hours = add_first_non_na(sports_hours)
     age = add_first_non_na(age)
     ethnicity = add_first_non_na(ethnicity)
     gender = add_first_non_na(gender)
@@ -424,6 +447,7 @@ def make_all_data(*, cache: bool, respect_load_cache: bool = True) -> pd.DataFra
         [
             mhi5,
             sports,
+            make_dummies(sports_hours),
             cumulative_sports,
             make_dummies(age),
             make_dummies(ethnicity),
