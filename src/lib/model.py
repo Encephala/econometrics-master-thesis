@@ -764,7 +764,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
             )
 
             if self._do_add_dummy_covariances:
-                self._add_dummy_covariances(rvals, is_first_wave)
+                self._add_dummy_covariances(rvals, is_first_wave, wave)
 
             self._add_between_regressor_covariances(rvals, is_first_wave)
 
@@ -856,11 +856,14 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
         return result
 
-    def _add_dummy_covariances(self, rvals: list[Variable], is_first_wave: bool):  # noqa: FBT001
-        """Adds the covariances between dummy levels for the given rvals (lvals must be interval scale).
+    def _add_dummy_covariances(self, rvals: list[Variable], is_first_wave: bool, wave: int):  # noqa: FBT001
+        """Adds the covariances between dummy levels for the given rvals.
 
         Should thus be called once for each regression."""
         rvals = self._filter_regressors_from_variables_if_fixed(rvals)
+
+        # Exclude lags of x and y to avoid redefinition (although y never has dummy levels anyways)
+        rvals = [rval for rval in rvals if rval.wave == wave]
 
         for name, values in groupby(rvals, lambda rval: rval.name):
             dummy_levels = [rval for rval in values if rval.name == name and rval.dummy_level is not None]
