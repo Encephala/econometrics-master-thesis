@@ -24,32 +24,7 @@ options(max.print = 2500)
 ```{r}
 sem_model <- "
 # Regressions (structural part)
-mhi5 ~ beta0*cs104 + zeta_ch4_good*ch4_good + zeta_ch4_moderate*ch4_moderate + zeta_ch4_poor*ch4_poor + zeta_ch4_very_good*ch4_very_good + zeta_bmi_normal_weight*bmi_normal_weight + zeta_bmi_overweight*bmi_overweight + zeta_bmi_obese*bmi_obese + prev_depr
-ch4_good ~ eta_ch4_good_x*cs104 + eta_ch4_good_prev_depr*prev_depr
-ch4_moderate ~ eta_ch4_moderate_x*cs104 + eta_ch4_moderate_prev_depr*prev_depr
-ch4_poor ~ eta_ch4_poor_x*cs104 + eta_ch4_poor_prev_depr*prev_depr
-ch4_very_good ~ eta_ch4_very_good_x*cs104 + eta_ch4_very_good_prev_depr*prev_depr
-bmi_normal_weight ~ eta_bmi_normal_weight_x*cs104 + eta_bmi_normal_weight_prev_depr*prev_depr
-bmi_overweight ~ eta_bmi_overweight_x*cs104 + eta_bmi_overweight_prev_depr*prev_depr
-bmi_obese ~ eta_bmi_obese_x*cs104 + eta_bmi_obese_prev_depr*prev_depr
-
-# Total effect
-direct := beta0
-total_ch4_good := zeta_ch4_good*eta_ch4_good_x
-total_ch4_moderate := zeta_ch4_moderate*eta_ch4_moderate_x
-total_ch4_poor := zeta_ch4_poor*eta_ch4_poor_x
-total_ch4_very_good := zeta_ch4_very_good*eta_ch4_very_good_x
-total_bmi_normal_weight := zeta_bmi_normal_weight*eta_bmi_normal_weight_x
-total_bmi_overweight := zeta_bmi_overweight*eta_bmi_overweight_x
-total_bmi_obese := zeta_bmi_obese*eta_bmi_obese_x
-total := direct + total_ch4_good + total_ch4_moderate + total_ch4_poor + total_ch4_very_good + total_bmi_normal_weight + total_bmi_overweight + total_bmi_obese
-
-# Additional covariances
-ch4_good ~~ ch4_moderate + ch4_poor + ch4_very_good
-ch4_moderate ~~ ch4_poor + ch4_very_good
-ch4_poor ~~ ch4_very_good
-bmi_normal_weight ~~ bmi_overweight + bmi_obese
-bmi_overweight ~~ bmi_obese
+mhi5 ~ alpha_mhi5*1 + beta0_cs105.0.3*cs105.0.3 + beta0_cs105.3.6*cs105.3.6 + beta0_cs105.6.10*cs105.6.10 + beta0_cs105.over.10*cs105.over.10 + ch4.good + ch4.moderate + ch4.poor + ch4.very.good + bmi.normal.weight + bmi.overweight + bmi.obese + leeftijd.18.24 + leeftijd.25.39 + leeftijd.40.66 + leeftijd.over.67 + herkomstgroep.first.w + herkomstgroep.first.nonw + herkomstgroep.second.w + herkomstgroep.second.nonw + geslacht.male + geslacht.other + burgstat.married + burgstat.never.been.married + burgstat.separated + burgstat.widow.or.widower + nettohh_f.under.15k + nettohh_f.15k.50k + nettohh_f.over.50k + oplcat.hbo + oplcat.mbo + oplcat.primary.school + oplcat.vmbo + oplcat.wo + employment.homemaker + employment.retired + employment.student + employment.unable.to.work + employment.unemployed + prev_depr
 
 "
 ```
