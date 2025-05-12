@@ -9,7 +9,7 @@ stds = [0.35, 0.37, 0.41, 0.44, 0.48, 0.40, 0.49, 0.44]
 # %%
 plt.figure()
 plt.title("RMSPE for varying maximum AR lag")
-plt.ylabel("RMSPE")
+plt.ylabel("RMSPE (MHI5)")
 plt.xlabel("Number of AR lags")
 
 plt.errorbar(np.arange(len(estimates)) + 1, estimates, yerr=stds, capsize=4)
