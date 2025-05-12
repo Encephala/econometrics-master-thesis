@@ -10,8 +10,9 @@ from lib.data import (
     available_dummy_levels,
 )
 
-# ruff: noqa: F403, F405
 from lib.data import Column
+
+# ruff: noqa: F403, F405
 from lib.data.variables import *
 from lib.model import PanelModelDefinitionBuilder, VariableDefinition
 
