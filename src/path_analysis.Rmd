@@ -282,7 +282,7 @@ for (i in seq_along(cv_models)) {
 ```{r Repeated CV}
 set.seed(69420)
 
-n_repeat <- 25
+n_repeats <- 25
 
 for (i in seq_along(cv_models)) {
     cat("Model", i, "\n")
@@ -290,14 +290,14 @@ for (i in seq_along(cv_models)) {
     # Means and stds across the folds, for each repeat
     results <- matrix(nrow = n_repeats, ncol = 2)
 
-    for (j in 1:n_repeat) {
+    for (j in 1:n_repeats) {
         result <- cv(cv_models[[i]], do_print = FALSE)
 
         results[j, 1] <- result[[1]]
         results[j, 2] <- result[[2]]
     }
 
-    cat("               Estimated mean RMSPE:", mean(results[, 1]), "+/-", sd(results[, 1]) / sqrt(n_repeat), "\n")
-    cat("Estimated std of RMSPE across folds:", mean(results[, 2]), "+/-", sd(results[, 2]) / sqrt(n_repeat), "\n")
+    cat("               Estimated mean RMSPE:", mean(results[, 1]), "+/-", sd(results[, 1]) / sqrt(n_repeats), "\n")
+    cat("Estimated std of RMSPE across folds:", mean(results[, 2]), "+/-", sd(results[, 2]) / sqrt(n_repeats), "\n")
 }
 ```
