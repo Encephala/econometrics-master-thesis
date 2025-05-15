@@ -63,7 +63,7 @@ summary(fit, fit.measures = TRUE)
 ```
 
 ```{r Potential model improvements}
-# Adding paths/relaxing 0 constraints
+# Adding paths (= relaxing 0 constraints)
 mi <- suppressWarnings(modificationindices(fit))
 
 head(mi[order(-mi$mi), , ], 10)
@@ -96,6 +96,7 @@ cv <- function(model, do_print) {
 
         tryCatch(
             {
+                # No FIML because ho lee that takes five and a half years to run.
                 fold_fit <- suppressWarnings(sem(model, train_split))
 
                 predictions <- as.data.frame(lavPredictY(fold_fit, test_split, ynames = lavNames(fold_fit, "eqs.y")))
