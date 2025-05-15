@@ -29,7 +29,7 @@ mask <- grepl("mhi5", colnames(all_data), fixed = TRUE)
 head(all_data)
 ```
 
-```{r}
+```{r Define model}
 sem_model <- "
 # Regressions (structural part)
 mhi5_13 ~ alpha_mhi5_13*1 + rho1*mhi5_12 + rho2*mhi5_11 + rho3*mhi5_10 + rho4*mhi5_9 + beta0_cs104_cum*cs104_cum_13 + beta1_cs104_cum*cs104_cum_12
@@ -56,7 +56,7 @@ mhi5_22 ~~ cs104_cum_23
 "
 ```
 
-```{r}
+```{r Fit model}
 fit <- sem(sem_model, data = all_data, missing = "fiml.x")
 
 summary(fit, fit.measures = TRUE)
