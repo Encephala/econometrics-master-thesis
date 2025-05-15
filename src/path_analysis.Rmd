@@ -275,7 +275,7 @@ for (i in seq_along(cv_models)) {
 
     result <- cv(cv_models[[i]], do_print = TRUE)
 
-    cat(result[[1]], "+/-", result[[2]])
+    cat(result[[1]], "+/-", result[[2]], "\n")
 }
 ```
 
