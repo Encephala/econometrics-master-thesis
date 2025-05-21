@@ -80,3 +80,56 @@ print(model_definition)
 
 # %% save for lavaan in R.
 save_for_R(model_definition, all_data, Path("/tmp/panel_data.feather"))  # noqa: S108
+
+
+# %% Models for cross-validation
+for max_lag in range(1, 9):
+    model_definition = (
+        PanelModelDefinitionBuilder()
+        .with_y(
+            VariableDefinition(MHI5),
+            lag_structure=list(range(1, max_lag + 1)),
+        )
+        .with_x(
+            # VariableDefinition(SPORTS_WEEKLY_HOURS, dummy_levels=available_dummy_levels(all_data, SPORTS_WEEKLY_HOURS)),
+            VariableDefinition(CUMULATIVE_SPORTS),
+            lag_structure=[1],
+            fixed=True,
+        )
+        .with_controls(
+            [VariableDefinition(variable, dummy_levels=available_dummy_levels(all_data, variable)) for variable in []]
+            + [VariableDefinition(variable) for variable in []]
+            + [
+                VariableDefinition(
+                    variable, is_time_invariant=True, dummy_levels=available_dummy_levels(all_data, variable)
+                )
+                for variable in [
+                    AGE,
+                    INCOME,
+                    ETHNICITY,
+                    GENDER,
+                    MARITAL_STATUS,
+                    EDUCATION_LEVEL,
+                    EMPLOYMENT,
+                ]
+            ]
+            + [VariableDefinition(variable, is_time_invariant=True) for variable in []]
+        )
+        .with_additional_covariances(
+            fix_variance_across_time=False,
+            free_covariance_across_time=True,
+            within_dummy_covariance=True,
+            x_predetermined=False,
+        )
+        .with_excluded_regressors(
+            [
+                Column(f"{GENDER}_first", dummy_level="other"),  # Makes stuff unstable, it's only 10 True
+                Column(f"{INCOME}_first", dummy_level="15k.50k"),  # Also unstable, only 9 True
+            ]
+        )
+        .with_time_dummy()
+        .with_excluded_regressand_waves([13, 15, 16, 17, 18, 19, 20, 21, 22])
+        .build(all_data)
+    )
+
+    print(model_definition)
