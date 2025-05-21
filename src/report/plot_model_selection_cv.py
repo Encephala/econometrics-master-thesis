@@ -18,3 +18,22 @@ index_min = np.argmin(estimates)
 plt.axhline(estimates[index_min] + stds[index_min], color="red", alpha=0.5)
 
 plt.show()
+
+# %% Comparing 3 to 4 max lags on a more complex model
+# Which uh, is kinda meaningless. 1-sigma rule has very different meaning here.
+# The difference is comparable to the difference with only mhi5_23 though, so corroborates the choice in that regard.
+
+estimates_complex = [10.73, 10.53]
+stds_complex = [0.37, 0.37]
+
+plt.figure()
+plt.title("RMSPE for varying maximum AR lag")
+plt.ylabel("RMSPE (MHI5)")
+plt.xlabel("Number of AR lags")
+
+plt.errorbar(np.arange(len(estimates_complex)) + 1, estimates_complex, yerr=stds_complex, capsize=4)
+
+index_min = np.argmin(estimates_complex)
+plt.axhline(estimates_complex[index_min] + stds_complex[index_min], color="red", alpha=0.5)
+
+plt.show()
