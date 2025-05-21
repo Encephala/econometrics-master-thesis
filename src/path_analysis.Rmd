@@ -184,6 +184,7 @@ for (i in seq_along(cv_models)) {
     results <- matrix(nrow = n_repeats, ncol = 2)
 
     for (j in 1:n_repeats) {
+        cat("Repeat", j, "\n")
         result <- cv(cv_models[[i]], do_print = FALSE)
 
         results[j, 1] <- result[[1]]
