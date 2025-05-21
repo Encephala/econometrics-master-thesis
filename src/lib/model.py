@@ -546,6 +546,9 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
     _time_invariant_controls: list[VariableDefinition]
 
+    # For convenience in cross-validation
+    _excluded_waves: list[int]
+
     # To make epsilon fixed
     _do_fix_variances_across_time: bool = True
 
@@ -560,6 +563,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
         super().__init__()
 
         self._time_invariant_controls = []
+        self._excluded_waves = []
         self._between_regressor_covariances = []
 
     def with_y(self, y: VariableDefinition, *, lag_structure: list[int] | None = None) -> Self:
@@ -646,6 +650,10 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
 
         return self
 
+    def with_excluded_regressand_waves(self, excluded_waves: list[int]) -> Self:
+        self._excluded_waves = excluded_waves
+        return self
+
     def _check_duplicate_definition(self):
         all_regressors = [self._x, *self._mediators, *self._controls, *self._time_invariant_controls]
 
@@ -663,6 +671,7 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
         available_variables: list[Column] = list(data.columns)  # pyright: ignore[reportAssignmentType]
 
         waves = self._available_dependent_variables(available_variables)
+        waves = [regressand for regressand in waves if regressand.wave not in self._excluded_waves]
 
         self._build_regressions(waves, available_variables, data, drop_first_dummy)
 
