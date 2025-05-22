@@ -36,7 +36,7 @@ model_definition = (
     )
     .with_x(
         # VariableDefinition(SPORTS_WEEKLY_HOURS, dummy_levels=available_dummy_levels(all_data, SPORTS_WEEKLY_HOURS)),
-        VariableDefinition(SPORTS),
+        VariableDefinition(CUMULATIVE_SPORTS),
         lag_structure=[1],
         fixed=True,
     )
