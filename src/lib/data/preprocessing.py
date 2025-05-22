@@ -282,7 +282,7 @@ def make_previous_depression(health_panel: pd.DataFrame) -> pd.DataFrame:
     PREVIOUS_DEPRESSION = "prev_depr"
 
     for person in previous_depression.index:
-        wavely_medication_status: pd.Series = depression.loc[person, names_depression].squeeze()
+        wavely_medication_status: pd.Series = depression.loc[person, names_depression].squeeze()  # pyright: ignore[reportAssignmentType]
 
         wavely_medication_status = wavely_medication_status.map(lambda x: x == "yes", na_action="ignore")
 
