@@ -32,7 +32,7 @@ model_definition = (
     PanelModelDefinitionBuilder()
     .with_y(
         VariableDefinition(MHI5),
-        lag_structure=[1],
+        lag_structure=[1, 2, 3, 4],
     )
     .with_x(
         # VariableDefinition(SPORTS_WEEKLY_HOURS, dummy_levels=available_dummy_levels(all_data, SPORTS_WEEKLY_HOURS)),
@@ -83,17 +83,17 @@ save_for_R(model_definition, all_data, Path("/tmp/panel_data.feather"))  # noqa:
 
 
 # %% Models for cross-validation
-for max_lag in range(3, 5):
+for max_lag in range(1, 11 + 1):
     model_definition = (
         PanelModelDefinitionBuilder()
         .with_y(
             VariableDefinition(MHI5),
-            lag_structure=list(range(1, max_lag + 1)),
+            lag_structure=[1, 2, 3, 4],
         )
         .with_x(
             # VariableDefinition(SPORTS_WEEKLY_HOURS, dummy_levels=available_dummy_levels(all_data, SPORTS_WEEKLY_HOURS)),
             VariableDefinition(CUMULATIVE_SPORTS),
-            lag_structure=[1],
+            lag_structure=list(range(1, max_lag + 1)),
             fixed=True,
         )
         .with_controls(
@@ -128,7 +128,7 @@ for max_lag in range(3, 5):
             ]
         )
         .with_time_dummy()
-        .with_excluded_regressand_waves([18])
+        .with_excluded_regressand_waves(list(range(8, 23)))
         .build(all_data)
     )
 

@@ -36,3 +36,21 @@ index_min = np.argmin(estimates_complex)
 plt.axhline(estimates_complex[index_min] + stds_complex[index_min], color="red", alpha=0.5)
 
 plt.show()
+
+# %% Comparing X lags (distributed lags)
+# Minimum lag 0
+
+estimates_x = [9.25, 9.29, 9.29, 9.32, 9.26, 9.24, 9.09, 9.06, 9.03, 8.84, 8.85]
+stds_x = [0.42, 0.46, 0.45, 0.45, 0.35, 0.44, 0.59, 0.49, 0.40, 0.57, 0.43]
+
+plt.figure()
+plt.title("RMSPE for varying distributed lag")
+plt.ylabel("RMSPE (MHI5)")
+plt.xlabel("Number of X lags")
+
+plt.errorbar(np.arange(len(estimates_x)) + 1, estimates_x, yerr=stds_x, capsize=4)
+
+index_min = np.argmin(estimates_x)
+plt.axhline(estimates_x[index_min] + stds_x[index_min], color="red", alpha=0.5)
+
+plt.show()
