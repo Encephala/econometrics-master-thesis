@@ -114,7 +114,7 @@ cv <- function(model, do_print) {
                 })
 
                 if (do_print) {
-                    cat("Fold", i, "RMSPEs:", rmspes, "\n")
+                    cat("Fold", i, "/", n_fold, "RMSPEs:", rmspes, "\n")
                 }
 
                 results[[i]] <- mean(rmspes)
@@ -178,13 +178,13 @@ set.seed(69420)
 n_repeats <- 10
 
 for (i in seq_along(cv_models)) {
-    cat("Model", i, "\n")
+    cat("Model", i, "/", length(cv_models), "\n")
 
     # Means and stds across the folds, for each repeat
     results <- matrix(nrow = n_repeats, ncol = 2)
 
     for (j in 1:n_repeats) {
-        cat("Repeat", j, "\n")
+        cat("Repeat", j, "/", n_repeats, "\n")
         result <- cv(cv_models[[i]], do_print = FALSE)
 
         results[j, 1] <- result[[1]]
