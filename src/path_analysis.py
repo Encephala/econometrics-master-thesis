@@ -83,7 +83,7 @@ save_for_R(model_definition, all_data, Path("/tmp/panel_data.feather"))  # noqa:
 
 
 # %% Models for cross-validation
-for max_lag in range(1, 9):
+for max_lag in range(3, 5):
     model_definition = (
         PanelModelDefinitionBuilder()
         .with_y(
@@ -128,7 +128,7 @@ for max_lag in range(1, 9):
             ]
         )
         .with_time_dummy()
-        .with_excluded_regressand_waves([13, 15, 16, 17, 18, 19, 20, 21, 22])
+        .with_excluded_regressand_waves([18])
         .build(all_data)
     )
 

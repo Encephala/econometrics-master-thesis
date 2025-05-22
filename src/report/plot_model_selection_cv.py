@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 estimates = [10.54, 9.68, 9.42, 9.24, 9.19, 9.19, 9.01, 8.93]
 stds = [0.36, 0.38, 0.41, 0.44, 0.48, 0.41, 0.49, 0.44]
 
-# %%
 plt.figure()
 plt.title("RMSPE for varying maximum AR lag")
 plt.ylabel("RMSPE (MHI5)")
