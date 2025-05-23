@@ -38,7 +38,7 @@ model_definition = (
         # VariableDefinition(SPORTS_WEEKLY_HOURS, dummy_levels=available_dummy_levels(all_data, SPORTS_WEEKLY_HOURS)),
         VariableDefinition(CUMULATIVE_SPORTS),
         lag_structure=[1],
-        fixed=True,
+        fixed=False,
     )
     .with_controls(
         [VariableDefinition(variable, dummy_levels=available_dummy_levels(all_data, variable)) for variable in []]
@@ -63,7 +63,7 @@ model_definition = (
         fix_variance_across_time=False,
         free_covariance_across_time=True,
         within_dummy_covariance=True,
-        x_predetermined=False,
+        x_predetermined=True,
     )
     .with_excluded_regressors(
         [
