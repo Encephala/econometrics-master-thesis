@@ -27,6 +27,12 @@ y_missing = y.isna().sum(axis=1) == y.shape[1]
 y_missing = y_missing[y_missing].index
 all_data = all_data.drop(y_missing)
 
+# Drop rows for which sports is always NA, as these provide no information towards our variable of interest
+x = select_variable(all_data, SPORTS)
+x_missing = x.isna().sum(axis=1) == x.shape[1]
+x_missing = x_missing[x_missing].index
+all_data = all_data.drop(x_missing)
+
 # %% model with single regression
 model_definition = (
     PanelModelDefinitionBuilder()
