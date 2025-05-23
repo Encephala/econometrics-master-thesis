@@ -41,7 +41,6 @@ model_definition = (
         lag_structure=[1, 2, 3, 4],
     )
     .with_x(
-        # VariableDefinition(SPORTS_WEEKLY_HOURS, dummy_levels=available_dummy_levels(all_data, SPORTS_WEEKLY_HOURS)),
         VariableDefinition(CUMULATIVE_SPORTS),
         lag_structure=[1],
         fixed=False,
@@ -97,7 +96,6 @@ for max_lag in range(1, 11 + 1):
             lag_structure=[1, 2, 3, 4],
         )
         .with_x(
-            # VariableDefinition(SPORTS_WEEKLY_HOURS, dummy_levels=available_dummy_levels(all_data, SPORTS_WEEKLY_HOURS)),
             VariableDefinition(CUMULATIVE_SPORTS),
             lag_structure=list(range(1, max_lag + 1)),
             fixed=True,
