@@ -88,16 +88,16 @@ save_for_R(model_definition, all_data, Path("/tmp/panel_data.feather"))  # noqa:
 
 
 # %% Models for cross-validation
-for max_lag in range(1, 11 + 1):
+for max_lag in range(1, 8 + 1):
     model_definition = (
         PanelModelDefinitionBuilder()
         .with_y(
             VariableDefinition(MHI5),
-            lag_structure=[1, 2, 3, 4],
+            lag_structure=list(range(1, max_lag + 1)),
         )
         .with_x(
             VariableDefinition(CUMULATIVE_SPORTS),
-            lag_structure=list(range(1, max_lag + 1)),
+            lag_structure=[1],
             fixed=True,
         )
         .with_controls(
