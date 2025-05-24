@@ -28,7 +28,7 @@ def plot(  # noqa: PLR0913
         plt.show()
         return
 
-    total_uncertainty = np.array(sigma_estimates) + np.array(sigma_stds)
+    total_uncertainty = np.sqrt(np.array(sigma_estimates) ** 2 + np.array(sigma_stds) ** 2)
 
     plt.errorbar(
         x,
