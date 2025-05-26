@@ -44,6 +44,7 @@ def plot(  # noqa: PLR0913
 
 
 # %%
+# AR lags 1-8 with distributed lags (DL) 1, R = 100 repeats, FIML (not fiml.x) and MLR
 estimates = [10.55, 9.67, 9.42, 9.25, 9.19, 9.19, 9.05, 8.93]
 stds = [0.36, 0.39, 0.37, 0.47, 0.43, 0.46, 0.51, 0.49]
 sigma_estimates = [0.001, 0.001, 0.002, 0.012, 0.002, 0.002, 0.024, 0.003]
@@ -54,6 +55,7 @@ plot(estimates, stds, sigma_estimates, sigma_stds)
 # %% Comparing 3 to 4 max lags on a more complex model
 # Which uh, is kinda meaningless. 1-sigma rule has very different meaning here.
 # The difference is comparable to the difference with only mhi5_23 though, so corroborates the choice in that regard.
+# (IIRC) AR lags 3 and 4 with DL 1, R = 10 repeats, no FIML, no MLR
 
 estimates_complex = [10.73, 10.53]
 stds_complex = [0.37, 0.37]
@@ -62,6 +64,7 @@ plot(estimates, stds)
 
 # %% Comparing X lags (distributed lags)
 # Minimum lag 0
+# (IIRC) DL 1-11 with AR 4, R = 10 repeats, no FIML or MLR
 
 estimates_x = [9.25, 9.29, 9.29, 9.32, 9.26, 9.24, 9.09, 9.06, 9.03, 8.84, 8.85]
 stds_x = [0.42, 0.46, 0.45, 0.45, 0.35, 0.44, 0.59, 0.49, 0.40, 0.57, 0.43]
