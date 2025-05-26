@@ -9,7 +9,7 @@ def plot(  # noqa: PLR0913
     stds: list[float],
     sigma_estimates: list[float] | None = None,
     sigma_stds: list[float] | None = None,
-    title: str = "RMSPE for varying maximum AR lag",
+    title: str = "Forecasting error for varying maximum AR lag",
     xlabel: str = "Number of AR lags",
 ):
     plt.figure()
@@ -69,4 +69,4 @@ plot(estimates, stds)
 estimates_x = [9.25, 9.29, 9.29, 9.32, 9.26, 9.24, 9.09, 9.06, 9.03, 8.84, 8.85]
 stds_x = [0.42, 0.46, 0.45, 0.45, 0.35, 0.44, 0.59, 0.49, 0.40, 0.57, 0.43]
 
-plot(estimates, stds, title="RMSPE for varying distributed lag", xlabel="Number of X lags")
+plot(estimates, stds, title="Forecasting error for varying distributed lag", xlabel="Number of X lags")
