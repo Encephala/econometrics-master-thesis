@@ -215,7 +215,7 @@ for (i in seq_along(cv_models_AR)) {
 ```{r Repeated CV}
 set.seed(69420)
 
-n_repeats <- 10
+n_repeats <- 100
 
 for (i in seq_along(cv_models_AR)) {
     cat("Model", i, "/", length(cv_models_AR), "\n")

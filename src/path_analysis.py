@@ -38,7 +38,7 @@ model_definition = (
     PanelModelDefinitionBuilder()
     .with_y(
         VariableDefinition(MHI5),
-        lag_structure=[1, 2, 3, 4],
+        lag_structure=[1, 2, 3],
     )
     .with_x(
         VariableDefinition(CUMULATIVE_SPORTS),
