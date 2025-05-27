@@ -17,3 +17,14 @@ plt.ylim(0, 100)
 plt.ylabel("MHI5")
 plt.xlabel("Year")
 plt.show()
+
+# %% Examine std
+stds = mhi5.std()
+
+plt.figure()
+plt.plot(list(available_waves(mhi5)), stds, "-o")
+plt.title("Std of MHI5-score over time")
+plt.ylim(0, 30)
+plt.ylabel(r"$\sigma_{MHI5}$")
+plt.xlabel("Year")
+plt.show()
