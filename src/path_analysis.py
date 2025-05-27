@@ -41,8 +41,8 @@ model_definition = (
         lag_structure=[1, 2, 3],
     )
     .with_x(
-        VariableDefinition(CUMULATIVE_SPORTS),
-        lag_structure=[1],
+        VariableDefinition(SPORTS),
+        lag_structure=[0, 1],
         fixed=False,
     )
     .with_controls(
