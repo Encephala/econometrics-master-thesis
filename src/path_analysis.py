@@ -96,9 +96,9 @@ for max_lag in range(1, 8 + 1):
             lag_structure=list(range(1, max_lag + 1)),
         )
         .with_x(
-            VariableDefinition(CUMULATIVE_SPORTS),
-            lag_structure=[1],
-            fixed=True,
+            VariableDefinition(SPORTS),
+            lag_structure=[0, 1],
+            fixed=False,
         )
         .with_controls(
             [VariableDefinition(variable, dummy_levels=available_dummy_levels(all_data, variable)) for variable in []]
@@ -123,7 +123,7 @@ for max_lag in range(1, 8 + 1):
             fix_variance_across_time=False,
             free_covariance_across_time=True,
             within_dummy_covariance=True,
-            x_predetermined=False,
+            x_predetermined=True,
         )
         .with_excluded_regressors(
             [
@@ -136,4 +136,6 @@ for max_lag in range(1, 8 + 1):
         .build(all_data)
     )
 
+    print("-" * 30)
     print(model_definition)
+    print("-" * 30)
