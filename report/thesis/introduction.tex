@@ -1,74 +1,62 @@
-The impact of Physical Activity (PA) on mental wellbeing has been the topic of much recent literature,
-both in empirical studies \cite{noetel2024effect, mahindru2023role}, and through mechanistic research \cite{smith2021role}.
+The relationship between Physical Exercise (exercise) and mental wellbeing has been the topic of much recent literature,
+both in empirical studies \cite{noetel2024effect, mahindru2023role}, and through mechanistic research \cite{smith2021role, lubans2016physical}.
+The latter suggest various mechanisms for the positive influence of exercise on mental wellbeing.
+Proposed mechanisms include neurobiological ones like structural changes to the brain and endorphin release (e.g. dopamine),
+as well as psychosocial mechanisms like relatedness, improved body image and self-efficacy (confidence in own ability to perform activities),
+and behavioural mechanisms like improved sleep, self-regulation and coping skills \cite{lubans2016physical}.
+Note that these mechanisms can be categorised into short-term effects like endorphin release, and long-term effects
+like improved body image; this will be crucial for the present analysis.
+
 However, while cross-sectional studies consistently find a strong association between the two, \citeA{chekroud2018association}
-note that the causal effect of PA on mental health as studied in randomised control trials has been inconsistent.
-\citeA{chalder2012facilitated} for instance find a highly insignificant change in the Beck's depression inventory score
-of $-0.54$ ($p = 0.68$), while \citeA{philippot2022impact} find a signifiacnt decrease in the Hospital Anxiety and
+note that the causal effect of exercise on mental health as studied in randomised controlled trials (RCT) has been inconsistent.
+\citeA{chalder2012facilitated} for instance find an insignificant change in the Beck's Depression Inventory score
+of $-0.54$ ($p = 0.68$), while \citeA{philippot2022impact} find a significant decrease in the Hospital Anxiety and
 Depression Scale of $3.8$ ($p = 0.016$).
-Due to this inconsistency, review articles only draw tentative conclusions, f.i. that PA ``is probably [beneficial]
+Due to this inconsistency, review articles only draw tentative conclusions, for example that exercise ``is probably [beneficial]
 for psychiatric diseases'' \cite{peluso2005physical}, ``hold(s) promise in the treatment [...] of mental health conditions''
 \cite{smith2021role}, et cetera.
+Strikingly, the review of reviews on the topic by \citeA{biddle2011physical} concludes there is a distinct lack of good quality research.
 
-I posit that longitudinal observational studies to date have not been powered to draw conclusions about the causal effect
-of PA on mental health, in part because they have not explicitly modelled the reverse effect, namely that individuals with poor
-mental health are less likely to engage in PA.
-\citeA{azevedo2012bidirectional} and \citeA{jerstad2010prospective} find empirical evidence for this reverse relationship,
-though other work is inconclusive \cite{birkeland2009longitudinal, ku2012physical}. Nevertheless, combined with the
-mechanistic argument that exercise increases self-efficacy \cite{smith2021role}, the assumption that engagement in PA is
-not influenced by mental health seems tenuous at best.
-A violation of this assumption leads to endogeneity when regressing mental health on PA and therethrough to
-inconsistent estimation of the causal effect, a fact that \citeA{leszczensky2022deal} note is often neglected in
+I posit that observational studies to date have not been powered to draw conclusions about the causal effect
+of exercise on mental health, in part because they have not explicitly modelled the reverse effect, namely that individuals with poor
+mental health are less likely to engage in exercise. If this is true, estimation of the effect of exercise on mental health is
+plagued by endogeneity, leading to inconsistent estimatioin of the causal effect, a fact that \citeA{leszczensky2022deal} note is often neglected in
 longitudinal research.
+There is a decided lack of literature on this reverse action, as is apparent in the review article by \citeA{fossati2021physical},
+whose discussion of the forward effect is much more extensive than that of the reverse effect.
+Nevertheless, they establish a consistent finding that mental health is associated with injury risk, which may hinder
+one's ability to engage in exercise. Additionally, other research has found low mood and stress to be common barriers for
+engaging in exercise \cite{firth2016motivating}.
+\citeA{azevedo2012bidirectional} and \citeA{jerstad2010prospective} also find empirical evidence for this reverse relationship,
+though other work is inconclusive \cite{birkeland2009longitudinal, ku2012physical}. Altogether, the assumption that engagement
+in exercise is not influenced by mental health seems tenuous at best.
 
 The aim of this work is then to remedy the discrepancy between on the one hand the consistent association found in
-cross-sectional studies, and the inconsistent findings of trials on the other hand. Specifically, the research question is as follows:
+cross-sectional studies, and the inconsistent findings of trials on the other hand, by making sure the reverse effect
+is accounted for.
+Specifically, the research question is as follows:
 \begin{quote}
-    Does engaging in physical activity significantly improve mental wellbeing?
+    Is physical exercise an effective intervention for improving mental wellbeing?
 \end{quote}
-This question is answered through explicitly modeling the potential mutual influence (simultaneity) between PA and mental health.
-\citeA{leszczensky2022deal} find excellent statistical properties of Structural Equation modeling (SEM)
-in this context, namely unbiasedness and significantly greater efficiency than Arellano-Bond (GMM) estimation.
-Inspired by their findings, the present study follows the procedures outlined by \citeA{allison2017maximum}
-for modeling reciprocal causation.
-SEM allows for modeling arbitrary (linear) interactions amongst variables,
-which makes it possible to flexibly compare model specifications, and various fit indices may be used to determine
-the most appropriate model.
-SEM thus lends itself well to a statistical study of the relationships between variables when it is assumed to be
-more nuanced than unidirectional causation.
+The emphasis is thus on the within-person effect of exercise, not simply the between-person correlation between the two.
+
+Panel data provides the means through which the reciprocal relationship can be modelled. Specifically, the simple fact
+that cause must preceed effect can be exploited with panel data.
+\citeA{leszczensky2022deal} find excellent statistical properties of Structural Equation modelling (SEM)
+when using panel data to model reciprocal action, namely lower bias and significantly greater efficiency than Arellano-Bond
+(GMM) estimation (if the model is correctly specified).
+Inspired by these findings, the present study follows the procedure outlined by \citeA{allison2017maximum}
+for modelling reciprocal causation.
+In SEM, arbitrary (linear) interactions amongst variables can be modelled, which gives a lot of freedom in model
+specification. SEM thus lends itself well to studying a complex and nuanced topic like human psychology,
+where manifold model assumptions might have to be made or relaxed.
+
 The data studied is from the LISS panel, which is a representative (invite-only) panel of $7500$ Dutch individuals aged
-sixteen and above \cite{scherpenzeel2010liss}. The panel comprises a broad range of questions, including the topics of PA
+sixteen and above \cite{scherpenzeel2010liss}. The panel comprises a broad range of questions, including the topics of exercise
 and mental wellbeing, but also manifold other variables that can therefore be controlled for in the analysis.
 Because the panel follows individuals for multiple years, it provides insight into the temporal nature of interactions
-between PA and mental health, which makes it possible to emphasise the within-person effect of exercise on mental health
+between exercise and mental health, which makes it possible to emphasise the within-person effect of exercise on mental health
 rather than the between-person assocation between the two.
 
-% In order to demonstrate the importance of properly modeling reverse causality, I first aim to closely follow
-% the analysis done by \citeA{chekroud2018association} to corroborate their main result that exercising decreases incidence
-% of poor mental health by $43\%$.
-% Then, the same question will be analysed in the SEM-framework to determine how much of this association can be attributed
-% to a causal effect. However, due to the measurement error in questionnaire responses and the retrospective nature of this study,
-% it will not be powered to accurately estimate the exact effect size \cite{pereira2014depressive}.
-% As such, this study does not aim to inform practical decisions, but the data should nevertheless be sufficient to find
-% significant effects and to study if the potential reverse causality appreciably influences parameter estimates.
-
-% A major challenge in the analysis be to find the appropriate lag structure, as the validity of the results heavily
-% relies on the correct specification of the lag structure. However, not only is this structure not known a priori,
-% it is also likely in general that the temporal effect of the predictor on the outcome does not align with the sampling
-% frequency (i.e. the time interval between panel waves) and the present literature has not established how SEM modeling
-% may then be effectively applied \cite{leszczensky2022deal}.
-% Furthermore, difficulty arises from the fact that the LISS panel is a continuous panel, with individuals joining and
-% leaving the panel every year. As such, each individual has responded to the questionnaires of different years,
-% effectively leading to a lot of missing data, on top of data missing due to incomplete responses.
-% While SEM provides some flexiblity in modeling this, there is no natural solution and part of this work will be to
-% develop a procedure that efficiently utilises the available data.
-% It is additionally important to appropriately control for individual-specific effects, as for instance physical
-% health makes a significant confounder, as it may preclude physical activity while also having a well-established impact
-% on mental health \cite{ohrnberger2017relationship}, thus leading to endogeneity. However, as panel regressions naturally
-% allow for controlling for individual-specific effects, that problem is readily solved.
-
-% TODO:
-% - Coming up with this todo list when my brain is no longer fried
-
-The present study aims to guide further research, both through contributing to a better understanding of the potentially
-complicated interdependence between mental health and PA, as well as by establishing the importance of considering this
-interdependence when studying the topic and providing an example way to do so.
+The present study aims to guide further research by contributing to a better understanding of the potentially
+complicated interdependence between mental health and exercise.
