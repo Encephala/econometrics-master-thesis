@@ -510,7 +510,7 @@ class _ModelDefinitionBuilder(ABC):
         result: list[str] = []
 
         if len(self._regressions) != 0:
-            result.append("# Regressions (structural part)")
+            result.append("# Regressions")
 
             result.extend(regression.build() for regression in self._regressions)
 
