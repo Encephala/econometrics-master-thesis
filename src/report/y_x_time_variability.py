@@ -57,14 +57,15 @@ plt.show()
 # %% Combined plots
 figure, axes = plt.subplots(1, 2, figsize=(9, 4))
 
-axes[0].errorbar(list(available_waves(mhi5)), mhi5_means, yerr=mhi5_stds, capsize=2)
+mhi5_no_nan = [mhi5[col].dropna() for col in mhi5]
+
+axes[0].boxplot(mhi5_no_nan, positions=list(available_waves(mhi5)), showfliers=False)
 axes[0].set_title("Mean MHI5-score over time")
-axes[0].set_ylim(0, 100)
+axes[0].set_ylim(-4, 104)
 axes[0].set_ylabel("MHI5")
 axes[0].set_xlabel("Year")
-axes[0].set_xticks(list(range(8, 24, 2)))
 
-axes[1].errorbar(list(available_waves(sports)), sports_means, yerr=sports_stds, capsize=2)
+axes[1].errorbar(list(available_waves(sports)), sports_means, yerr=sports_stds, capsize=2, color="black")
 axes[1].set_title("Sports engagement over time")
 axes[1].set_ylabel("Rate of engagement in sports")
 axes[1].set_xlabel("Year")
