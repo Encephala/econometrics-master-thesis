@@ -29,7 +29,7 @@ mental health is typically overreported, leading to a bias towards zero when est
 Self-reporting bias in general is a well-established phenomenon \cite{rosenman2011measuring}, but in practice it is a
 necessary price to pay when gathering data at such a large scale. The large sample size of the LISS panel might
 help to preserve statistical power in the face of the increased variance, but the resulting bias cannot be overcome
-without explicitly modelling the bias-inducing effect, which is beyond the scope of this study.
+without explicitly modelling the bias-inducing effect, which is a psychological phenomenon that is beyond the scope of this study.
 
 Another risk factor for poor data quality is the extensiveness of the questionnaire. The total yearly LISS study
 comprises multiple thousands of questions, and it is likely that this causes respondents to not answer each question
@@ -78,5 +78,55 @@ for this work.
     \end{subfigure}
 \end{figure}
 
+\section{Preprocessing}
+\label{sec:data:preprocessing}
+BLablablababal
+
 \section{Missingness}
 \label{sec:data:missingness}
+A significant portion of all data is missing. For some variables in specific waves, all data is available,
+but for others upwards of 70\% is missing. Across all variables considered in this study, after preprocessing,
+the average percentage of missing variables is 48.8\%.
+This missing data is due to multiple factors. Firstly, due to attrition or due to joining the panel
+in one of the later recruitment waves, data for a certain individual might not be available for all waves.
+Additionally, the Leisure study only started in 2008, so no data from it is available for 2007. An idiosyncracy is
+the fact that the Health study was not held at all in 2014, for which no reason is given publicly.
+% TODO response on my email see if there is a known reason
+Furthermore, an individual may give a partial response, either in the form of not answering some of the questions in a study,
+or in the form of not responding to an entire study for a year (even if they did respond to other studies).
+
+When dealing with missing data, it is important to consider why the data is missing, as different reasons for the missingness
+have differing impacts on the outcomes. In general, we differentiate between three different forms of missingness,
+namely missing completely at random (MCAR), missing at random (MAR) and missing not at random (MNAR).
+MCAR is the least problematic as it entails the absence of the data is utterly random and not related to any of the
+variables used in the study. In this case, we simply lose statistical power due to the missing information, but
+no biases are introduced.
+The other extreme, MNAR, entails that whether the data is missing for some variable depends on the value of the variable itself.
+Imagine for instance an online survey sent out to a chosen group of people that asks how much one uses the internet.
+Clearly, there would be a selection bias, as no respondents would say ``never''.
+As such, in the face of MNAR data, serious biases may be introduced into the analysis. No general solutions exist for handling
+MNAR missingness. It might be possible to handle it via a case-specific model of the exact mechanism leading to missing data,
+but this would at least require extensive expert knowledge of the data being studied.
+Lastly, there is MAR. MAR data is data for which the missingness depends on the values of other variables in the dataset,
+but not the variable itself. In this case, general solutions exist, which preserve as much information as possible
+without introducing biases.
+
+SEM has a natural solution to MCAR or MAR data which will be explained in \cref{sec:methods:sem}.
+However, it cannot naturally deal with MNAR data, so a discussion of which mechanisms are present in the LISS data is prudent.
+First, consider missingness due to late recruitment. As explained earlier, selection for late recruitment is done based
+on household type, age and ethnicity, so as to make the panel representative of the general population. For cases of missing
+data due to late recruitment, it is thus MAR in general, but MNAR with respect to those free background variables.
+Since those variables are only used as controls in this work, the impact of the MNAR data is likely minimal.
+Second, consider attrition. Centerdata has studied attrition \cite{vos2009attrition}, and it was found the only significant
+predictors of attrition were age, whether internet was provided and whether there was a disabled person
+in the household (Table 4 of the report). The latter two variables are not variables studied in this work, so through
+the same argument as for late recruitment, attrition is only of minor concern.
+The missing information for the Leisure panel in 2007 can be considered MCAR, and while it cannot be said for certain as
+the reason for its absence is not known, the same is assumed for the missing Health panel wave of 2014.
+% TODO Same as above, is this true?
+Lastly, there is missingness due to incomplete responses, which poses a more significant problem.
+\citeA{grotan2019mental} found students with mental distress were four times more likely to experience low self-efficacy,
+and this association between mental health and self-efficacy is corroborated in other literature,
+f.i. \citeA{schonfeld2016effects,najafi2007relationship}. Lower self-efficacy would almost by definition decrease
+the probability of responding to the survey, thus providing a significant mechanism for MNAR missingness of mental health.
+% Find out and describe on how common this is (missingness of MHI5 after first observation for an individual)
