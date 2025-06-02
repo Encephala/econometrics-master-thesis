@@ -14,7 +14,7 @@
 \usepackage[onehalfspacing]{setspace} % Increase line spacing
 \usepackage[margin=2.5cm]{geometry} % Modify margins
 \usepackage{graphicx,booktabs} % Packages for images, tables, and APA citations
-\usepackage{svg,caption}
+\usepackage{svg,caption,subcaption}
 \captionsetup{justification=centering}
 
 \usepackage{amsmath,amsfonts}
@@ -89,8 +89,7 @@
 \bibliography{../common/references}
 
 \appendix
-\chapter{Programming code}
-All code used for the research as well as for the figures in this report is available at \url{https://github.com/Encephala/econometrics-master-thesis} under an MIT license.
+\input{appendix}
 
 
 \end{document}

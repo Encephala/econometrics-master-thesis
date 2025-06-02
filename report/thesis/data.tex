@@ -1,0 +1,82 @@
+The LISS panel \cite{scherpenzeel2010liss} started in 2007 in the Netherlands. It takes the form of an online questionnaire
+which is held yearly, on various topics such as health, religion, leisure, family, work and so on.
+Its data is freely available for the purposes of research and policymaking.
+Besides these studies, background variables are collected on a monthly basis, like age, household composition,
+income and primary occupation.
+Recruitment is done invite-only to limit self-selection, although it cannot be wholly prevented as
+participation is still voluntary and motivated by a financial incentive. Additionally, some self-selection might occur
+in the roughly 80\% response rate, despite efforts to contact inactive panel members. Due to a yearly attrition of 12\%,
+refreshment samples were occassionally introduced, selected such as to balance representativeness of househould type,
+age and ethnicity \cite{lissdata_methodology}. This also effectively introduces missing data.
+The nature and impact of this missing data is further discussed in \cref{sec:data:missingness}.
+
+The focus of this study is on two of the core studies, namely the Social Integration and Leisure study and the Health study.
+The prior directly measures engagement in physical exercise by question 104, ``Do you practice sports?''.
+Mental health is queried in the latter, though not as directly. Questions 11 through 15 are the five-item Mental Health Inventory
+(MHI5), a standard screening questionnaire for mental health \cite{berwick1991performance}. Respondents are asked how often, over the past four weeks,
+they felt very anxious; so down that nothing could cheer them up; calm and peaceful; depressed and gloomy; and happy.
+Responses are measured on a 6-point Likert scale ranging from ``never'' to ``continuously'', and the scores are combined
+linearly to create the MHI5 score from 0 to 100 with increments of 4, where a higher score indicates superior mental health.
+Refer to \cref{chap:app:liss_questions} for the exact formulation of the questions asked for all of the variables studied,
+including the controls and mediators that as selected in \cref{sec:modelling:regressors}.
+
+\section{Quality Issues}
+\label{sec:data:quality}
+Beyond the problem of self-selection as already discussed, there are more issues that plague the studied data.
+Naturally, all the information is self-reported. This can lead to noise in the data, as for instance the difference
+between ``sometimes'' and ``often'' in the MHI5 screening can be subjective. Furthermore, \citeA{brown2018mental} find that
+mental health is typically overreported, leading to a bias towards zero when estimating the effect of an intervention.
+Self-reporting bias in general is a well-established phenomenon \cite{rosenman2011measuring}, but in practice it is a
+necessary price to pay when gathering data at such a large scale. The large sample size of the LISS panel might
+help to preserve statistical power in the face of the increased variance, but the resulting bias cannot be overcome
+without explicitly modelling the bias-inducing effect, which is beyond the scope of this study.
+
+Another risk factor for poor data quality is the extensiveness of the questionnaire. The total yearly LISS study
+comprises multiple thousands of questions, and it is likely that this causes respondents to not answer each question
+with as much care as they would on a shorter questionnaire, and perhaps even more significantly, it might lead to
+failure to respond in the first place.
+To combat this, the core studies are held at different times of year. The Health study is (almost) always held in November
+through December, whereas the Leisure study was held in February through March before 2015, and October through November since.
+The effect of questionnaire length has been studied in the literature, with somewhat conflicting results. \citeA{galesic2009effects} for instance
+find worse reponse quality for questions later in the survey as compared to earlier. On the other hand, \citeA{andreadis2020impact,subar2001shorter}
+do not find significant evidence for improved response rate and data quality with shorter questionnaires. The latter
+also note ease of administration may compensate for length, in which regard the online nature and typically multiple-choice
+questions of the panel do well. The impact of the length of the panel is thus likely not a major concern.
+
+A worthwhile consideration is the impact of the Covid-19 pandemic on the data. The negative effect of the pandemic on public
+mental health has been the topic of much discussion \cite{cullen2020mental,kumar2021covid} and has been empirically verified \cite{kupcova2023effects}.
+Additionally, due to closing of public facilites, people engaged in exercise significantly less \cite{amini2021covid}.
+The pandemic thus seems a priori to be a significant risk factor for endogeneity in the present analysis.
+However, curiously, neither the effect of the pandemic on mental health nor its effect on rates of physical exercise
+seem to be present in the data. As \cref{fig:data:sample_moments_y_x} shows, sample statistics of both variables
+vary little over time with no appreciably change after the onset of the Covid pandemic in 2020.
+This puts the validity of the data into question, as these findings conflict with the literature on this topic.
+The constance in sports engagement may be explained by the fact that while sports facilities closed, people had more spare time
+as for instance social events and commuting were no longer possible, which appears to compensate for the effect of
+closing sports facilities.
+However, the lack of decrease in mental health is quite remarkable. It is perhaps an artefact of biases introduced
+due to self-reported data, as people may have measured their state relative that of people around them, rather than
+relative to themselves previously.
+Regardless, based on the lack of impact on the sample statistics, the Covid pandemic will not be of further consideration
+for this work.
+
+\begin{figure}[htbp]
+    \centering
+    \caption{Distributions of the MHI5-score and sports engagement across years}
+    \label{fig:data:sample_moments_y_x}
+    \begin{subfigure}[t]{0.49\textwidth}
+        \includesvg[width=\textwidth]{figures/data/boxplot_mhi5.svg}
+        \vspace{0.1em}
+        \subcaption{Boxplot of the MHI5-score for each available year. Whiskers are 10th and 90th percentiles.
+        Note the appreciable varability in the median is simply because the MHI5-score has an interval of 4}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.49\textwidth}
+        \includesvg[width=\textwidth]{figures/data/errorbar_sports.svg}
+        \vspace{0.1em}
+        \subcaption{Rate of engagement in exercise for each available year. Errorbars are sample standard deviations}
+    \end{subfigure}
+\end{figure}
+
+\section{Missingness}
+\label{sec:data:missingness}
