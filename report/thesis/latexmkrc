@@ -1,0 +1,2 @@
+# https://tex.stackexchange.com/a/681154/378987
+$pdflatex = 'pdflatex --shell-escape';
