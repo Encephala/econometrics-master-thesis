@@ -58,7 +58,7 @@ plt.show()
 mhi5_no_nan = [mhi5[col].dropna() for col in mhi5]
 
 plt.figure(figsize=(4, 3))
-plt.boxplot(mhi5_no_nan, positions=list(available_waves(mhi5)), showfliers=False)
+plt.boxplot(mhi5_no_nan, positions=list(available_waves(mhi5)), whis=(10, 90), showfliers=False)
 plt.title("Mean MHI5-score over time")
 plt.ylim(-4, 104)
 plt.ylabel("MHI5")
