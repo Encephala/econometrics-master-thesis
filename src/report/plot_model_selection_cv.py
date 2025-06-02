@@ -60,7 +60,7 @@ plot(estimates, stds, sigma_estimates, sigma_stds)
 estimates_complex = [10.73, 10.53]
 stds_complex = [0.37, 0.37]
 
-plot(estimates, stds)
+plot(estimates_complex, stds_complex)
 
 # %% Comparing X lags (distributed lags)
 # Minimum lag 0
