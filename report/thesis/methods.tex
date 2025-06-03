@@ -57,5 +57,26 @@ for individuals with better mental health. That is, in the observed sample, $Y_i
 the average treatment effect.
 This holds true even if the treatment effect itself is not influenced by a priori mental health.
 
+% Probably make this a subfigure with left CS and right panel
+\begin{figure}[htbp]
+    \centering
+    \caption{Directed graph representation of reverse causality between MHI5-score and sports}
+    \label{fig:methods:reverse_causality_crosssectional}
+    \begin{tikzpicture}[
+        node distance=0.8cm,
+        main node/.style={circle,draw,font=\small\sffamily\bfseries,minimum size=1.8cm},
+        every edge/.style={draw,thick,->}
+    ]
+        \node[main node] (mhi5) {MHI5};
+        \node[main node, below=of mhi5] (sports) {SPORTS};
+        \node[main node] (x) at ($(mhi5)!0.5!(sports) + (-3.5cm,0)$) {X};
+
+        \path[bend left] (mhi5) edge (sports);
+        \path[bend left] (sports) edge (mhi5);
+        \path (x) edge (mhi5);
+        \path (x) edge (sports);
+    \end{tikzpicture}
+\end{figure}
+
 \section{Structural Equation Modelling}
 \label{sec:methods:sem}
