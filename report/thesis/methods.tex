@@ -1,5 +1,61 @@
 \section{Causal analysis}
 \label{sec:methods:causal}
 
+\subsection{Potential Outcome Framework}
+
+In order to credibly make the claim that the estimated effect is a causal one, some a priori considerations are in order.
+To this end, the review by \citeA{imbens2024causal} is considered.
+
+Firstly, there is the stable unit treatment value assumption (SUTVA), which is the assumption that the outcome for one
+individual is not influenced by treatment exposure (in this case, engagement in exercise) of another.
+Since the subjects of the LISS panel are selected to be representative of the Netherlands as a whole, the subjects
+live all over the country and are not likely to know each other, let alone influence each other. However, it is typical
+for multiple individuals to partake within a single household. On average, it is found that about 1.6 individuals participate
+per household. Within one household, we cannot rule out that individuals influence each other. In fact, \citeA{maltby2012contextual}
+find that one's perception of the benefit of exercise is influenced by social norms, clearly violating the SUTVA.
+However, because these violations are local to small groups in the dataset, the assumption is taken to hold at large for
+the studied data.
+
+Next, we formalise the effect of interest, namely the causal effect of exercise on mental wellbeing, using the
+potential outcome.
+For each individual $i$, $Y_i(T)$ is the potential outcome if they engage in exercise (treatment),
+and $Y_i(C)$ is the potential outcome if they don't (control). The variable of interest then is the sample average
+treatment effect
+\begin{equation}
+\label{eq:methods:sate}
+    \tau_{\text{sample}} = \sum_{i=1}^N (Y_i(T) - Y_i(C)),
+\end{equation}
+which thanks to the representativeness of the sample is assumed to estimate the population average treatement.
+This is where SUTVA is crucial, as without it the potential outcomes are not simply a function of individual $i$'s treatment,
+but also of individual $j$'s treatment (where $j \neq i$), and so we could not meaningfully interpret the average
+treatment effect calculated as in \cref{eq:methods:sate}.
+For any one individual the treatment effect may deviate from the average effect, in the sense that it may be moderated by
+for instance personal circumstances or genetics, but such analysis is left to further research.
+
+Denote $X_i$ as the treatment assignment for individual $i$, $X_i \in \{C, T\}$. The crucial assumption is that the
+\textit{potential} outcomes are not influenced by the treatment assignment, or formally, given some set of controls
+$W_i$,
+\begin{equation}
+    (Y_i(T), Y_i(C)) \perp\!\!\!\perp X_i \mid W_i.
+\end{equation}
+This assumption is called the ignorability assumption or the assumption of no unobserved confounders.
+The controls are included to lend credibility to the assumption, as they remove biases in comparing treated individuals
+to individuals in the control group.
+Selection bias, MNAR data and the assumption's namesake in no unobserved confounders can all equivalently be considered
+violations of the ignorability assumption.
+The crucial difficulty that necessitates the assumption is that for any one individual $i$,
+only either $Y_i(T)$ or $Y_i(C)$ is observed, and thus we cannot directly observe the difference in potential outcomes.
+However, under the ignorability assumption, this difference can be estimated by $Y_i(T) - Y_j(C)$ for $j \neq i$,
+which is a quantity that can be observed directly.
+
+\subsection{Reverse Causality}
+Now consider the aim of the present study, namely estimating the effect of exercise on mental health, $Y_i(T) - Y_i(C)$.
+If mental health influences the probability to engage in exercise, the ignorability assumption is violated.
+If for instance better mental health makes one more likely to engage in exercise, and assuming the greater mental health
+does not disappear as soon as one engages in exercise, then the \textit{potential} outcomes $Y_i$ are increased
+for individuals with better mental health. That is, in the observed sample, $Y_i(T) - Y_j(C)$ will be inflated with respect to
+the average treatment effect.
+This holds true even if the treatment effect itself is not influenced by a priori mental health.
+
 \section{Structural Equation Modelling}
 \label{sec:methods:sem}
