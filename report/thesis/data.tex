@@ -16,7 +16,7 @@ Mental health is queried in the latter, though not as directly. Questions 11 thr
 (MHI5), a standard screening questionnaire for mental health \cite{berwick1991performance}. Respondents are asked how often, over the past four weeks,
 they felt very anxious; so down that nothing could cheer them up; calm and peaceful; depressed and gloomy; and happy.
 Responses are measured on a 6-point Likert scale ranging from ``never'' to ``continuously'', and the scores are combined
-linearly to create the MHI5 score from 0 to 100 with increments of 4, where a higher score indicates superior mental health.
+linearly to create the MHI5-score from 0 to 100 with increments of 4, where a higher score indicates superior mental health.
 Refer to \cref{chap:app:liss_questions} for the exact formulation of the questions asked for all of the variables studied,
 including the controls and mediators that as selected in \cref{sec:modelling:regressors}.
 
@@ -80,7 +80,64 @@ for this work.
 
 \section{Preprocessing}
 \label{sec:data:preprocessing}
-BLablablababal
+\subsubsection{MHI5}
+As said, the MHI5-score is derived linearly from the responses to the five relevant questions. It was found that
+there is no partial missingness, in the sense that either all five questions were answered or none of them were answered.
+The score is then simply calculated when all responses are given, and missing otherwise.
+Listwise deletion is performed for those individuals for whom the MHI5-score is always missing, as they provide no
+information towards the relationship being studied.
+
+\subsubsection{Sports}
+The variable is used as-is, but as with MHI5, those individuals for whom sports is always missing are deleted from the data.
+A consideration is to also remove individuals for whom sports is constant in time, i.e. either always ``no'' or always ``yes'',
+as for such individuals there is no within-person variability to be studied. However, under the assumption that there
+are no individual-specific unmeasured confounders, the between-person variability would equal the within-person variability.
+While this assumption is up for contention in the present study, as will be elaborated on in \cref{sec:methods:sem},
+% TODO more precise reference?
+it was chosen to leave such observation in the data for the purpose of maintaining statistical power.
+
+\subsubsection{Dummy Encoding}
+Many questions in the study are measured on a categorical or ordinal scale (f.i. a Likert scale), which cannot be
+meaningfully included directly as regressors, for example primary occupation, ethnicity and education level.
+Naturally, such variables are expanded to dummy variables, with one dummy variable for each level of the original variable
+(also known as one-hot encoding).
+
+Additionally, some variables are measured on an ordinal scale, but their effect on mental wellbeing is very unlikely to
+be linear, namely age, income and bmi. Without expert knowledge on the exact relationship between each variable
+and mental health and in order to avoid model complexity, these variables are stratified into categories and then also
+included as dummy variables. While this involves some loss of information, it also simultaneously provides robustness
+against outliers, such as individuals whose reported height and weight imply an infeasible body mass index (BMI) of over 100.
+Refer to \cref{tab:data:stratification} for the exact stratification.
+For age, the stratification is chosen as to align roughly with different phases of life, as the strata roughly represent
+children, students, young adults, middle adults and retirees.
+For income, the strata represent no income, minimal income, regular income and high income.
+For BMI, the strata reflect underweight, normal weight, overweight and obese, as derived from \citeA{who_healthy_lifestyle_2010}.
+Additionally, for BMI, individuals who reported a weight or height that was excessively high or low were assigned NA as their BMI.
+Lower cutoffs were 5\,cm and 1\,kg and upper cutoffs were 270\,cm (the height of the tallest man ever) and 635\,kg
+(the weight of the heaviest man ever). These are conservative bounds so as to eliminate outliers due to for instance
+mistyping, but with minimal subjective judgment to avoid researches biases.
+
+\begin{table}[htbp]
+    \centering
+    \caption{Stratification applied to variables whose effect is unlikely to be linear. All bounds are left-inclusive}
+    \label{tab:data:stratification}
+    \begin{tabular}{l|c|c}
+        Variable & Stratum Bounds & Number of Strata \\
+        \hline
+        % This hfill abomination makes stuff nicely spread out throughout the table
+        % Just write it with regular dashes and then hit em with an
+        % s/ - / \hfill- \hfill/g
+        Age        & 0 \hfill- \hfill18 \hfill- \hfill25 \hfill- \hfill40 \hfill- \hfill67 \hfill- \hfill$ \infty$ & 5  \\
+        Income (€) & 0 \hfill- \hfill1 \hfill- \hfill15000 \hfill- \hfill50000 \hfill- \hfill$ \infty$ & 4  \\
+        BMI        & 0 \hfill- \hfill18.5 \hfill- \hfill25.0 \hfill- \hfill30 \hfill- \hfill$ \infty$  & 4  \\
+    \end{tabular}
+\end{table}
+
+If such a dummy-encoded variable was missing, that observation is assigned NA for each dummy level, and this missing
+data will then be naturally handled by the method explained in \cref{sec:methods:sem}. % TODO more precise
+An alternative would be to assign 0 to each dummy level. However, that would imply that on average, mental wellbeing of non-respondents
+is equal to the mental wellbeing in the dummy level that is left out for identification, which is an assumption that
+clearly need not hold in general.
 
 \section{Missingness}
 \label{sec:data:missingness}
