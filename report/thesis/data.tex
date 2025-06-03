@@ -148,7 +148,9 @@ clearly need not hold in general.
 
 \section{Missingness}
 \label{sec:data:missingness}
-A significant portion of all data is missing. For some variables in specific waves, all data is available,
+After removing individuals for which MHI5 or sports are always unavailable, we are left with data for 12\,920 individuals
+for the years 2008 through 2023.
+However, a significant portion of all data is missing. For some variables in specific years, all data is available,
 but for others upwards of 70\% is missing. Across all variables considered in this study, after preprocessing,
 the average percentage of missing variables is 48.8\%.
 This missing data is due to multiple factors. Firstly, due to attrition or due to joining the panel
@@ -159,6 +161,35 @@ available.
 % TODO response on my email, see if there is a known reason
 Lastly, an individual may give a partial response, either in the form of not answering some of the questions in a study,
 or in the form of not responding to an entire study for a year (even if they did respond to other studies).
+
+A noteworthy quantity is the coverage between sports and the MHI5-score, defined as the percentage of observations
+(for each year) for which both sports and the MHI5-score is available.
+This can be found in \cref{tab:data:coverage}. It is found to be quite low, just over 15\% for each year. As a result,
+out of the almost 13\,000 individuals each year, only about 2\,000 contribute direct information to the relationship of interest.
+
+\begin{table}[htbp]
+    \centering
+    \caption{Coverage of sports and MHI5-score each year, i.e. percentage of observations for which both are available}
+    \label{tab:data:coverage}
+    \begin{tabular}{lc}
+        \toprule
+        Year & Coverage \\
+        \hline
+        2012 & 16.4\% \\
+        2013 & 15.7\% \\
+        2014 & -      \\
+        2015 & 17.4\% \\
+        2016 & 16.2\% \\
+        2017 & 18.0\% \\
+        2018 & 16.5\% \\
+        2019 & 15.1\% \\
+        2020 & 17.3\% \\
+        2021 & 15.1\% \\
+        2022 & 17.4\% \\
+        2023 & 17.8\% \\
+        \bottomrule
+    \end{tabular}
+\end{table}
 
 When dealing with missing data, it is important to consider why the data is missing, as different reasons for the missingness
 have differing impacts on the outcomes. In general, we differentiate between three different forms of missingness,
