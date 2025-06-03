@@ -151,8 +151,9 @@ def make_age(background_vars: pd.DataFrame) -> pd.DataFrame:
     return age.apply(
         lambda column: pd.cut(
             column,
-            bins=[-np.inf, 17, 24, 39, 66, np.inf],
+            bins=[-np.inf, 18, 25, 40, 67, np.inf],
             labels=age_labels,
+            right=False,
         )
     )
 
@@ -258,7 +259,12 @@ def make_bmi(health_panel: pd.DataFrame) -> pd.DataFrame:
         lambda column: pd.cut(
             column,
             bins=[-np.inf, 18.5, 25.0, 30, np.inf],
-            labels=["underweight", "normal weight", "overweight", "obese"],
+            labels=[
+                "underweight",
+                "normal weight",
+                "overweight",
+                "obese",
+            ],
             right=False,
         )
     )
