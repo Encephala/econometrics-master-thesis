@@ -90,9 +90,10 @@ the average percentage of missing variables is 48.8\%.
 This missing data is due to multiple factors. Firstly, due to attrition or due to joining the panel
 in one of the later recruitment waves, data for a certain individual might not be available for all waves.
 Additionally, the Leisure study only started in 2008, so no data from it is available for 2007. An idiosyncracy is
-the fact that the Health study was not held at all in 2014, for which no reason is given publicly.
-% TODO response on my email see if there is a known reason
-Furthermore, an individual may give a partial response, either in the form of not answering some of the questions in a study,
+the fact that the Health study was not held at all in 2014, leaving a gap in the data, for which no explanation is publicly
+available.
+% TODO response on my email, see if there is a known reason
+Lastly, an individual may give a partial response, either in the form of not answering some of the questions in a study,
 or in the form of not responding to an entire study for a year (even if they did respond to other studies).
 
 When dealing with missing data, it is important to consider why the data is missing, as different reasons for the missingness
@@ -106,7 +107,9 @@ Imagine for instance an online survey sent out to a chosen group of people that 
 Clearly, there would be a selection bias, as no respondents would say ``never''.
 As such, in the face of MNAR data, serious biases may be introduced into the analysis. No general solutions exist for handling
 MNAR missingness. It might be possible to handle it via a case-specific model of the exact mechanism leading to missing data,
-but this would at least require extensive expert knowledge of the data being studied.
+but this would at least require extensive expert knowledge of the data being studied. Note that listwise deletion,
+that is simply removing observations for which some data is missing, does not prevent these biases from ocurring,
+as the remaining studied data is not representative of the population as a whole.
 Lastly, there is MAR. MAR data is data for which the missingness depends on the values of other variables in the dataset,
 but not the variable itself. In this case, general solutions exist, which preserve as much information as possible
 without introducing biases.
@@ -124,9 +127,17 @@ the same argument as for late recruitment, attrition is only of minor concern.
 The missing information for the Leisure panel in 2007 can be considered MCAR, and while it cannot be said for certain as
 the reason for its absence is not known, the same is assumed for the missing Health panel wave of 2014.
 % TODO Same as above, is this true?
-Lastly, there is missingness due to incomplete responses, which poses a more significant problem.
-\citeA{grotan2019mental} found students with mental distress were four times more likely to experience low self-efficacy,
-and this association between mental health and self-efficacy is corroborated in other literature,
-f.i. \citeA{schonfeld2016effects,najafi2007relationship}. Lower self-efficacy would almost by definition decrease
-the probability of responding to the survey, thus providing a significant mechanism for MNAR missingness of mental health.
-% Find out and describe on how common this is (missingness of MHI5 after first observation for an individual)
+Lastly, there is missingness due to incomplete responses, which poses a more significant problem, as
+poor mental wellbeing is known to be associated with worse self-efficacy.
+\citeA{grotan2019mental} found students with mental distress were four times more likely to experience low
+self-efficacy, and the association is corroborated in other literature, f.i. \citeA{schonfeld2016effects,najafi2007relationship}.
+Lower self-efficacy would almost by definition decrease the probability of responding to the survey, thus providing
+a significant mechanism for MNAR missingness of mental health.
+To study this, I examine what percentage of MHI5-scores is missing in between each individual's first and last
+available MHI5-score, which is just over 9\%. This slightly underestimates the true number, as nonresponse
+in the first or last year of panel participation would not be measured. Nevertheless, it should be a reasonable
+estimate. Some proportion of this will be just MCAR or MAR missingness, but it cannot be known what proportion.
+Since self-efficacy is not directly measured in the panel and due to a lack of expert knowledge on this association,
+the MNAR missingness is not handled explicitly in this work and thus remains as a limitation of the study.
+In a more strictly controlled environment than online web surveys, such missingness might be avoided, but it is likely
+a necessary price to pay when studying mental health in large samples.
