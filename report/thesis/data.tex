@@ -90,11 +90,15 @@ information towards the relationship being studied.
 \subsubsection{Sports}
 The variable is used as-is, but as with MHI5, those individuals for whom sports is always missing are deleted from the data.
 A consideration is to also remove individuals for whom sports is constant in time, i.e. either always ``no'' or always ``yes'',
-as for such individuals there is no within-person variability to be studied. However, under the assumption that there
-are no individual-specific unmeasured confounders, the between-person variability would equal the within-person variability.
-While this assumption is up for contention in the present study, as will be elaborated on in \cref{sec:methods:sem},
-% TODO more precise reference?
-it was chosen to leave such observation in the data for the purpose of maintaining statistical power.
+as for such individuals there is no within-person variability to be studied. Such subjects are likely to be subject
+to unmeasured individual-specific confounders, causing endogeneity.
+However, upon further consideration this appears to be a rather arbitrary threshold. For example, if one individual has a
+probability of 1 to engage in exercise yet another has a probability of 0.9, it is not unlikely that during their
+panel participation, both always engaged in exercise, yet these are clearly different individuals.
+A threshold of 90\% engagement in sports may then be used, but this choice quickly becomes arbitrary.
+Additionally, opposed to endogeneity caused by unmeasured confounders is endogeneity caused by the selection bias
+that would occur if such individuals were left out.
+The choice is thus made to include such observations.
 
 \subsubsection{Dummy Encoding}
 Many questions in the study are measured on a categorical or ordinal scale (f.i. a Likert scale), which cannot be
