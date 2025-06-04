@@ -48,34 +48,92 @@ only either $Y_i(T)$ or $Y_i(C)$ is observed, and thus we cannot directly observ
 However, under the ignorability assumption, this difference can be estimated by $Y_i(T) - Y_j(C)$ for $j \neq i$,
 which is a quantity that can be observed directly.
 
+Considering the research question at hand is whether physical exercise is an effective intervention, the aim is not to
+quantify the exact effect, rather to find whether a significant effect exists. To that end, the ignorability assumption
+can be relaxed slightly to assuming that in so far as there are unmeasured confounders, they do not change the statistical
+significance (nor the sign) of the estimated effect.
+
 \subsection{Reverse Causality}
 Now consider the aim of the present study, namely estimating the effect of exercise on mental health, $Y_i(T) - Y_i(C)$.
-If mental health influences the probability to engage in exercise, the ignorability assumption is violated.
+In a cross-sectional dataset, this effect is not identified,
+because if mental health influences the probability to engage in exercise, the ignorability assumption is violated.
 If for instance better mental health makes one more likely to engage in exercise, and assuming the greater mental health
 does not disappear as soon as one engages in exercise, then the \textit{potential} outcomes $Y_i$ are increased
 for individuals with better mental health. That is, in the observed sample, $Y_i(T) - Y_j(C)$ will be inflated with respect to
 the average treatment effect.
 This holds true even if the treatment effect itself is not influenced by a priori mental health.
+\Cref{fig:methods:reverse_causality:cs} gives a graphical representation of how the forward and reverse effect
+are not simultaneously identified.
 
-% Probably make this a subfigure with left CS and right panel
+On the other hand, with panel data, we can exploit the fact that cause must preceed effect. The graphical representation
+in \cref{fig:methods:reverse_causality:panel} shows the instantaneous effects, along with presumed
+autoregressive effects and a lagged effect.
+The latter is now identified. Crucially, the instantaneous effect of sports on MHI5 is not identified, nor is the effect
+of lagged sports through the autoregressive behaviour of MHI5.
+Recalling that the established mechanisms through which sports may improve mental health can be split into short-term
+and long-term mechanisms, it can thus be concluded that observational data provides no way to quantify the short-term effects,
+at least not for any effects that last much shorter than the time difference between two waves of the panel.
+The elevated endorphin levels post-exercise for instance would likely last on the order of hours (though there is no
+research on the exact duration), which is clearly not identifiable on the yearly time-scale of the LISS panel.
+Considering the various mechanisms for a positive short-term effect, and assuming a positive long-term effect is found,
+it is reasonable to postulate that the short-term effect would also be positive.
+Assuming positive autoregressive coefficients, both the aforementioned unidentified effects will be positive.
+To the end of answering the research question then, we may conclude that the total benefit of exercise is at least
+as large as the found long-term benefit. Thus, while the unidentified effects mean decreased power in answering
+the research question, but significance in the sense of the type I error rate is preserved.
+
 \begin{figure}[htbp]
-    \centering
-    \caption{Directed graph representation of reverse causality between MHI5-score and sports}
-    \label{fig:methods:reverse_causality_crosssectional}
-    \begin{tikzpicture}[
-        node distance=0.8cm,
-        main node/.style={circle,draw,font=\small\sffamily\bfseries,minimum size=1.8cm},
-        every edge/.style={draw,thick,->}
-    ]
-        \node[main node] (mhi5) {MHI5};
-        \node[main node, below=of mhi5] (sports) {SPORTS};
-        \node[main node] (x) at ($(mhi5)!0.5!(sports) + (-3.5cm,0)$) {X};
+    \caption{Graph representations of the interactions between MHI5-score and sports. Controls are left out for
+    simplicity. Red arrows indicate unidentified effects}
+    \label{fig:methods:reverse_causality}
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        \begin{tikzpicture}[
+            node distance=0.8cm,
+            main node/.style={circle,draw,font=\scriptsize\sffamily\bfseries,minimum size=1.9cm},
+            every edge/.style={draw,thick,->},
+        ]
+            \node[main node] (mhi5) {MHI5};
+            \node[main node, below=of mhi5] (sports) {SPORTS};
 
-        \path[bend left] (mhi5) edge (sports);
-        \path[bend left] (sports) edge (mhi5);
-        \path (x) edge (mhi5);
-        \path (x) edge (sports);
-    \end{tikzpicture}
+            \path[bend left,color=red] (mhi5) edge (sports);
+            \path[bend left,color=red] (sports) edge (mhi5);
+        \end{tikzpicture}
+        \subcaption{Cross-sectional data}
+        \label{fig:methods:reverse_causality:cs}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        \begin{tikzpicture}[
+            node distance=0.8cm,
+            main node/.style={circle,draw,font=\scriptsize\sffamily\bfseries,minimum size=1.9cm},
+            every edge/.style={draw,thick,->},
+            fading line/.style={draw, thick, dotted, dash pattern=on 2pt off 2pt},
+        ]
+            \node[main node] (mhi5_t) {MHI5$_t$};
+            \node[main node, below=of mhi5_t] (sports_t) {SPORTS$_t$};
+            \node[main node, left=1.5cm of mhi5_t] (mhi5_t1) {MHI5$_{t-1}$};
+            \node[main node, below=of mhi5_t1] (sports_t1) {SPORTS$_{t-1}$};
+
+            \path[bend left,color=red] (mhi5_t) edge (sports_t);
+            \path[bend left,color=red] (sports_t) edge (mhi5_t);
+            \path[bend left,color=red] (mhi5_t1) edge (sports_t1);
+            \path[bend left,color=red] (sports_t1) edge (mhi5_t1);
+            \path (mhi5_t1) edge (mhi5_t);
+            \path (sports_t1) edge (sports_t);
+            \path[opacity=0.5] (mhi5_t1) edge (sports_t);
+            \path[color=green!70!black] (sports_t1) edge (mhi5_t);
+
+            \draw[fading line] ([xshift=-0.6cm]mhi5_t1.west) -- (mhi5_t1.west);
+            \draw[fading line] ([xshift=-0.6cm]sports_t1.west) -- (sports_t1.west);
+            \draw[fading line] (mhi5_t.east) -- ([xshift=0.6cm]mhi5_t.east);
+            \draw[fading line] (sports_t.east) -- ([xshift=0.6cm]sports_t.east);
+        \end{tikzpicture}
+        \subcaption{Panel data. Note the effect of MHI5$_{t-1}$ on SPORTS$_t$ is identified,
+        but is considered a nuisance parameter}
+        \label{fig:methods:reverse_causality:panel}
+    \end{subfigure}
 \end{figure}
 
 \section{Structural Equation Modelling}
