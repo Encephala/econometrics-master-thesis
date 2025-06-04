@@ -44,11 +44,11 @@ def plot(  # noqa: PLR0913
 
 
 # %%
-# AR lags 1-8 with distributed lags (DL) 1, R = 100 repeats, FIML (not fiml.x) and MLR
-estimates = [10.55, 9.67, 9.42, 9.25, 9.19, 9.19, 9.05, 8.93]
-stds = [0.36, 0.39, 0.37, 0.47, 0.43, 0.46, 0.51, 0.49]
-sigma_estimates = [0.001, 0.001, 0.002, 0.012, 0.002, 0.002, 0.024, 0.003]
-sigma_stds = [0.012, 0.015, 0.014, 0.029, 0.018, 0.017, 0.050, 0.017]
+# AR lags 1-8 with distributed lags (DL) [0, 1], R = 50 repeats, FIML (not fiml.x) and MLR
+estimates = [10.66, 9.76, 9.50, 9.31, 9.25, 9.27, 9.07, 9.02]
+stds = [0.36, 0.39, 0.40, 0.46, 0.44, 0.50, 0.48, 0.53]
+sigma_estimates = [0.002, 0.002, 0.002, 0.002, 0.003, 0.030, 0.004, 0.025]
+sigma_stds = [0.016, 0.018, 0.022, 0.025, 0.027, 0.057, 0.021, 0.064]
 
 plot(estimates, stds, sigma_estimates, sigma_stds)
 
