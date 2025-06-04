@@ -138,3 +138,54 @@ the research question, but significance in the sense of the type I error rate is
 
 \section{Structural Equation Modelling}
 \label{sec:methods:sem}
+SEM can be considered a generalisation of the linear model, where rather than one regression equation which explains
+the variability of the regressand with regards to a set of regressors, multiple regression equations are estimated simultaneously
+to explain the total covariance structure of all variables involved.
+The following will be a minimal introduction for the purpose of this work, in which accuracy is sacrificed to some degree
+in favour of simplicity.
+For a full introduction, consider textbooks such as \citeA{kline2023principles}.
+While SEM also allows for modelling latent variables in its general form, such constructs are not considered
+in this work. This is because the author possesses no a priori knowledge as to what latent constructs might exist, and
+\citeA{ludtke2022comparison} find in a simulation study that empirically deciding on latent structures ``is only
+of limited usefulness, beacuse the different model[l]ing approaches provide almost equivalent representations of [the data].''
+
+Consider then a vector $z_i$, which contains for individual $i$ the outcome variable of interest $y_i$ as well as
+all regressors $x$.
+For the purpose of maximum likelihood estimation of the population parameters, note the well-known
+likelihood (density) of a single observation
+\begin{equation}
+    f(z_i; \mu, \Sigma) = (2\pi)^{-\frac{p}{2}} |\Sigma|^{-\frac{1}{2}} e^{-\frac{1}{2}(z_i - \mu)' \Sigma^{-1}(z_i - \mu)},
+\end{equation}
+where $p$ denotes the dimension of $z_i$.
+Assuming independent observations and dropping the constant, the sample log likelihood is
+\begin{equation}
+    \label{eq:methods:sample_likelihood}
+    l(z) = \prod_{i=1}^N f(z_i; \mu, \Sigma)
+    = -\frac{N}{2} \log(|\Sigma|) -\frac{1}{2} \sum_{i=1}^N (z_i - \mu)' \Sigma^{-1} (z_i - \mu),
+\end{equation}
+which for the purposes of optimisation can be rewritten to an equivalent fit function $F$, defined in terms of
+the sample mean $\bar{x}$ and covariance matrix $S$ \cite{preacher2016ml} as
+\begin{equation}
+    \label{eq:methods:fit_function}
+    F(\mu, \Sigma) = \log|\Sigma| + \text{tr}(S \Sigma^{-1}) - \log|S| - p + (\bar{z} - \mu)' \Sigma^{-1} (\bar{x} - \mu),
+\end{equation}
+with tr($\cdot$) denoting the trace of a matrix and the minimum of $F$ coincides with the maximum likelihood estimate.
+Note this fit function does not directly involve any observation $z_i$. Rather it is defined purely in terms of the
+sample moments $\bar{z}$ and $S$, which is to say that while \cref{eq:methods:sample_likelihood} and \cref{eq:methods:fit_function}
+are theoretically equivalent, the latter operates on a higher level of abstraction.
+
+At this stage, the elements of $\mu$ and $\Sigma$ may be estimated directly through numerical optimisation.
+Firstly, note that $\mu$ can always be estimated as $\hat{\mu} = \bar{z}$, such that the last term in
+\cref{eq:methods:fit_function} vanishes. It can thus be estimated separately from $\Sigma$,
+and because the research question pertains specifically to the variability of variables,
+the mean term is ignored in further discussion.
+To see how this general multivariate likelihood approach relates to the linear model, consider the very simple example
+regresson of $y = \alpha + \beta_1 x_1 + \beta_2 x_2 + \epsilon$. From this equation, the model-implied covariance between $y$
+and $x_1$ can be readily defined in terms of the regressor covariances as
+$\text{Cov}(y, x_1) = \beta_1 \Sigma_{x_1} + \beta_2 \Sigma_{x_1 x_2}$, where $\Sigma_{x_1}$ denotes the variance of $x_1$
+and $\Sigma_{x_1 x_2}$ denotes the covariance between $x_1$ and $x_2$.
+Estimating covariance elements of $\Sigma$ thus corresponds directly to estimating a regression equation.
+To be precise, the diagonal elements of $\Sigma$ are estimated directly as well as the covariance elements between
+the regressors, at which point estimating the above regression equation as compared to estimating the remaining elements
+of $\Sigma$ directly is just a matter of reparametrisation; the two models are completely equivalent.
+
