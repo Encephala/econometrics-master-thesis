@@ -180,12 +180,67 @@ Firstly, note that $\mu$ can always be estimated as $\hat{\mu} = \bar{z}$, such 
 and because the research question pertains specifically to the variability of variables,
 the mean term is ignored in further discussion.
 To see how this general multivariate likelihood approach relates to the linear model, consider the very simple example
-regresson of $y = \alpha + \beta_1 x_1 + \beta_2 x_2 + \epsilon$. From this equation, the model-implied covariance between $y$
-and $x_1$ can be readily defined in terms of the regressor covariances as
-$\text{Cov}(y, x_1) = \beta_1 \Sigma_{x_1} + \beta_2 \Sigma_{x_1 x_2}$, where $\Sigma_{x_1}$ denotes the variance of $x_1$
-and $\Sigma_{x_1 x_2}$ denotes the covariance between $x_1$ and $x_2$.
-Estimating covariance elements of $\Sigma$ thus corresponds directly to estimating a regression equation.
-To be precise, the diagonal elements of $\Sigma$ are estimated directly as well as the covariance elements between
-the regressors, at which point estimating the above regression equation as compared to estimating the remaining elements
-of $\Sigma$ directly is just a matter of reparametrisation; the two models are completely equivalent.
+regresson of
+\begin{equation}
+    \label{eq:methods:simple_regression}
+    y = \alpha + \beta_1 x_1 + \beta_2 x_2 + \epsilon.
+\end{equation}
+From this equation, the model-implied covariances between $y$
+and $x_1$ and $x_2$ can be readily defined in terms of the regressor covariances as
+\begin{align}
+\begin{split}
+    \label{eq:methods:covariance_simple_regression}
+    \Sigma_{y x_1} &= \beta_1 \Sigma_{x_1} + \beta_2 \Sigma_{x_1 x_2}\text{ and} \\
+    \Sigma_{y x_2} &= \beta_1 \Sigma_{x_1 x_2} + \beta_2 \Sigma_{x_2},
+\end{split}
+\end{align}
+where $\Sigma_{x_1}$ ($\Sigma_{x_2}$) denotes the variance of $x_1$ ($x_2$) and $\Sigma_{x_1 x_2}$ denotes the covariance between $x_1$ and $x_2$.
+Estimating $\Sigma_{y x_1}$ and $\Sigma_{y x_2}$ thus corresponds directly to estimating $\beta_1$ and $\beta_2$.
+In general, the upper-right row of elements of the covariance matrix of $z$ is $\Sigma_{xy} = \Sigma_x \beta$ for
+a vector of regressors $x$ and a vector of parameters $\beta$, where $\Sigma_x$ is the covariance matrix of $x$.
+For completeness, the diagonal elements of $\Sigma$ are estimated directly as well as the covariance elements between
+the regressors, at which point estimating the above regression equation is just a matter of reparametrisation as compared
+to estimating the corresponding elements of $\Sigma$ directly; the two approaches are completely equivalent.
 
+A benefit of the higher-level abstraction in SEM as compared the canonical linear model, is that multiple regressions
+can be estimated simultaneously. Consider for instance
+\begin{align}
+\begin{split}
+    \label{eq:methods:simultaneous_regression}
+    y_1 &= \alpha_1 + \gamma y_2 + \epsilon_1;\\
+    y_2 &= \alpha_2 + \beta x + \epsilon_2.
+\end{split}
+\end{align}
+Note the subscripts in $y_1$ and $y_2$ denote different variables altogether,
+not necessarily the same variable at different points in time.
+Now, the model-implied $\Sigma_{y_1 x} = \gamma \beta \Sigma_x$.
+However, because in general the second equation in \cref{eq:methods:simultaneous_regression} does not fully explain the
+variance in $y_2$ ($R^2 < 1$), this may not fully explain the covariance between $y_1$ and $x$.
+That is, there may be a residual covariance $\phi_{y_1 x}$, such that $\Sigma_{y_1 x} = \gamma \beta \Sigma_x + \phi_{y_1 x}$.
+Note also that with three total variables, there are three covariance elements in $\Sigma$, but $\{\gamma, \beta\}$
+constitutes only two parameters to estimate, which is too few parameters to exactly estimate the full covariance structure.
+
+A general implication of the higher level of abstraction is that while canonically, the linear model has $N - k$ degrees
+of freedom if there are $k$ parameters to be estimated, in SEM there are $\frac{p(p+1)}{2} - k$ degrees of freedom
+for a model that involves $p$ variables. Note $\frac{p(p+1)}{2}$ is the number of unique elements in the covariance matrix.
+The model in \cref{eq:methods:simple_regression} involves three variables (again, neglecting the mean components),
+so again three covariance elements in $\Sigma$. Two of these are implied as in \cref{eq:methods:covariance_simple_regression},
+and because both $x_1$ and $x_2$ only show up as regressors, the model does not imply any structure to their covariance,
+and it is simply estimated as $\Sigma_{x_1 x_2} = \phi_{x_1 x_2}$. The residual variance of $y$ is also estimated along
+with the two variances of the regressors, which leaves $\frac{p(p + 1)}{2} - k = 6 - 6 = 0$ degrees of freedom. This is
+referred to as a model that is just identified.
+The model in \cref{eq:methods:simultaneous_regression} differs in that it implies all three covariances, but with only two
+parameters. If the model is not supplemented with $\phi_{y_1 x}$, there is $6 - 5 = 1$ degree of freedom, which is to
+say that the model is overidentified.
+While the example is trivial, in a more complex model overidentification may be exploited to quantify
+whether the proposed model adequately describes the data. In other words, fit indices can be derived from these degrees
+of freedom, in some sense analogous to the Sargan-Hansen test for the generalised method of moments.
+
+SEM lends itself well to the present research, because it necessitates very few restrictions on the model.
+This makes it a natural choice for exploring a potentially complex and unknown relationship between variables.
+A panel regression fits into the SEM framework by having one regression for each wave of the panel,
+i.e. $y_{i,1} = \ldots; y_{i, 2} = \ldots$, and so on. The framework then for instance allows adding autoregressive terms,
+having (co)variances vary across waves or adding individual-specific effects. Fundamentally, the only restriction
+imposed by SEM is that the covariance matrix is sufficient to identify the parameters.
+Notably, while Arellano-Bond estimation of panel models relies on first-differencing the model for identification,
+SEM does not and as such it is possible to include time-invariant controls beyond just the catch-all individual-specific effect.
