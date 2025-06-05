@@ -120,8 +120,8 @@ meaningfully included directly as regressors, for example primary occupation, et
 Naturally, such variables are expanded to dummy variables, with one dummy variable for each level of the original variable
 (also known as one-hot encoding).
 
-Additionally, some variables are measured on an ordinal scale, but their effect on mental wellbeing is very unlikely to
-be linear, namely age, income and bmi. Without expert knowledge on the exact relationship between each variable
+Additionally, even for variables that are measured on an ordinal scale, for instance age, income and bmi, the effect on mental wellbeing is very unlikely to
+be linear. Without expert knowledge on the exact relationship between each variable
 and mental health and in order to avoid model complexity, these variables are stratified into categories and then also
 included as dummy variables. While this involves some loss of information, it also simultaneously provides robustness
 against outliers, such as individuals whose reported height and weight imply an infeasible body mass index (BMI) of over 100.

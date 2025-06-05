@@ -2,5 +2,28 @@
 \label{chap:app:liss_questions}
 TODO
 
+\chapter{Long-run Effect in ARDL Model}
+\label{chap:app:long_run_effect}
+Consider the following model with both autoregressive and distributed lags.
+\begin{equation}
+    \label{eq:app:ardl_model}
+    y_{it} = \sum_{l=1}^{L_y} \rho_l y_{i,t-l} + \sum_{l=0}^{L_x} \beta_l x_{i,t-l} + \epsilon_{it}
+\end{equation}
+Without loss of generality, controls are left out for simplicity.
+The coefficients $\beta_l$ can be interpreted as causing a shift in the equilibrium value of $y_{it}$.
+In equilibrium we have
+\begin{equation}
+    E(y_{it}) = E(y_{i,t-1}) = y^*,
+\end{equation}
+and $x_{it} = x^*$. Substituting in \cref{eq:app:ardl_model}, we get
+\begin{equation}
+    y^* (1 - \sum_{l=1}^{L_y} \rho_l) = x^* \sum_{l=0}^{L_x} \beta_l
+\end{equation}
+Thus, if a binary variable $x_{it}$ changes from 0 to 1, the equilibrium value of $y_{it}$ changes by
+\begin{equation}
+    \frac{\sum_{l=0}^{L_x} \beta_l}{1 - \sum_{l=1}^{L_y} \rho_l}
+\end{equation}
+
 \chapter{Programming code}
-All code used for the research as well as for the figures in this report is available at \url{https://github.com/Encephala/econometrics-master-thesis} under an MIT license.
+All code used for the research as well as for the figures in this report is available at
+\url{https://github.com/Encephala/econometrics-master-thesis} under an MIT license.

@@ -4,7 +4,7 @@
 \subsection{Potential Outcome Framework}
 
 In order to credibly make the claim that the estimated effect is a causal one, some a priori considerations are in order.
-To this end, the review by \citeA{imbens2024causal} is considered.
+To this end, the review on causal analysis by \citeA{imbens2024causal} is considered.
 
 Firstly, there is the stable unit treatment value assumption (SUTVA), which is the assumption that the outcome for one
 individual is not influenced by treatment exposure (in this case, engagement in exercise) of another.
@@ -36,6 +36,7 @@ Denote $X_i$ as the treatment assignment for individual $i$, $X_i \in \{C, T\}$.
 \textit{potential} outcomes are not influenced by the treatment assignment, or formally, given some set of controls
 $W_i$,
 \begin{equation}
+    \label{eq:methods:ignorability_assumption}
     (Y_i(T), Y_i(C)) \perp\!\!\!\perp X_i \mid W_i.
 \end{equation}
 This assumption is called the ignorability assumption or the assumption of no unobserved confounders.
@@ -49,7 +50,7 @@ However, under the ignorability assumption, this difference can be estimated by 
 which is a quantity that can be observed directly.
 
 Considering the research question at hand is whether physical exercise is an effective intervention, the aim is not to
-quantify the exact effect, rather to find whether a significant effect exists. To that end, the ignorability assumption
+quantify the exact effect, but rather to find whether a significant effect exists. To that end, the ignorability assumption
 can be relaxed slightly to assuming that in so far as there are unmeasured confounders, they do not change the statistical
 significance (nor the sign) of the estimated effect.
 
@@ -223,9 +224,9 @@ constitutes only two parameters to estimate, which is too few parameters to exac
 A general implication of the higher level of abstraction is that while canonically, the linear model has $N - k$ degrees
 of freedom if there are $k$ parameters to be estimated, in SEM there are $\frac{p(p+1)}{2} - k$ degrees of freedom
 for a model that involves $p$ variables. Note $\frac{p(p+1)}{2}$ is the number of unique elements in the covariance matrix.
-The model in \cref{eq:methods:simple_regression} involves three variables (again, neglecting the mean component),
+For example, the model in \cref{eq:methods:simple_regression} involves three variables (again, neglecting the mean component),
 so again three covariance elements in $\Sigma$. Two of these are implied as in \cref{eq:methods:covariance_simple_regression},
-and because both $x_1$ and $x_2$ only show up as regressors, the model does not imply any structure to their covariance,
+but because both $x_1$ and $x_2$ only show up as regressors, the model does not imply any structure to their covariance,
 and it is simply estimated as $\Sigma_{x_1 x_2} = \phi_{x_1 x_2}$. The residual variance of $y$ is also estimated along
 with the two variances of the regressors, which leaves $\frac{p(p + 1)}{2} - k = 6 - 6 = 0$ degrees of freedom. This is
 referred to as a model that is just identified.
@@ -239,25 +240,79 @@ of freedom, in some sense analogous to the Sargan-Hansen test for the generalise
 SEM lends itself well to the present research, because it necessitates very few restrictions on the model.
 This makes it a natural choice for exploring a potentially complex and unknown relationship between variables.
 A panel regression fits into the SEM framework by having one regression for each wave of the panel,
-i.e. $y_{i,1} = \ldots; y_{i, 2} = \ldots$, and so on. The framework then allows for instance adding autoregressive terms,
-having (co)variances vary across waves or adding individual-specific effects. Fundamentally, the only restriction
-imposed by SEM is that the covariance matrix is sufficient to identify the parameters.
-Notably, while Arellano-Bond estimation of panel models relies on first-differencing the model for identification,
+i.e. $y_{i,1} = \ldots; y_{i, 2} = \ldots$, and so on. The framework then allows for instance adding autoregressive terms
+(dynamic panels), having (co)variances vary across waves or even two-way fixed effects
+(i.e. time dummies and individual-specific effects).
+Fundamentally, the only restriction imposed by SEM is that the covariance matrix is sufficient to identify the parameters.
+Notably, while Arellano-Bond (AB) estimation of dynamic panel models relies on first-differencing the model for identification,
 SEM does not and as such it is possible to include time-invariant controls beyond just the catch-all individual-specific effect.
+Additionally, AB estimation necessitates on a choice of instruments which compromise model validity if inappropriate
+\cite{bazzi2013blunt}, and SEM was empirically found to be more efficient than AB \cite{leszczensky2022deal}.
+Altogether, SEM is the preferred choice for the present study.
+
+\subsection{Panel Model Formulation}
+\label{sec:methods:model_formulation}
+The following model formulation is adapted from \citeA{allison2017maximum}.
+In a simplified form, the central regression equation is
+\begin{equation}
+    \label{eq:methods:model_formulation}
+    y_{it} = \alpha_t + \rho y_{i,t-1} + \beta x_{it} + \omega' w_{it} + \delta' z_i + \epsilon_{it}.
+\end{equation}
+$y_{it}$ is the MHI5-score of individual $i$ at time $t$ while $\alpha_t$ represents a time dummy,
+$x_{it}$ exercise status, $w_{it}$ is a vector of time-varying controls and $z_i$ a vector of time-invariant controls.
+This equation is simplified in the sense that it only contains a single autoregressive (AR) term and a single lag of $x$,
+i.e. no distributed lags (DL). This is not a necessary restriction, but is done here for simplicity.
+The selection of lags for the final model is discussed in \cref{sec:modelling:lags}.
+Note also that no individual-specific effects are included. This is because while they help justify the ignorability
+assumption through eliminating unmeasured confounders, they also potentially obscure the effects of time-invariant mediators,
+which equally invalidate the findings. The approach is thus to model individual-specific variability through the
+time-invariant controls $z_i$. Additionally, inclusion of fixed effects entails estimating $N$ additional parameters
+(the incidental parameter problem). Since it is likely that $N > \frac{p(p + 1)}{2}$, the model would not be identified.
+That being said, nothing prevents modelling random effects. In fact, this is commonly done in
+SEM, see for instance \citeA{heck2001multilevel}. However, the author leaves it as an avenue for further research.
+
+The identifying assumption is \cite{moral2019dynamic}
+\begin{equation}
+    \label{eq:methods:identifying_assumption}
+    E(\epsilon_{it} | y_i^{t-1}, x_i^t, \alpha_t, w_{i}^t, z_i) = 0 \,\forall\,\{i,t\},
+\end{equation}
+where a superscript $t$ denotes all observations of the corresponding variable up to time $t$.
+Verbally, the assumption entails that all included regressors are exogenous.
+Note the exogeneity of $x$ is also implied by the ignorability assumption (\cref{eq:methods:ignorability_assumption}).
+Furthermore, while all regressors are included in the identifying assumption, if a control is endogenous it simply
+leads to inconsistent estimation of the corresponding parameter, that has a weaker influence on the estimation
+of the parameter of interest ($\beta$) than endogeneity of $x$ itself, and is thus of lesser concern in practice.
+
+The effect $\beta$ in \cref{eq:methods:model_formulation} cannot be interpreted directly as the effect that $x$ (exercise)
+has at time $t$ on $y$ (MHI5-score), due to the autoregressive behaviour. However, it can be interpreted as a change
+in the equilibrium value of $y_{it}$. Namely, if for an individual $x_{it}$ changes from 0 to 1, i.e. they did not
+engage in exercise but have started doing so, they equilibrium value of $y_{it}$ changes by
+\begin{equation}
+    \frac{\sum_{l=0}^{L_x} \beta_l}{1 - \sum_{l=1}^{L_y} \rho_l}.
+\end{equation}
+Refer to \cref{chap:app:long_run_effect} for a derivation.
+
+To briefly note, \cref{eq:methods:model_formulation} assumes a linear influence of all regressors onto $y$. However, all regressors
+are included as dummies, i.e. on a binary scale. For such a scale, linearity holds exactly.
+The only exception is the autoregressive terms, but since even a small number of autoregressive terms can already
+model highly nonlinear temporal behaviour, it is likely a reasonable approxmation.
+% TODO any non-binary regressors
 
 \subsection{Fit Indices}
 \label{sec:methods:fit_indices}
 There is an extensive set of fit indices for SEM models available in the literature. These derive from the degrees of freedom
 in various ways. No single fit index is definitive for model fit, so it is prudent to consider multiple together
 for a more complete view. A canonical set of fit indices is described hereafter. However, two general remarks are in order.
-Firstly, if a model is just identified, each of these fit indices will by definition indicate a perfect fit, which is to
+Firstly, if a model is just identified, each of these fit indices will always indicate a perfect fit, which is to
 say there is then no value in interpreting the indices.
 Secondly, these tests do not necessarily provide a way to compare competing models. Considering they all measure the
 extent to which the model-implied covariance matrix differs from the sample covariance matrix, if two competing models
 involve a different set of variables, the indices cannot be directly compared. That is, if model A fits the sample
 covariance matrix $S_A$ better than model B fits $S_B$, it does not necessarily follow that model A is better than model B.
 Rather, fit indices quantify fit in an absolute sense, where a poor fit reflects poor internal validity.
-\Cref{sec:methods:cv} will discuss the approach used in this work for model selection.
+For example, a model which has no controls would likely yield better fit indices because it is a much simpler model,
+but that does not make it the preferred model over a model which includes a set of relevant control variables.
+\Cref{sec:methods:cv} will discuss the alternative approach used in this work for model selection.
 
 \subsubsection{$\chi^2$ test}
 The $\chi^2$ test is the most general (and the original) fit index used \cite{smith2001primer}. It is a badness-of-fit
