@@ -166,17 +166,17 @@ Assuming independent observations and dropping the constant, the sample log like
 which for the purposes of optimisation can be rewritten to an equivalent fit function $F$, defined in terms of
 the sample mean $\bar{x}$ and covariance matrix $S$ \cite{preacher2016ml} as
 \begin{equation}
-    \label{eq:methods:fit_function}
+    \label{eq:methods:objective_function}
     F(\mu, \Sigma) = \log|\Sigma| + \text{tr}(S \Sigma^{-1}) - \log|S| - p + (\bar{z} - \mu)' \Sigma^{-1} (\bar{x} - \mu),
 \end{equation}
 with tr($\cdot$) denoting the trace of a matrix and the minimum of $F$ coincides with the maximum likelihood estimate.
 Note this fit function does not directly involve any observation $z_i$. Rather it is defined purely in terms of the
-sample moments $\bar{z}$ and $S$, which is to say that while \cref{eq:methods:sample_likelihood} and \cref{eq:methods:fit_function}
-are theoretically equivalent, the latter operates on a higher level of abstraction.
+sample moments $\bar{z}$ and $S$, which is to say that while \cref{eq:methods:sample_likelihood} and
+\cref{eq:methods:objective_function} are theoretically equivalent, the latter operates on a higher level of abstraction.
 
 At this stage, the elements of $\mu$ and $\Sigma$ may be estimated directly through numerical optimisation.
 Firstly, note that $\mu$ can always be estimated as $\hat{\mu} = \bar{z}$, such that the last term in
-\cref{eq:methods:fit_function} vanishes. It can thus be estimated separately from $\Sigma$,
+\cref{eq:methods:objective_function} vanishes. It can thus be estimated separately from $\Sigma$,
 and because the research question pertains specifically to the variability of variables,
 the mean term is ignored in further discussion.
 To see how this general multivariate likelihood approach relates to the linear model, consider the very simple example
@@ -223,7 +223,7 @@ constitutes only two parameters to estimate, which is too few parameters to exac
 A general implication of the higher level of abstraction is that while canonically, the linear model has $N - k$ degrees
 of freedom if there are $k$ parameters to be estimated, in SEM there are $\frac{p(p+1)}{2} - k$ degrees of freedom
 for a model that involves $p$ variables. Note $\frac{p(p+1)}{2}$ is the number of unique elements in the covariance matrix.
-The model in \cref{eq:methods:simple_regression} involves three variables (again, neglecting the mean components),
+The model in \cref{eq:methods:simple_regression} involves three variables (again, neglecting the mean component),
 so again three covariance elements in $\Sigma$. Two of these are implied as in \cref{eq:methods:covariance_simple_regression},
 and because both $x_1$ and $x_2$ only show up as regressors, the model does not imply any structure to their covariance,
 and it is simply estimated as $\Sigma_{x_1 x_2} = \phi_{x_1 x_2}$. The residual variance of $y$ is also estimated along
@@ -232,15 +232,97 @@ referred to as a model that is just identified.
 The model in \cref{eq:methods:simultaneous_regression} differs in that it implies all three covariances, but with only two
 parameters. If the model is not supplemented with $\phi_{y_1 x}$, there is $6 - 5 = 1$ degree of freedom, which is to
 say that the model is overidentified.
-While the example is trivial, in a more complex model overidentification may be exploited to quantify
+While the example is trivial, in a more complex model we may exploit overidentification to quantify
 whether the proposed model adequately describes the data. In other words, fit indices can be derived from these degrees
 of freedom, in some sense analogous to the Sargan-Hansen test for the generalised method of moments.
 
 SEM lends itself well to the present research, because it necessitates very few restrictions on the model.
 This makes it a natural choice for exploring a potentially complex and unknown relationship between variables.
 A panel regression fits into the SEM framework by having one regression for each wave of the panel,
-i.e. $y_{i,1} = \ldots; y_{i, 2} = \ldots$, and so on. The framework then for instance allows adding autoregressive terms,
+i.e. $y_{i,1} = \ldots; y_{i, 2} = \ldots$, and so on. The framework then allows for instance adding autoregressive terms,
 having (co)variances vary across waves or adding individual-specific effects. Fundamentally, the only restriction
 imposed by SEM is that the covariance matrix is sufficient to identify the parameters.
 Notably, while Arellano-Bond estimation of panel models relies on first-differencing the model for identification,
 SEM does not and as such it is possible to include time-invariant controls beyond just the catch-all individual-specific effect.
+
+\subsection{Fit Indices}
+\label{sec:methods:fit_indices}
+There is an extensive set of fit indices for SEM models available in the literature. These derive from the degrees of freedom
+in various ways. No single fit index is definitive for model fit, so it is prudent to consider multiple together
+for a more complete view. A canonical set of fit indices is described hereafter. However, two general remarks are in order.
+Firstly, if a model is just identified, each of these fit indices will by definition indicate a perfect fit, which is to
+say there is then no value in interpreting the indices.
+Secondly, these tests do not necessarily provide a way to compare competing models. Considering they all measure the
+extent to which the model-implied covariance matrix differs from the sample covariance matrix, if two competing models
+involve a different set of variables, the indices cannot be directly compared. That is, if model A fits the sample
+covariance matrix $S_A$ better than model B fits $S_B$, it does not necessarily follow that model A is better than model B.
+Rather, fit indices quantify fit in an absolute sense, where a poor fit reflects poor internal validity.
+\Cref{sec:methods:cv} will discuss the approach used in this work for model selection.
+
+\subsubsection{$\chi^2$ test}
+The $\chi^2$ test is the most general (and the original) fit index used \cite{smith2001primer}. It is a badness-of-fit
+test, in the sense that the null hypothesis is that the model explains the data perfectly. To be precise,
+the test statistic is the discrepancy between the model-implied covariance matrix, and a significant test result
+thus implies the null is rejected, implying a significant discrepancy.
+In practice with ML estimation, the test statistic is calculated as
+\begin{equation}
+    \label{eq:methods:chi2_test_stat}
+    \chi^2 = (N - 1) F(\hat{\Sigma}),
+\end{equation}
+where $F(\cdot)$ is the objective function as in \cref{eq:methods:objective_function}.
+Under the null, the statistic is distributed as $\chi^2_{df}$ if the model has $df = \frac{p(p + 1)}{2} - k$ degrees of freedom
+\cite{zheng2025enhancing}.
+
+However, a shortcoming of the $\chi^2$ test is that it is sensitive to sample size, in the sense that as
+the number of observations $N$ increases, the null is less likely to be maintained. This is not a
+desirable property of a fit index, which has given rise to other fit indices \cite{smith2001primer}.
+As an alternative, \citeA{joreskog1993lisrel} propose using the ratio $\chi^2 / df$ as an indicator of goodness-of-fit,
+where a ratio below 2 represents ``good'' fit and below 3 ``acceptable''. However, this does not fundamentally eliminate
+the sensitivity to sample size; rather, it just proposes more lenient critical values.
+
+\subsubsection{Comparative Fit Index (CFI)}
+The CFI derives from the $\chi^2$ test. It compares the $\chi^2$ test statistic of the model to that of a baseline model.
+While what constitutes the baseline model is subjective (f.i. \citeA{van2021understanding}), typically the baseline model is a
+model in which the variances of all variables are estimated, whereas the covariances are not (i.e. fixed to 0).
+The statistic is then
+\begin{equation}
+    \text{CFI} = 1 - \frac{\max(\chi^2 - df, 0)}{max(\chi^2 - df, \chi^2_b - df_b, 0)}.
+\end{equation}
+Here, $\chi^2$ and $df$ denote the test statistic and degrees of freedom of the model and the subscript of $b$ denotes
+those for the baseline model \cite{schermelleh2003evaluating}.
+While no analytical distribution is available for this statistic, its value is in the range $[0, 1]$, with a
+higher value indicating better fit. It reaches a value of 1 if the ratio of $\chi^2$ to $df$ is less than 1,
+and a value of 0 if the baseline model fits the data better than the proposed model.
+Typically a cutoff value of $0.95$ is taken to indicate good model fit \cite{hu1999cutoff}.
+
+\subsubsection{Tucket-Lews Index (TLI)}
+Similar to the CFI, \citeA{schermelleh2003evaluating} define the TLI as
+\begin{equation}
+    \text{TLI} = \frac{\chi^2 / df - \chi^2_b / df_b}{\chi^2 / df - 1}.
+\end{equation}
+While not strictly confined to the range of $[0, 1]$, the TLI is typically in that range. Again, higher is better,
+and the cutoff for good fit is taken from \citeA{hu1999cutoff} as 0.95.
+
+\subsubsection{Root Mean Square Error of Approximation (RMSEA)}
+Rather than deriving from the $\chi^2$ test, the RMSEA directly measures the discrepancy between the model-implied- and
+sample covariance matrices, roughly defined as the root mean square difference between the two \cite{schermelleh2003evaluating}:
+\begin{equation}
+    \text{RMSEA}^2 = \max(\frac{F(\hat{\Sigma})}{df} - \frac{1}{N - 1}, 0).
+\end{equation}
+$F(\hat{\Sigma})$ again denotes the objective function (\cref{eq:methods:objective_function}) at the optimal parameters.
+The RMSEA has a lower bound of 0 and no upper bound, and lower is better. We use a cutoff of 0.06 to indicate good fit
+\cite{hu1999cutoff}.
+
+\subsubsection{Standardised Root Mean Square Residual (SRMR)}
+Lastly, the SRMR is defined most explicitly in terms of $S - \hat{\Sigma}$ without considering degrees of freedom,
+namely as \cite{schermelleh2003evaluating}
+\begin{equation}
+    \text{SRMR}^2 = \frac{\sum_{i=1}^p\sum_{j=1}^i (\frac{S_{ij} - \hat{\Sigma}_{ij}}{S_i S_j})^2}{p(p+1)/2}.
+\end{equation}
+The term being summed is the (square) discrepancy between $S$ and $\hat{\Sigma}$, standardised with respect to the sample standard
+deviations $S_i$ and $S_j$ to eliminate dependence on the scale of variables.
+Again, it has no upper bound but is bounded below by 0, and lower values indicate better fit.
+The cutoff used is 0.08 \cite{hu1999cutoff}.
+
+\subsection{Cross Validation}
+\label{sec:methods:cv}
