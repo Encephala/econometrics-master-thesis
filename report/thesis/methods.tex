@@ -451,3 +451,20 @@ as well as to regressands, making it highly valuable for the present study.
 It is not, however, a solution to a variable completely missing from the data, due to for instance the missing Health
 study in 2014, as in that case there is no information in the sample altogether. In practical terms, the sample covariance
 is not known and thus cannot be fit to.
+
+\subsection{Normality and Robust Maximum Likelihood}
+\label{sec:methods:normality_mlr}
+The derivation of the objective function in \cref{eq:methods:objective_function} relies heavily on the assumption
+of normality. However, while this assumption might hold approximately for the MHI5-score, it clearly does not hold
+for all the binary regressors. This is of no concern for exogenous variables, as their covariances are simply fixed
+to the sample covariance, but it does implicate the parameter of interest, namely the effect of exercise on MHI5.
+Even so, \citeA{knief2021violating} find that the normal estimator still behaves well in terms of bias and
+efficiency. They even argue that it may be preferable to violate the assumption of normality over using specific
+techniques to adjust for non-normality, as those are error prone.
+Nevertheless, it would seem worthwhile to use robust approach to maximum likelihood estimation that are readily
+available in software packages. While multiple choices exist, ML with Huber-White standard errors is used (often
+referred to as ``MLR''), as it was found to perform well in the face of nonnormality \cite{zhong2011bias}, while
+still allowing for the use of FIML, which some robust alternatives prohibit.
+In practice it was found that bootstrap standard errors align well with the standard errors implied by MLR estimation,
+whereas SEs with regular maximum likelihood were appreciably smaller, which corroborates the decision to prefer
+robust estimation.
