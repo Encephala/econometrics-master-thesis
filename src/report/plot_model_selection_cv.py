@@ -64,9 +64,18 @@ plot(estimates_complex, stds_complex)
 
 # %% Comparing X lags (distributed lags)
 # Minimum lag 0
-# (IIRC) DL 1-11 with AR 4, R = 10 repeats, no FIML or MLR
+# DL 1-11 with AR 3, R = 50 repeats, FIML (not fiml.x) and MLR
 
-estimates_x = [9.25, 9.29, 9.29, 9.32, 9.26, 9.24, 9.09, 9.06, 9.03, 8.84, 8.85]
-stds_x = [0.42, 0.46, 0.45, 0.45, 0.35, 0.44, 0.59, 0.49, 0.40, 0.57, 0.43]
+estimates_x = [9.50, 9.50, 9.50, 9.50, 9.49, 9.50, 9.49, 9.49, 9.49, 9.50, 9.50]
+stds_x = [0.37, 0.40, 0.40, 0.41, 0.39, 0.36, 0.41, 0.38, 0.38, 0.37, 0.38]
+sigma_estimates_x = [0.002, 0.003, 0.002, 0.002, 0.002, 0.002, 0.002, 0.002, 0.002, 0.002, 0.002]
+sigma_stds_x = [0.017, 0.020, 0.022, 0.021, 0.022, 0.019, 0.015, 0.021, 0.023, 0.020, 0.022]
 
-plot(estimates, stds, title="Forecasting error for varying distributed lag", xlabel="Number of X lags")
+plot(
+    estimates_x,
+    stds_x,
+    sigma_estimates_x,
+    sigma_stds_x,
+    title="Forecasting error for varying distributed lag",
+    xlabel="Number of X lags",
+)

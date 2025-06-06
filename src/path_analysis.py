@@ -87,7 +87,7 @@ print(model_definition)
 save_for_R(model_definition, all_data, Path("/tmp/panel_data.feather"))  # noqa: S108
 
 
-# %% Models for cross-validation
+# %% Models for cross-validation y
 for max_lag in range(1, 8 + 1):
     model_definition = (
         PanelModelDefinitionBuilder()
@@ -98,6 +98,59 @@ for max_lag in range(1, 8 + 1):
         .with_x(
             VariableDefinition(SPORTS),
             lag_structure=[0, 1],
+            fixed=False,
+        )
+        .with_controls(
+            [VariableDefinition(variable, dummy_levels=available_dummy_levels(all_data, variable)) for variable in []]
+            + [VariableDefinition(variable) for variable in []]
+            + [
+                VariableDefinition(
+                    variable, is_time_invariant=True, dummy_levels=available_dummy_levels(all_data, variable)
+                )
+                for variable in [
+                    AGE,
+                    INCOME,
+                    ETHNICITY,
+                    GENDER,
+                    MARITAL_STATUS,
+                    EDUCATION_LEVEL,
+                    EMPLOYMENT,
+                ]
+            ]
+            + [VariableDefinition(variable, is_time_invariant=True) for variable in []]
+        )
+        .with_additional_covariances(
+            fix_variance_across_time=False,
+            free_covariance_across_time=True,
+            within_dummy_covariance=True,
+            x_predetermined=True,
+        )
+        .with_excluded_regressors(
+            [
+                Column(f"{GENDER}_first", dummy_level="other"),  # Makes stuff unstable, it's only 10 True
+                Column(f"{INCOME}_first", dummy_level="15k.50k"),  # Also unstable, only 9 True
+            ]
+        )
+        .with_time_dummy()
+        .with_excluded_regressand_waves(list(range(8, 23)))
+        .build(all_data)
+    )
+
+    print("-" * 30)
+    print(model_definition)
+    print("-" * 30)
+
+# %% Models for cross-validation x
+for max_lag in range(1, 11 + 1):
+    model_definition = (
+        PanelModelDefinitionBuilder()
+        .with_y(
+            VariableDefinition(MHI5),
+            lag_structure=[1, 2, 3],
+        )
+        .with_x(
+            VariableDefinition(SPORTS),
+            lag_structure=list(range(max_lag + 1)),
             fixed=False,
         )
         .with_controls(
