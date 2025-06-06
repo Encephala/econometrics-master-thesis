@@ -262,7 +262,11 @@ $y_{it}$ is the MHI5-score of individual $i$ at time $t$ while $\alpha_t$ repres
 $x_{it}$ exercise status, $w_{it}$ is a vector of time-varying controls and $z_i$ a vector of time-invariant controls.
 This equation is simplified in the sense that it only contains a single autoregressive (AR) term and a single lag of $x$,
 i.e. no distributed lags (DL). This is not a necessary restriction, but is done here for simplicity.
-The selection of lags for the final model is discussed in \cref{sec:modelling:lags}.
+The selection of lags for the final model is discussed in \cref{sec:modelling:lags}. The model has to be complemented
+with the initial conditions for $y$. If only one autoregressive lag is included, only $y_{i,1}$ is required,
+but for a higher lag order more initial conditions are required. If distributed lags are included, then likewise for $x$.
+A practical implication of this is that the higher the autoregressive (distributed) lag order, the fewer waves
+are available for analysis.
 Note also that no individual-specific effects are included. This is because while they help justify the ignorability
 assumption through eliminating unmeasured confounders, they also potentially obscure the effects of time-invariant mediators,
 which equally invalidate the findings. The approach is thus to model individual-specific variability through the
@@ -309,8 +313,8 @@ Secondly, these tests do not necessarily provide a way to compare competing mode
 extent to which the model-implied covariance matrix differs from the sample covariance matrix, if two competing models
 involve a different set of variables, the indices cannot be directly compared. That is, if model A fits the sample
 covariance matrix $S_A$ better than model B fits $S_B$, it does not necessarily follow that model A is better than model B.
-Rather, fit indices quantify fit in an absolute sense, where a poor fit reflects poor internal validity.
-For example, a model which has no controls would likely yield better fit indices because it is a much simpler model,
+For example, a model which has no controls would likely yield better fit indices because it is a much simpler model
+in the sense that there are fewer parameters to be estimated,
 but that does not make it the preferred model over a model which includes a set of relevant control variables.
 \Cref{sec:methods:cv} will discuss the alternative approach used in this work for model selection.
 
@@ -353,10 +357,11 @@ Typically a cutoff value of $0.95$ is taken to indicate good model fit \cite{hu1
 \subsubsection{Tucket-Lews Index (TLI)}
 Similar to the CFI, \citeA{schermelleh2003evaluating} define the TLI as
 \begin{equation}
-    \text{TLI} = \frac{\chi^2 / df - \chi^2_b / df_b}{\chi^2 / df - 1}.
+    \text{TLI} = \frac{\chi_b^2 / df_b - \chi^2 / df}{\chi_b^2 / df_b - 1}.
 \end{equation}
-While not strictly confined to the range of $[0, 1]$, the TLI is typically in that range. Again, higher is better,
-and the cutoff for good fit is taken from \citeA{hu1999cutoff} as 0.95.
+While not strictly confined to the range of $[0, 1]$, the TLI is typically in that range, only exceeding it
+if the baseline model outperforms the proposed model, or if model fit is so good as to make $\chi^2 < df$.
+Again, higher is better, and the cutoff for good fit is taken from \citeA{hu1999cutoff} as 0.95.
 
 \subsubsection{Root Mean Square Error of Approximation (RMSEA)}
 Rather than deriving from the $\chi^2$ test, the RMSEA directly measures the discrepancy between the model-implied- and
@@ -381,3 +386,30 @@ The cutoff used is 0.08 \cite{hu1999cutoff}.
 
 \subsection{Cross Validation}
 \label{sec:methods:cv}
+For the sake of model selection, a model-agnostic measure of model fit is required. To this end, we may borrow from the
+machine learning literature and use out-of-sample forecasting accuracy through cross validation.
+This approach can be used to compare any two models, including non-nested ones, and is a fit measure more akin to those
+used in canonical linear modelling.
+However, as mentioned before, when comparing different autoregressve lag orders, the lower lag order will have
+more waves available. It is likely that a model fit to a larger number of waves has a worse fit due to slight
+unmodelled heterogeneity across the waves, making the comparison between models unfair. Because of this, only the last
+available wave (2023) is used for cross validation, both for fitting the models as well as for determining the forecasting
+accuracy. It does not necessarily hold that the model that best fits the final wave is the one that best fits
+the data as whole, but it is nevertheless taken as a necessary and reasonable approximation.
+
+In model selection, accuracy must be balanced with parsimony. To this end, the decision rule used is the 1-$\sigma$ rule,
+where the model chosen is the simplest model whose out-of-sample forecasting accuracy is within one standard deviation
+of the best-performing model. Specifically, across the $v$ folds, the root mean square prediction error (RMSPE)
+$\mu_{\text{RMSPE}}$ is calculated, along with the standard deviation of this prediction error across the folds,
+$\sigma_{\text{RMSPE}}$. The simplest model whose $\mu_{\text{RMSPE}}$ is below the optimal model's
+$\mu_{\text{RMSPE},opt} + \sigma_{\text{RMSPE},opt}$ is selected.
+In this, the number of folds $v$ plays a critical role, as when more folds are used, the training sets are larger
+and the testing sets are smaller, which generally leads to lower $\mu_{\text{RMSPE}}$. Typical values are $v = 5$ or
+$v = 10$. The dataset at hand is large, but considering the high percentage of missing data, a smaller number for
+$v$ is preferred to avoid unrepresentative test sets, so $v = 5$ is used.
+To improve the accuracy of the estimated $\mu_{\text{RMSPE}}$ and $\sigma_{\text{RMSPE}}$, this cross validation
+is repeated $R$ times with different random folds in each repetition. Here, the larger $R$ the better, but $R = 50$
+is chosen to balance accuracy and computational tractability.
+There is the possibility that the model used is not identified or numerically unstable for a given split due to the high
+degree of missingness. When this occurs, the fold is simply ignored for that repetition, i.e. $\mu_{\text{RMSPE}}$ is then
+simply calculated across 4 folds. In practice, this happened only very rarely.
