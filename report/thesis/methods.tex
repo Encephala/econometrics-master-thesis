@@ -2,7 +2,6 @@
 \label{sec:methods:causal}
 
 \subsection{Potential Outcome Framework}
-
 In order to credibly make the claim that the estimated effect is a causal one, some a priori considerations are in order.
 To this end, the review on causal analysis by \citeA{imbens2024causal} is considered.
 
@@ -237,6 +236,8 @@ While the example is trivial, in a more complex model we may exploit overidentif
 whether the proposed model adequately describes the data. In other words, fit indices can be derived from these degrees
 of freedom, in some sense analogous to the Sargan-Hansen test for the generalised method of moments.
 
+A model specification in SEM is simply the set of regression pathways and residual variances to be estimated as free
+parameters.
 SEM lends itself well to the present research, because it necessitates very few restrictions on the model.
 This makes it a natural choice for exploring a potentially complex and unknown relationship between variables.
 A panel regression fits into the SEM framework by having one regression for each wave of the panel,
@@ -413,3 +414,23 @@ is chosen to balance accuracy and computational tractability.
 There is the possibility that the model used is not identified or numerically unstable for a given split due to the high
 degree of missingness. When this occurs, the fold is simply ignored for that repetition, i.e. $\mu_{\text{RMSPE}}$ is then
 simply calculated across 4 folds. In practice, this happened only very rarely.
+
+\subsection{Endogenous and Exogenous Variables}
+\label{sec:methods:endo_exo}
+In SEM, the terms endogeneity and exogeneity have a different meaning than in the econometric literature.
+Namely, an endogenous variable is one whose covariance structure is model-implied, whereas an exogenous variable is one
+whose covariance structure is fixed to the sample covariance, eliminating all associated degrees of freedom.
+For instance, in \cref{eq:methods:simple_regression}, $y$ is endogenous but $x_1, x_2$ exogenous, whereas in
+\cref{eq:methods:simultaneous_regression}, $y_1, y_2$ are endogenous but $x$ exogenous.
+Typically, in software packages a variable is treated as endogenous if it is not a regressand and no residual (co)variances
+are set as parameters to be estimated.
+
+A choice in SEM is whether to treat regressors as endogenous are exogenous. Treating them as endogenous makes it possible
+to examine the covariance structure between the regressors, for instance to test whether $\text{Cov}(x_1, x_2) = 0$.
+However, for the present work, the choice to treat regressors as exogenous in general comes naturally,
+as the covariance structure between regressors is not relevant to the research question; it improves model parsimony;
+and because fit indices are defined in terms of the degrees of freedom,
+a good model fit with respect to the regressors may obscure a poor model fit with respect to the outcome variable,
+decreasing their value to the present study.
+However, it was found empirically that numerical stability was very poor if sports was treated as an exogenous variable,
+so it was treated as endogenous.
