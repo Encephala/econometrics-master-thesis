@@ -14,6 +14,7 @@ PRINCIPAL_OCCUPATION = "belbezig"  # To derive employment status
 PHYSICAL_HEALTH = "ch4"
 HEIGHT, WEIGHT = "ch16", "ch17"  # For BMI
 DEPRESSION_MEDICATION = "ch178"
+DISEASE_STATUS = "ch98"
 
 # Derivatives
 BMI = "bmi"

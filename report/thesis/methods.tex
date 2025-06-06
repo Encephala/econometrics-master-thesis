@@ -54,6 +54,7 @@ can be relaxed slightly to assuming that in so far as there are unmeasured confo
 significance (nor the sign) of the estimated effect.
 
 \subsection{Reverse Causality}
+\label{sec:methods:reverse_causality}
 Now consider the aim of the present study, namely estimating the effect of exercise on mental health, $Y_i(T) - Y_i(C)$.
 In a cross-sectional dataset, this effect is not identified,
 because if mental health influences the probability to engage in exercise, the ignorability assumption is violated.
@@ -261,7 +262,7 @@ The following model formulation is adapted from \citeA{allison2017maximum}.
 In a simplified form, the central regression equation is
 \begin{equation}
     \label{eq:methods:model_formulation}
-    y_{it} = \alpha_t + \rho y_{i,t-1} + \beta x_{it} + \omega' w_{it} + \delta' z_i + \epsilon_{it}.
+    y_{it} = \alpha_t + \alpha_i + \rho y_{i,t-1} + \beta x_{it} + \omega' w_{it} + \delta' z_i + \epsilon_{it}.
 \end{equation}
 $y_{it}$ is the MHI5-score of individual $i$ at time $t$ while $\alpha_t$ represents a time dummy,
 $x_{it}$ exercise status, $w_{it}$ is a vector of time-varying controls and $z_i$ a vector of time-invariant controls.
@@ -271,16 +272,10 @@ The selection of lags for the final model is discussed in \cref{sec:modelling:la
 with the initial conditions for $y$. If only one autoregressive lag is included, only $y_{i,1}$ is required,
 but for a higher lag order more initial conditions are required. If distributed lags are included, then likewise for $x$.
 A practical implication of this is that the higher the autoregressive (distributed) lag order, the fewer waves
-are available for analysis.
-Note also that no individual-specific effects are included. This is because while they help justify the ignorability
-assumption through eliminating unmeasured confounders, they also potentially obscure the effects of time-invariant mediators,
-which equally invalidate the findings. The approach is thus to model individual-specific variability through the
-time-invariant controls $z_i$. Additionally, inclusion of fixed effects entails estimating $N$ additional parameters
-(the incidental parameter problem). Since it is likely that $N > \frac{p(p + 1)}{2}$, the model would not be identified.
-That being said, nothing prevents modelling random effects. In fact, this is commonly done in
-SEM, see for instance \citeA{heck2001multilevel}. However, the author leaves it as an avenue for further research.
+are available for analysis. This is especially relevant in the present study, because the missingness of the MHI5-score
+in 2014 means twice as many waves are lost as would be the case if the Health study had been conducted that year.
 
-The identifying assumption is \cite{moral2019dynamic}
+The main identifying assumption is \cite{moral2019dynamic}
 \begin{equation}
     \label{eq:methods:identifying_assumption}
     E(\epsilon_{it} | y_i^{t-1}, x_i^t, \alpha_t, w_{i}^t, z_i) = 0 \,\forall\,\{i,t\},

@@ -1,6 +1,67 @@
 \section{Regressors}
 \label{sec:modelling:regressors}
-Something something controls and mediators.
+As discussed extensively already, the selection of controls is crucial to avoid unmeasured confounders. However,
+a second important consideration is the action of mediators. Mediators are variables that explain the effect
+of $x$ on $y$, in the sense that $x$ causes some mediator $m$ which causes $y$. An example of a mediator in the present
+study might be physical health. If physical health is included as a control in the regression, the interpretation of $\beta$
+becomes ``the effect of sports on MHI5-score, \textit{given} the physical health status of an individual.'' However,
+improvement of physical health may well be a strong mechanism through which sports affects mental health, which
+should very much be included in $\beta$ for the purpose of answering the research question. The subtleties of mediation
+are often not discussed in the literature \cite{imbens2024causal}, e.g. \citeA{chekroud2018association} simply include physical health as a control.
+Such mediation might be measured directly while still effectively controlling for confoundedness due to the mediator as
+in the following, simplified example:
+\begin{align}
+\begin{split}
+    \label{eq:modelling:mediation_example}
+    y_{it} &= \alpha_y + \beta x_{it} + \eta m_{it} + \epsilon_y; \\
+    m_{it} &= \alpha_m + \zeta x_{it} + \epsilon_m.
+\end{split}
+\end{align}
+Then, the total effect of $x$ on $y$ is given as $\beta + \zeta \eta$, the sum of the direct and the indirect effects.
+Conveniently, these two regressions may be estimated simultaneously in SEM.
+
+Thus, when determining the controls used, attention must be paid to which variables may be mediators and those should be
+modelled as in \cref{eq:modelling:mediation_example}. There is a significant price to be paid in terms of model parsimony
+though, as a mediator is necessarily an endogenous variable, adding many additional parameters to the model.
+If a mediator is simply excluded from the regression altogether, this model complexity is avoided, while the indirect
+effect (e.g. $\zeta \eta$) is absorbed into the main parameter ($\beta$). However, in doing so, the mediator, in so far
+as it is not fully explained by $x$, also functions as a potential unmeasured confounder.
+Because it is not clear a priori which approach is preferred, the results for both will be given in the present study.
+In this way, it can also be directly examined to which degree the mediators are confounders.
+
+As covariates, we include a basic set of sociodemographic variables available in the Background Variables of the LISS panel,
+namely age, ethnicity, gender, marital status, education level, employment status and net household income.
+Of these, the last four might be hypothesised as mediators based on the literature
+(\citeA{spiker2014mental,hjorth2016mental,frijters2014effect,thomson2022income} respectively).
+However, all of these variables were found to vary so little in time that including them as time-variant covariates caused
+numerical instability, so they could only be included as time-invariants. This precludes modelling them as mediators,
+but the fact that they vary so little indicates that their effect as mediators could only be weak ($\zeta$ must be small),
+so the error in estimating the total effect due to not modelling them as mediators could only be marginal.
+Beyond this set, based on the literature and availability in the data, we include (self-reported) physical health
+and disease status as additional mediators \cite{westcott2012resistance}.
+While the Health study also queries more nuanced variables like hospital admittance and medication use, these are
+highly correlated with health and disease status (e.g. $\rho = 1.0$ for medication use and disease status),
+and are thus excluded for the sake of parsimony.
+
+Because only the long-term effect of sports on mental health is considered (recall \cref{sec:methods:reverse_causality}),
+it would be natural to the cumulative years that someone has exercised as the variable of interest, rather than the
+yearly exercise status. However, because it is not known how many years one has exercised at the time of joining this panel,
+this variable can only be roughly approximated through a running sum. Additionally, information missing in one year would
+complicate using the variable in all future years.
+As such, sports is used directly, while examining different orders of the distributed lags to model effects beyond
+one year ahead.
+
+This study chooses to not include individual-specific effects $\alpha_i$ in the model. This is because while they help justify
+the ignorability assumption through eliminating unmeasured confounders, they also potentially obscure the effects of time-invariant mediators,
+which equally invalidate the findings. The approach is thus instead to model individual-specific variability through the
+time-invariant controls $z_i$. Additionally, inclusion of fixed effects entails estimating $N$ additional parameters
+(the incidental parameter problem). Since it is likely that $N > \frac{p(p + 1)}{2}$, the model would not be identified.
+That being said, nothing prevents modelling random effects. In fact, this is commonly done in
+SEM, see for instance \citeA{heck2001multilevel}. However, the author leaves it as an avenue for further research.
+
+As a minor final comment, some dummy levels of controls were excluded, because they occurred so infrequently in the data
+that including them as regressors led to numerical instability.
+These were a gender of ``other'' and, perhaps surprisingly, a household income between 15\,000 and 50\,000.
 
 \section{Lag Selection}
 \label{sec:modelling:lags}
