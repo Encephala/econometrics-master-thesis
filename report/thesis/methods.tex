@@ -160,7 +160,7 @@ where $p$ denotes the dimension of $z_i$.
 Assuming independent observations and dropping the constant, the sample log likelihood is
 \begin{equation}
     \label{eq:methods:sample_likelihood}
-    l(z) = \prod_{i=1}^N f(z_i; \mu, \Sigma)
+    l(z) = \sum_{i=1}^N \log(f(z_i; \mu, \Sigma))
     = -\frac{N}{2} \log(|\Sigma|) -\frac{1}{2} \sum_{i=1}^N (z_i - \mu)' \Sigma^{-1} (z_i - \mu),
 \end{equation}
 which for the purposes of optimisation can be rewritten to an equivalent fit function $F$, defined in terms of
@@ -434,3 +434,20 @@ a good model fit with respect to the regressors may obscure a poor model fit wit
 decreasing their value to the present study.
 However, it was found empirically that numerical stability was very poor if sports was treated as an exogenous variable,
 so it was treated as endogenous.
+
+\subsection{Full Information Maximum Likelihood}
+\label{sec:methods:fiml}
+SEM, at least when combined with maximum likelihood estimation, provides a natural way to handle (MAR) missing data in the
+form of Full Information Maximum Likelihood (FIML) \cite{arbuckle2013full}.
+The basic premise of FIML is that if a variable is missing for some observation, that observation provides no information
+as to how the missing variable relates to other variables, but it still provides information for the remaining variables.
+Formally, consider estimation of the covariance matrx $\Sigma$ of the vector $x' = (x_1, x_2, x_3)$.
+Because the total sample likelihood (\cref{eq:methods:sample_likelihood}) is the product of the likelihood of each observation,
+we need not necessarily use the same likelihood specification for each observation.
+If for some observations $x_3$ is missing, their contribution to the likelihood is simply calculated with the two-dimensional
+covariance matrix of the sub-vector $(x_1, x_2)'$.
+In this way, FIML uses all information available in the dataset, hence its name. It can be applied to regressors
+as well as to regressands, making it highly valuable for the present study.
+It is not, however, a solution to a variable completely missing from the data, due to for instance the missing Health
+study in 2014, as in that case there is no information in the sample altogether. In practical terms, the sample covariance
+is not known and thus cannot be fit to.
