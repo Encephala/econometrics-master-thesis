@@ -294,8 +294,9 @@ has at time $t$ on $y$ (MHI5-score), due to the autoregressive behaviour. Howeve
 in the equilibrium value of $y_{it}$. Namely, if for an individual $x_{it}$ changes from 0 to 1, i.e. they did not
 engage in exercise but have started doing so, they equilibrium value of $y_{it}$ changes by
 \begin{equation}
-    \frac{\sum_{l=0}^{L_x} \beta_l}{1 - \sum_{l=1}^{L_y} \rho_l}.
+    \frac{\sum_{l=0}^{L_x} \beta_l}{1 - \sum_{l=1}^{L_y} \rho_l}
 \end{equation}
+where $L_x$ denotes the distributed lag order and $L_y$ denotes the autoregressive lag order.
 Refer to \cref{chap:app:long_run_effect} for a derivation.
 
 To briefly note, \cref{eq:methods:model_formulation} assumes a linear influence of all regressors onto $y$. However, all regressors
