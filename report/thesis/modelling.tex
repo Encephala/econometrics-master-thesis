@@ -119,3 +119,25 @@ The simplest model with $L_x = 1$ is clearly chosen.
 
 \section{Fixing Parameters across Time}
 \label{sec:modelling:parameter_fixing}
+In the SEM model formulation, a fixing a parameter across time is effected by imposing an equality constraint on the
+parameters to be estimated.
+It is possible to quantify the validity of these parameter constraints in terms of the $\chi^2$ statistic.
+Namely, when relaxing such a constraint, a single degree of freedom is won. The improvement (decrease) in the $\chi^2$
+statistic can then be compared to a $\chi^2(1)$ distribution for statistical significance, where the null is
+that the parameter constraint is appropriate.
+% TODO fill in the numbers
+When performing this test on the TODO constraints imposed in the model without mediators, the highest found test
+statistic was TODO, which is greater than the critical value of $3.84$. However, multiple testing ought to be considered.
+When simply applying a Bonferroni correction for doing TODO tests, the critical value becomes TODO, thus none of the
+imposed constraints are put into question.
+While an alternative correction would maintain more power and might reject the null, it should also be noted that
+the $\chi^2$ test's sensitivity to sample size means the null is rarely maintained. As such, the conclusion is drawn
+that fixing the (regression) parameters across time is appropriate.
+It is assumed that this finding generalises to the model with mediators.
+
+However, the same cannot be said for the residual variances of $y$. Because of the way that SEM estimates the
+parameters when regressands are also used as regressors (as in \cref{eq:methods:simultaneous_regression}),
+the residual variance of MHI5 in 2023 is smaller than that the earlier waves. The model could be adjusted
+to prevent this by setting the residual variances between MHI5-values that don't occur in the same regression as free
+parameters (eliminating associated degrees of freedom). However, the residual variances are not of interest for the present
+research question, so for simplicity's sake the residual variances of MHI5 are simply not constrained across time.
