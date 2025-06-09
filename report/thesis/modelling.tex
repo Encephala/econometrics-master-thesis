@@ -71,6 +71,10 @@ However, for computational tractability, mediators were not modelled explicitly 
 This should have only a minor impact on forecasting MHI5, but makes a higher number of repeats $R = 50$ feasible.
 It is assumed that the optimal model structure found in this way also applies when mediation regressions are also
 included.
+Additionally, it was found that only applying FIML to the endogenous variables yielded very similar parameter estimates
+and thus similar forecasts. To then further improve computational tractability in cross validation, listwise deletion
+was used for the exogenous variables (i.e. the controls).
+
 Both $L_y$ and $L_x$ were varied from 1 to the highest number available based on the data.
 Due to the missing Health study in 2014, this is $L_y = 8$, and because the sports has only been included since 2012,
 $L_x = 11$.

@@ -420,6 +420,7 @@ simply calculated across 4 folds. In practice, this happened only very rarely.
 
 \subsection{Endogenous and Exogenous Variables}
 \label{sec:methods:endo_exo}
+% TODO: use fixed/nonfixed rather than endo/exo
 In SEM, the terms endogeneity and exogeneity have a different meaning than in the econometric literature.
 Namely, an endogenous variable is one whose covariance structure is model-implied, whereas an exogenous variable is one
 whose covariance structure is fixed to the sample covariance, eliminating all associated degrees of freedom.
@@ -454,6 +455,10 @@ as well as to regressands, making it highly valuable for the present study.
 It is not, however, a solution to a variable completely missing from the data, due to for instance the missing Health
 study in 2014, as in that case there is no information in the sample altogether. In practical terms, the sample covariance
 is not known and thus cannot be fit to.
+
+\textit{Lavaan} provides the option to apply FIML only to the endogenous variables or to all variables.
+If FIML is only applied to the endogenous variables, listwise deletion is applied for those cases where the exogenous
+variables are missing. As doing so would eliminate a large portion of the data, FIML is used for all variables in the dataset.
 
 \subsection{Normality and Robust Maximum Likelihood}
 \label{sec:methods:normality_mlr}
