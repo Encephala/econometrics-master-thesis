@@ -412,8 +412,8 @@ and the testing sets are smaller, which generally leads to lower $\mu_{\text{RMS
 $v = 10$. The dataset at hand is large, but considering the high percentage of missing data, a smaller number for
 $v$ is preferred to avoid unrepresentative test sets, so $v = 5$ is used.
 To improve the accuracy of the estimated $\mu_{\text{RMSPE}}$ and $\sigma_{\text{RMSPE}}$, this cross validation
-is repeated $R$ times with different random folds in each repetition. Here, the larger $R$ the better, but $R = 50$
-is chosen to balance accuracy and computational tractability.
+is repeated $R$ times with different random folds in each repetition and the average estimates is taken.
+Here, the larger $R$ the better, but $R = 50$ is chosen to balance precision and computational tractability.
 There is the possibility that the model used is not identified or numerically unstable for a given split due to the high
 degree of missingness. When this occurs, the fold is simply ignored for that repetition, i.e. $\mu_{\text{RMSPE}}$ is then
 simply calculated across 4 folds. In practice, this happened only very rarely.
