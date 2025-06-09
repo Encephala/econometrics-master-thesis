@@ -343,6 +343,14 @@ def make_ethnicity(background_vars: pd.DataFrame) -> pd.DataFrame:
     return ethnicity.apply(lambda column: column.cat.rename_categories(category_map))
 
 
+# Disease status
+def make_disease_status(health_panel: pd.DataFrame) -> pd.DataFrame:
+    disease = select_variable(health_panel, DISEASE_STATUS)
+
+    # Making it an actual boolean instead of "yes"/"no"
+    return disease.apply(lambda column: column.map({"yes": True, "no": False}, na_action="ignore")).astype("boolean")
+
+
 # Finding the first non-NA value of each variable within each column
 def find_first_non_na(data: pd.DataFrame) -> pd.Series:
     """Makes a series that contains the first (temporally) non-NA value in the data for each individual.
@@ -440,6 +448,7 @@ def make_all_data(*, cache: bool, respect_load_cache: bool = True) -> pd.DataFra
     bmi = make_bmi(health_panel)
     depression = make_depression(health_panel)
     previous_depression = make_previous_depression(health_panel)
+    disease = make_disease_status(health_panel)
 
     # Add "*_first" version of each variable
     # Can't find a nice DRY way to do this, whatever
@@ -456,6 +465,7 @@ def make_all_data(*, cache: bool, respect_load_cache: bool = True) -> pd.DataFra
     physical_health = add_first_non_na(physical_health)
     bmi = add_first_non_na(bmi)
     depression = add_first_non_na(depression)
+    disease = add_first_non_na(disease)
 
     result = pd.DataFrame(index=background_vars.index).join(
         [
@@ -474,6 +484,7 @@ def make_all_data(*, cache: bool, respect_load_cache: bool = True) -> pd.DataFra
             make_dummies(bmi),
             depression,
             previous_depression,
+            disease,
         ]
     )
 
