@@ -101,8 +101,11 @@ for max_lag in range(1, 8 + 1):
             fixed=False,
         )
         .with_controls(
-            [VariableDefinition(variable, dummy_levels=available_dummy_levels(all_data, variable)) for variable in []]
-            + [VariableDefinition(variable) for variable in []]
+            [
+                VariableDefinition(variable, dummy_levels=available_dummy_levels(all_data, variable))
+                for variable in [PHYSICAL_HEALTH]
+            ]
+            + [VariableDefinition(variable) for variable in [DISEASE_STATUS]]
             + [
                 VariableDefinition(
                     variable, is_time_invariant=True, dummy_levels=available_dummy_levels(all_data, variable)
@@ -154,8 +157,11 @@ for max_lag in range(1, 11 + 1):
             fixed=False,
         )
         .with_controls(
-            [VariableDefinition(variable, dummy_levels=available_dummy_levels(all_data, variable)) for variable in []]
-            + [VariableDefinition(variable) for variable in []]
+            [
+                VariableDefinition(variable, dummy_levels=available_dummy_levels(all_data, variable))
+                for variable in [PHYSICAL_HEALTH]
+            ]
+            + [VariableDefinition(variable) for variable in [DISEASE_STATUS]]
             + [
                 VariableDefinition(
                     variable, is_time_invariant=True, dummy_levels=available_dummy_levels(all_data, variable)
