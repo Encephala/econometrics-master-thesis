@@ -9,10 +9,11 @@ def plot(  # noqa: PLR0913
     stds: list[float],
     sigma_estimates: list[float] | None = None,
     sigma_stds: list[float] | None = None,
-    title: str = "Forecasting error for varying maximum AR lag",
-    xlabel: str = "Number of AR lags",
+    title: str = "Forecasting error for varying AR lag order",
+    xlabel: str = "Maximum $y$ lag",
+    save_path: str | None = None,
 ):
-    plt.figure()
+    plt.figure(figsize=(4, 3))
     plt.title(title)
     plt.ylabel("RMSPE (MHI5)")
     plt.xlabel(xlabel)
@@ -40,6 +41,9 @@ def plot(  # noqa: PLR0913
         capsize=2,
     )
 
+    if save_path is not None:
+        plt.savefig(save_path)
+
     plt.show()
 
 
@@ -50,7 +54,7 @@ stds = [0.36, 0.39, 0.40, 0.46, 0.44, 0.50, 0.48, 0.53]
 sigma_estimates = [0.002, 0.002, 0.002, 0.002, 0.003, 0.030, 0.004, 0.025]
 sigma_stds = [0.016, 0.018, 0.022, 0.025, 0.027, 0.057, 0.021, 0.064]
 
-plot(estimates, stds, sigma_estimates, sigma_stds)
+plot(estimates, stds, sigma_estimates, sigma_stds, save_path="../report/thesis/figures/modelling/cv_AR.svg")
 
 # %% Comparing 3 to 4 max lags on a more complex model
 # Which uh, is kinda meaningless. 1-sigma rule has very different meaning here.
@@ -76,6 +80,7 @@ plot(
     stds_x,
     sigma_estimates_x,
     sigma_stds_x,
-    title="Forecasting error for varying distributed lag",
-    xlabel="Number of X lags",
+    title="Forecasting error for varying DL lag order",
+    xlabel="Maximum $x$ lag",
+    save_path="../report/thesis/figures/modelling/cv_DL.svg",
 )

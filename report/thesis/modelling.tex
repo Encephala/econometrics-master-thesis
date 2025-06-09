@@ -18,7 +18,7 @@ in the following, simplified example:
 \end{split}
 \end{align}
 Then, the total effect of $x$ on $y$ is given as $\beta + \zeta \eta$, the sum of the direct and the indirect effects.
-Conveniently, these two regressions may be estimated simultaneously in SEM.
+Conveniently, these two regressions min order ay be estimated simultaneously in SEM.
 
 Thus, when determining the controls used, attention must be paid to which variables may be mediators and those should be
 modelled as in \cref{eq:modelling:mediation_example}. There is a significant price to be paid in terms of model parsimony
@@ -65,6 +65,53 @@ These were a gender of ``other'' and, perhaps surprisingly, a household income b
 
 \section{Lag Selection}
 \label{sec:modelling:lags}
+For determining the autoregressive lag order $L_y$ and the distributed lag order $L_x$, cross validation was run as
+described in \cref{sec:methods:cv}.
+However, for computational tractability, mediators were not modelled explicitly as such but simply included as controls.
+This should have only a minor impact on forecasting MHI5, but makes a higher number of repeats $R = 50$ feasible.
+It is assumed that the optimal model structure found in this way also applies when mediation regressions are also
+included.
+Both $L_y$ and $L_x$ were varied from 1 to the highest number available based on the data.
+Due to the missing Health study in 2014, this is $L_y = 8$, and because the sports has only been included since 2012,
+$L_x = 11$.
+The optimal $L_y$ is first estimated, as it has a more profound role in the model than the distributed lag.
+When doing so, $L_x = 1$ is used as the most minimal model. When optimising $L_x$, the optimal set of AR lags is used.
+It could technically be possible that a better model fit is found when not including all lags between the lowest
+and the highest lag, for instance having the set of lags $\{1, 2, 4\}$. This was however not tested as it seems improbable
+given the mechanisms at play, and thus would likely be overfitting.
+\Cref{fig:modelling:cv_lags} visualises the found RMSPEs. Because uncertainty in the estimates has a significant impact
+on the 1-$\sigma$ decision rule, the measurement inaccuracies are calculated by quadratically adding the two standard
+devations of the estimates across the $R$ repetitions.
+
+\begin{figure}[htbp]
+    \centering
+    \caption{Cross validated out-of-sample forecasting accuracy for varying lag orders, measured by root mean square error.
+    Errorbars are standard deviations of accuracy across folds. The horizontal line represents the 1-$\sigma$ decision rule.
+    The smaller errorbars represent uncertainty in $\mu_{\text{RMSPE}} + \sigma_{\text{RMSPE}}$}
+    \label{fig:modelling:cv_lags}
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        \includesvg[width=\textwidth]{figures/modelling/cv_AR.svg}
+        \vspace{0.1em}
+        \subcaption{$\mu_{\text{RMSPE}}$ for varying maximum autoregressive lag $L_y$}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.49\textwidth}
+        \centering
+        \includesvg[width=\textwidth]{figures/modelling/cv_DL.svg}
+        \vspace{0.1em}
+        \subcaption{$\mu_{\text{RMSPE}}$ for varying maximum distributed lag $L_x$}
+    \end{subfigure}
+\end{figure}
+
+% TODO: check if this still is accurate when definitive numbers (including mediators in CV) are here
+For the autoregressive lags, the most complex model with AR lag order $L_y = 8$ performs best. The decision rule
+then indicates $L_y = 3$ is best, though the estimation uncertainty also allows for choosing $L_y = 4$.
+Recalling that the cross validation findings may not generalise as it is only done on the data for 2023, and noting that
+simpler models generalise better, $L_y = 3$ is chosen.
+For the distributed lags, there is no appreciable difference in forecasting error across the models, indicating that
+the regression coefficients for higher order lags of sports are near zero.
+The simplest model with $L_x = 1$ is clearly chosen.
 
 \section{Fixing Parameters across Time}
 \label{sec:modelling:parameter_fixing}
