@@ -49,10 +49,10 @@ def plot(  # noqa: PLR0913
 
 # %%
 # AR lags 1-8 with distributed lags (DL) [0, 1], R = 50 repeats, FIML (not fiml.x) and MLR
-estimates = [10.66, 9.76, 9.50, 9.31, 9.25, 9.27, 9.07, 9.02]
-stds = [0.36, 0.39, 0.40, 0.46, 0.44, 0.50, 0.48, 0.53]
-sigma_estimates = [0.002, 0.002, 0.002, 0.002, 0.003, 0.030, 0.004, 0.025]
-sigma_stds = [0.016, 0.018, 0.022, 0.025, 0.027, 0.057, 0.021, 0.064]
+estimates = [10.36, 9.53, 9.30, 9.15, 9.09, 9.09, 8.92, 8.87]
+stds = [0.35, 0.38, 0.38, 0.43, 0.42, 0.42, 0.45, 0.44]
+sigma_estimates = [0.002, 0.003, 0.003, 0.002, 0.003, 0.003, 0.004, 0.004]
+sigma_stds = [0.016, 0.018, 0.020, 0.024, 0.026, 0.023, 0.020, 0.028]
 
 plot(estimates, stds, sigma_estimates, sigma_stds, save_path="../report/thesis/figures/modelling/cv_AR.svg")
 
