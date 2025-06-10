@@ -67,8 +67,9 @@ plt.xticks(list(range(8, 24, 2)), labels=list(range(8, 24, 2)))  # pyright: igno
 plt.savefig("../report/thesis/figures/data/boxplot_mhi5.svg")
 
 plt.figure(figsize=(4, 3))
-plt.errorbar(list(available_waves(sports)), sports_means, yerr=sports_stds, capsize=2, color="black")
+plt.plot(list(available_waves(sports)), sports_means, ".-", color="black")
 plt.title("Sports engagement over time")
+plt.ylim(0, 1)
 plt.ylabel("Rate of engagement in sports")
 plt.xlabel("Year")
 plt.savefig("../report/thesis/figures/data/errorbar_sports.svg")
