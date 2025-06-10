@@ -3,7 +3,37 @@ For the definitive models in \textit{lavaan} syntax, refer to the programming co
 \section{Excluding Mediation}
 \label{sec:results:no_mediation}
 
+To reiterate, in this approach mediation regressions are not included and neither are the mediators included as regressors,
+gaining model parsimony at risk of violating the ignorability assumption.
+The regression parameters are listed in \cref{tab:results:basic_regression}. Since besides the autoregressive
+terms each variable included is a binary variable, the parameters can be interpreted as the percentage point change
+in mental wellbeing (MHI5) as a result of that variable.
+In general, very few estimated parameters are significant, and even those that are represent only a marginal impact,
+no greater than $1.4$ points for an income above € 50\,000 as compared to no income. Compare this to the interquartile
+range in MHI5 of about $20$ (\cref{fig:data:sample_moments_y_x}).
+This is evidence for the impact of the various data quality issues discussed, but is perhaps also indicative of the
+complexities of mental wellbeing that make it hard to explain its variability in terms of the studied variables.
+The fit indices represent good to excellent fit.
 
+The results may especially be put into question for the very small instantaneous association between sports and MHI5.
+While statistically significant, an average improvement of $0.48$ on a scale of 0 to 100 for individuals who exercise
+is in stark contrast with cross-sectional analyses in the literature. Recall for instance the 43\% decrease in days of poor mental
+health found in \citeA{chekroud2018association}, or the review by \citeA{noetel2024effect} who find effect sizes of between
+$0.2$ and $0.8$ times the sample standard deviation on various measures.
+The estimated long-term effect of exercise is highly insignificant ($p = 0.786$), and hence the null hypothesis that
+no such long-term benefit exists is maintained. In this sense, the present study is consistent with the outcomes
+of randomised controlled trials in the literature, many of which also do not find evidence for a beneficial effect
+(e.g. \citeA{chalder2012facilitated}).
+However, the data quality issues also lend credence to the idea that analysis of observational data will in general
+not be powered for the present causal analysis, as it may be infeasible to justify the ignorability assumption
+without an experimental design that explicitly controls for confounders. Mainly, the MNAR missingness and the issues resulting
+from self-reported data in questionnaires cause a downward bias that compromise statistical power.
+
+In time series analysis, it is customary to examine the stability of the data, as stability is typically a necessary
+assumption for estimation. While SEM does not rely explicitly on this assumption, absence of stability would make the
+assumption that parameters are constant in time contentious. Based on the reported autoregressive coefficients,
+the roots of the characteristic polynomial are $z_1 = 1.10$, $z_2 = -1.16 + 1.78i$ and $z_3 = -1.16 - 1.78i$, which all
+fall well outside of the unit circle, indicating a stable time series.
 
 \newcolumntype{L}{>{\hspace*{3mm}}l}
 \begin{table}[htbp]
@@ -42,7 +72,7 @@ For the definitive models in \textit{lavaan} syntax, refer to the programming co
     below € 15\,000                 & 1.007     & 0.535 & 1.882     & 0.060 $^+$ \\
     over € 50\,000                  & 1.372     & 1.178 & 1.165     & 0.244 \\
 
-    \multicolumn{5}{l}{\textit{ethnicity} (Dutch)} \\
+    \multicolumn{5}{l}{\textit{immigration status} (Dutch)} \\
     first generation western        & -0.684    & 0.256 & -2.667    & 0.008 ** \\
     first generation non-western    & -0.946    & 0.268 & -3.535    & 0.000 *** \\
     second generation western       & -0.423    & 0.233 & -1.897    & 0.058 $^+$ \\
@@ -75,10 +105,10 @@ For the definitive models in \textit{lavaan} syntax, refer to the programming co
 
     Observations    & \multicolumn{4}{l}{12920} \\
     $\chi^2$        & \multicolumn{4}{l}{3106.4 ($df = 527$, $p = 0.000$)} \\
-    CFI             & \multicolumn{4}{l}{0.953} \\
-    TLI             & \multicolumn{4}{l}{0.945} \\
-    RMSEA           & \multicolumn{4}{l}{0.019} \\
-    SRMR            & \multicolumn{4}{l}{0.044} \\
+    CFI             & \multicolumn{4}{l}{0.953 (cutoff = 0.95)} \\
+    TLI             & \multicolumn{4}{l}{0.945 (cutoff = 0.95)} \\
+    RMSEA           & \multicolumn{4}{l}{0.019 (cutoff = 0.06)} \\
+    SRMR            & \multicolumn{4}{l}{0.044 (cutoff = 0.08)} \\
 
     \bottomrule
 
@@ -88,6 +118,3 @@ For the definitive models in \textit{lavaan} syntax, refer to the programming co
 
 \section{Including Mediation}
 \label{sec:results:mediation}
-
-\section{Discussion}
-\label{sec:results:discussion}

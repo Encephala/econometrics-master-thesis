@@ -26,9 +26,15 @@ def empirical(coefs):
 def analytical(coefs):
     roots = np.roots([*np.flip(coefs), -1])
 
+    print(roots)
+
     plt.figure()
     plt.scatter(roots.real, roots.imag)
 
     plt.gca().add_patch(Circle((0, 0), 1, fill=False))
 
     plt.show()
+
+
+# %%
+analytical([0.396, 0.247, 0.202])
