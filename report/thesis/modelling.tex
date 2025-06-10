@@ -132,7 +132,9 @@ statistic was for the first autoregressive parameter in wave 2023. It was $11.6$
 value of $3.84$. However, multiple testing ought to be considered.
 When simply applying a Bonferroni correction for doing 180 tests, the critical value becomes $13.2$, thus none of the
 imposed constraints are put into question.
-While an alternative correction would maintain more power and might reject the null, it should also be noted that
+While an alternative correction would maintain more power and might reject the null, especially because
+the Bonferroni correction assumes the tests are independent but because the parameters are fixed across multiple
+regressions this is clearly not true, it should also be noted that
 the $\chi^2$ test's sensitivity to sample size means the null is rarely maintained. As such, the conclusion is drawn
 that fixing the (regression) parameters across time is appropriate.
 It is assumed that this finding generalises to the model with mediators.
