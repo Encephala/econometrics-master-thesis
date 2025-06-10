@@ -371,14 +371,14 @@ if the baseline model outperforms the proposed model, or if model fit is so good
 Again, higher is better, and the cutoff for good fit is taken from \citeA{hu1999cutoff} as 0.95.
 
 \subsubsection{Root Mean Square Error of Approximation (RMSEA)}
-Rather than deriving from the $\chi^2$ test, the RMSEA directly measures the discrepancy between the model-implied- and
-sample covariance matrices, roughly defined as the root mean square difference between the two \cite{schermelleh2003evaluating}:
+The RMSEA measures the discrepancy between the model-implied- and sample covariance matrices per degree of freedom,
+roughly defined as the root mean square difference between the two \cite{schermelleh2003evaluating}.
+It improves on the $\chi^2$ statistic by compensating for the degrees of freedom and the sample size.
 \begin{equation}
-    \text{RMSEA}^2 = \max(\frac{F(\hat{\Sigma})}{df} - \frac{1}{N - 1}, 0).
+    \text{RMSEA}^2 = \frac{\max(\chi^2 - df, 0)}{df(N - 1)}.
 \end{equation}
-$F(\hat{\Sigma})$ again denotes the objective function (\cref{eq:methods:objective_function}) at the optimal parameters.
-The RMSEA has a lower bound of 0 and no upper bound, and lower is better. We use a cutoff of 0.06 to indicate good fit
-\cite{hu1999cutoff}.
+The RMSEA has a lower bound of 0 and no upper bound, with a lower RMSEA representing better fit.
+We use a cutoff of 0.06 to indicate good fit \cite{hu1999cutoff}.
 
 \subsubsection{Standardised Root Mean Square Residual (SRMR)}
 Lastly, the SRMR is defined most explicitly in terms of $S - \hat{\Sigma}$ without considering degrees of freedom,
