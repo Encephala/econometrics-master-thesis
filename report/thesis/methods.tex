@@ -226,6 +226,9 @@ variance in $y_2$ ($R^2 < 1$), this may not fully explain the covariance between
 That is, there may be a residual covariance $\phi_{y_1 x}$, such that $\Sigma_{y_1 x} = \gamma \beta \Sigma_x + \phi_{y_1 x}$.
 Note also that with three total variables, there are three covariance elements in $\Sigma$, but $\{\gamma, \beta\}$
 constitutes only two parameters to estimate, which is too few parameters to exactly estimate the full covariance structure.
+Additionally, $\Sigma_{y_1} = \phi_{y_1} + \gamma \phi_{y_2} + \gamma \beta \Sigma_x$, where
+$\phi_{y_1}$ denotes the residual variance of $y_1$ and likewise $\phi_{y_2}$. That is, the variance of $y_1$ is not
+just defined in terms of its regressors, but also in terms of its regressors' regressors (and so on).
 
 A general implication of the higher level of abstraction is that while canonically, the linear model has $N - k$ degrees
 of freedom if there are $k$ parameters to be estimated, in SEM there are $\frac{p(p+1)}{2} - k$ degrees of freedom
