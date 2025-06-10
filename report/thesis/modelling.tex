@@ -27,7 +27,8 @@ If a mediator is simply excluded from the regression altogether, this model comp
 effect (e.g. $\zeta \eta$) is absorbed into the main parameter ($\beta$). However, in doing so, the mediator, in so far
 as it is not fully explained by $x$, also functions as a potential unmeasured confounder.
 Because it is not clear a priori which approach is preferred, the results for both will be given in the present study.
-In this way, it can also be directly examined to which degree the mediators are confounders.
+In this way, it can also be directly examined to which degree the mediators are confounders by comparing
+the estimated coefficients $\beta$ between the two approaches.
 
 As covariates, we include a basic set of sociodemographic variables available in the Background Variables of the LISS panel,
 namely age, ethnicity, gender, marital status, education level, employment status and net household income.
@@ -39,10 +40,10 @@ of the time-variant sports,
 but the fact that they vary so little indicates that their effect as mediators could only be weak ($\zeta$ must be small),
 so the error in estimating the total effect due to not modelling them as mediators could only be marginal.
 Beyond this set, based on the literature and availability in the data, we include (self-reported) physical health
-and disease status as additional mediators \cite{westcott2012resistance}.
+and presence of diagnosed diseases as additional mediators \cite{westcott2012resistance}.
 While the Health study also queries more nuanced variables like hospital admittance and medication use, these are
-highly correlated with health and disease status (e.g. $\rho \approx 0.55$ for medication use and disease status),
-and are thus excluded for the sake of parsimony.
+highly correlated with general health and disease status (e.g. $\rho \approx 0.55$ for medication use and disease status),
+and are thus excluded for the sake of parsimony, noting the significant increase in complexity that mediators bring.
 
 Because only the long-term effect of sports on mental health is considered (recall \cref{sec:methods:reverse_causality}),
 it would be natural to the cumulative years that someone has exercised as the variable of interest, rather than the
