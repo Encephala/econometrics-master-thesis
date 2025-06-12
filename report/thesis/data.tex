@@ -6,7 +6,7 @@ income and primary occupation.
 Recruitment is done invite-only to limit self-selection, although it cannot be wholly prevented as
 participation is still voluntary and motivated by a financial incentive. Additionally, some self-selection might occur
 in the roughly 80\,\% response rate, despite efforts to contact inactive panel members. Due to a yearly attrition of 12\,\%,
-refreshment samples were occassionally introduced, selected such as to balance representativeness of househould type,
+refreshment samples were occasionally introduced, selected such as to balance representativeness of household type,
 age and ethnicity \cite{lissdata_methodology}. This also effectively introduces missing data.
 The nature and impact of this missing data is further discussed in \cref{sec:data:missingness}.
 
@@ -41,7 +41,7 @@ failure to respond in the first place.
 To combat this, the core studies are held at different times of year. The Health study is (almost) always held in November
 through December, whereas the Leisure study was held in February through March before 2015, and October through November since.
 The effect of questionnaire length has been studied in the literature, with somewhat conflicting results. \citeA{galesic2009effects} for instance
-find worse reponse quality for questions later in the survey as compared to earlier. On the other hand, \citeA{andreadis2020impact,subar2001shorter}
+find worse response quality for questions later in the survey as compared to earlier. On the other hand, \citeA{andreadis2020impact,subar2001shorter}
 do not find significant evidence for improved response rate and data quality with shorter questionnaires. The latter
 also note ease of administration may compensate for length, in which regard the online nature and typically multiple-choice
 questions of the panel do well. The impact of the length of the panel is thus likely not a major concern.
@@ -58,7 +58,7 @@ namely November each year.
 
 A worthwhile consideration is the impact of the Covid-19 pandemic on the data. The negative effect of the pandemic on public
 mental health has been the topic of much discussion \cite{cullen2020mental,kumar2021covid} and has been empirically verified \cite{kupcova2023effects}.
-Additionally, due to closing of public facilites, people engaged in exercise significantly less \cite{amini2021covid}.
+Additionally, due to closing of public facilities, people engaged in exercise significantly less \cite{amini2021covid}.
 The pandemic thus seems a priori to be a significant risk factor for endogeneity in the present analysis.
 However, curiously, neither the effect of the pandemic on mental health nor its effect on rates of physical exercise
 seem to be present in the data. As \cref{fig:data:sample_moments_y_x} shows, sample statistics of both variables
@@ -219,7 +219,7 @@ Clearly, there would be a selection bias, as no respondents would say ``never''.
 As such, in the face of MNAR data, serious biases may be introduced into the analysis. No general solutions exist for handling
 MNAR missingness. It might be possible to handle it via a case-specific model of the exact mechanism leading to missing data,
 but this would at least require extensive expert knowledge of the data being studied. Note that listwise deletion,
-that is simply removing observations for which some data is missing, does not prevent these biases from ocurring,
+that is simply removing observations for which some data is missing, does not prevent these biases from occurring,
 as the remaining studied data is not representative of the population as a whole.
 Lastly, there is MAR. MAR data is data for which the missingness depends on the values of other variables in the dataset,
 but not the variable itself. In this case, general solutions exist, which preserve as much information as possible
