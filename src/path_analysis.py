@@ -43,7 +43,7 @@ model_definition_base = (
     .with_x(
         VariableDefinition(SPORTS),
         lag_structure=[0, 1],
-        fixed=False,
+        fixed=True,
     )
     .with_controls(
         [VariableDefinition(variable, dummy_levels=available_dummy_levels(all_data, variable)) for variable in []]
@@ -68,7 +68,7 @@ model_definition_base = (
         fix_variance_across_time=False,
         free_covariance_across_time=True,
         within_dummy_covariance=True,
-        x_predetermined=True,
+        x_predetermined=False,
     )
     .with_excluded_regressors(
         [
@@ -96,7 +96,7 @@ model_definition_mediation = (
     .with_x(
         VariableDefinition(SPORTS),
         lag_structure=[0, 1],
-        fixed=False,
+        fixed=True,
     )
     .with_controls(
         [VariableDefinition(variable, dummy_levels=available_dummy_levels(all_data, variable)) for variable in []]
@@ -128,7 +128,7 @@ model_definition_mediation = (
         fix_variance_across_time=False,
         free_covariance_across_time=True,
         within_dummy_covariance=True,
-        x_predetermined=True,
+        x_predetermined=False,
     )
     .with_excluded_regressors(
         [
@@ -155,7 +155,7 @@ for max_lag in range(1, 8 + 1):
         .with_x(
             VariableDefinition(SPORTS),
             lag_structure=[0, 1],
-            fixed=False,
+            fixed=True,
         )
         .with_controls(
             [
@@ -183,7 +183,7 @@ for max_lag in range(1, 8 + 1):
             fix_variance_across_time=False,
             free_covariance_across_time=True,
             within_dummy_covariance=True,
-            x_predetermined=True,
+            x_predetermined=False,
         )
         .with_excluded_regressors(
             [
@@ -211,7 +211,7 @@ for max_lag in range(1, 11 + 1):
         .with_x(
             VariableDefinition(SPORTS),
             lag_structure=list(range(max_lag + 1)),
-            fixed=False,
+            fixed=True,
         )
         .with_controls(
             [
@@ -239,7 +239,7 @@ for max_lag in range(1, 11 + 1):
             fix_variance_across_time=False,
             free_covariance_across_time=True,
             within_dummy_covariance=True,
-            x_predetermined=True,
+            x_predetermined=False,
         )
         .with_excluded_regressors(
             [
