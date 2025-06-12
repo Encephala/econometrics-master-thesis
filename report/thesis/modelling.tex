@@ -85,9 +85,7 @@ When doing so, $L_x = 1$ is used as the most minimal model. When optimising $L_x
 It could technically be possible that a better model fit is found when not including all lags between the lowest
 and the highest lag, for instance having the set of lags $\{1, 2, 4\}$. This was however not tested as it seems improbable
 given the mechanisms at play, and thus would likely be overfitting.
-\Cref{fig:modelling:cv_lags} visualises the found RMSPEs. Because uncertainty in the estimates has a significant impact
-on the 1-$\sigma$ decision rule, the measurement inaccuracies are calculated by quadratically adding the two standard
-deviations of the estimates across the $R$ repetitions.
+\Cref{fig:modelling:cv_lags} visualises the found RMSPEs.
 
 \begin{figure}[htbp]
     \centering

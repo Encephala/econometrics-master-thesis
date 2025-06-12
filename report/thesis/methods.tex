@@ -417,6 +417,10 @@ $v$ is preferred to avoid unrepresentative test sets, so $v = 5$ is used.
 To improve the accuracy of the estimated $\mu_{\text{RMSPE}}$ and $\sigma_{\text{RMSPE}}$, this cross validation
 is repeated $R$ times with different random folds in each repetition and the average estimates is taken.
 Here, the larger $R$ the better, but $R = 50$ is chosen to balance precision and computational tractability.
+Because uncertainty in the estimates has a significant impact on the 1-$\sigma$ decision rule,
+the uncertainties in the estimates of $\mu_{\text{RMSPE}}$ and $\sigma_{\text{RMSPE}}$ are calculated as the standard
+deviation of the respective estimates across the repetitions divided by the square root of $R$.
+The uncertainty of the decision rule threshold is then found by quadratically adding these two uncertainties.
 There is the possibility that the model used is not identified or numerically unstable for a given split due to the high
 degree of missingness. When this occurs, the fold is simply ignored for that repetition, i.e. $\mu_{\text{RMSPE}}$ is then
 simply calculated across 4 folds. In practice, this happened only very rarely.
