@@ -342,11 +342,13 @@ for (i in seq_along(cv_models_x)) {
     results <- matrix(nrow = n_repeats, ncol = 2)
 
     for (j in 1:n_repeats) {
-        cat("Repeat", j, "/", n_repeats, "\n")
+        cat("Repeat", j, "/", n_repeats)
         result <- cv(cv_models_x[[i]], do_print = FALSE)
 
         results[j, 1] <- result[[1]]
         results[j, 2] <- result[[2]]
+
+        cat(results[[1]], "+/-", result[[2]], "\n")
     }
 
     cat("               Estimated mean RMSPE:", mean(results[, 1]), "+/-", sd(results[, 1]) / sqrt(n_repeats), "\n")
