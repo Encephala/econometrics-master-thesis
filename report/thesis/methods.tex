@@ -24,7 +24,7 @@ treatment effect
 \label{eq:methods:sate}
     \tau_{\text{sample}} = \sum_{i=1}^N (Y_i(T) - Y_i(C)),
 \end{equation}
-which thanks to the representativeness of the sample is assumed to estimate the population average treatement.
+which thanks to the representativeness of the sample is assumed to estimate the population average treatment.
 This is where SUTVA is crucial, as without it the potential outcomes are not simply a function of individual $i$'s treatment,
 but also of individual $j$'s treatment (where $j \neq i$), and so we could not meaningfully interpret the average
 treatment effect calculated as in \cref{eq:methods:sate}.
@@ -66,7 +66,7 @@ This holds true even if the treatment effect itself is not influenced by a prior
 \Cref{fig:methods:reverse_causality:cs} gives a graphical representation of how the forward and reverse effect
 are not simultaneously identified.
 
-On the other hand, with panel data, we can exploit the fact that cause must preceed effect. The graphical representation
+On the other hand, with panel data, we can exploit the fact that cause must precede effect. The graphical representation
 in \cref{fig:methods:reverse_causality:panel} shows the instantaneous effects, along with presumed
 autoregressive effects and a lagged effect.
 The latter is now identified. Crucially, the instantaneous effect of sports on MHI5 is not identified, nor is the effect
@@ -82,7 +82,7 @@ Assuming positive autoregressive coefficients, both the aforementioned unidentif
 To the end of answering the research question then, we may conclude that the total benefit of exercise is at least
 as large as the found long-term benefit. Thus, while the unidentified effects mean decreased power in answering
 the research question, but significance in the sense of the type I error rate is preserved.
-Do note that in a regression context, in order for the effect of SPORTS$_{t-1}$ to be identifed with respect to the simultaneous
+Do note that in a regression context, in order for the effect of SPORTS$_{t-1}$ to be identified with respect to the simultaneous
 effects, SPORTS$_t$ should be included as a regressor, as the autoregressive patterns otherwise obscure its effect.
 
 \begin{figure}[htbp]
@@ -140,7 +140,7 @@ effects, SPORTS$_t$ should be included as a regressor, as the autoregressive pat
 \end{figure}
 
 While many alternatives exist, for the present research, the package \textit{lavaan} in R is used \cite{rosseel2012lavaan}.
-This choice was made because \textit{lavaan} is a mature and feature-rich project, whose reliablity is exemplified by its
+This choice was made because \textit{lavaan} is a mature and feature-rich project, whose reliability is exemplified by its
 extensive use in the literature.
 
 \section{Structural Equation Modelling}
@@ -154,7 +154,7 @@ For a full introduction, consider textbooks such as \citeA{kline2023principles}.
 While SEM also allows for modelling latent variables in its general form, such constructs are not considered
 in this work. This is because the author possesses no a priori knowledge as to what latent constructs might exist, and
 \citeA{ludtke2022comparison} find in a simulation study that empirically deciding on latent structures ``is only
-of limited usefulness, beacuse the different model[l]ing approaches provide almost equivalent representations of [the data].''
+of limited usefulness, because the different model[l]ing approaches provide almost equivalent representations of [the data].''
 
 Consider then a vector $z_i$, which contains for individual $i$ the outcome variable of interest $y_i$ as well as
 all regressors $x$.
@@ -187,7 +187,7 @@ Firstly, note that $\mu$ can always be estimated as $\hat{\mu} = \bar{z}$, such 
 and because the research question pertains specifically to the variability of variables,
 the mean term is ignored in further discussion.
 To see how this general multivariate likelihood approach relates to the linear model, consider the very simple example
-regresson of
+regression of
 \begin{equation}
     \label{eq:methods:simple_regression}
     y = \alpha + \beta_1 x_1 + \beta_2 x_2 + \epsilon.
@@ -307,7 +307,7 @@ Refer to \cref{chap:app:long_run_effect} for a derivation.
 To briefly note, \cref{eq:methods:model_formulation} assumes a linear influence of all regressors onto $y$. However, all regressors
 are included as dummies, i.e. on a binary scale. For such a scale, linearity holds exactly.
 The only exception is the autoregressive terms, but since even a small number of autoregressive terms can already
-model highly nonlinear temporal behaviour, it is likely a reasonable approxmation.
+model highly nonlinear temporal behaviour, it is likely a reasonable approximation.
 
 \subsection{Fit Indices}
 \label{sec:methods:fit_indices}
@@ -397,7 +397,7 @@ For the sake of model selection, a model-agnostic measure of model fit is requir
 machine learning literature and use out-of-sample forecasting accuracy through cross validation.
 This approach can be used to compare any two models, including non-nested ones, and is a fit measure more akin to those
 used in canonical linear modelling.
-However, as mentioned before, when comparing different autoregressve lag orders, the lower lag order will have
+However, as mentioned before, when comparing different autoregressive lag orders, the lower lag order will have
 more waves available. It is likely that a model fit to a larger number of waves has a worse fit due to slight
 unmodelled heterogeneity across the waves, making the comparison between models unfair. Because of this, only the last
 available wave (2023) is used for cross validation, both for fitting the models as well as for determining the forecasting
