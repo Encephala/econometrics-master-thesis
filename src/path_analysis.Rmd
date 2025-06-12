@@ -224,11 +224,11 @@ cv <- function(model, do_print) {
         )
 
         if (!fold_successful) {
-            results[[i]] <- NA
+            return(NA)
         }
     }
 
-    c(mean(results, na.rm = TRUE), sd(results, na.rm = TRUE))
+    c(mean(results), sd(results))
 }
 ```
 
@@ -321,12 +321,20 @@ mhi5_23 ~ alpha_mhi5_23*1 + rho1*mhi5_22 + rho2*mhi5_21 + rho3*mhi5_20 + beta0_c
 ```{r Do CV}
 set.seed(69420)
 
-for (i in seq_along(cv_models_AR)) {
+while (i < len(cv_models_AR)) {
     cat("Model", i, "\n")
 
     result <- cv(cv_models_AR[[i]], do_print = TRUE)
 
+    if (anyNA(result)) {
+        cat("Failed\n")
+        # Try again
+        next
+    }
+
     cat(result[[1]], "+/-", result[[2]], "\n")
+
+    i <- i + 1
 }
 ```
 
@@ -341,14 +349,24 @@ for (i in seq_along(cv_models_x)) {
     # Means and stds across the folds, for each repeat
     results <- matrix(nrow = n_repeats, ncol = 2)
 
-    for (j in 1:n_repeats) {
+    j <- 0
+
+    while (j < n_repeats) {
         cat("Repeat", j, "/", n_repeats, "- ")
         result <- cv(cv_models_x[[i]], do_print = FALSE)
+
+        if (anyNA(result)) {
+            cat("Failed\n")
+            # Try again
+            next
+        }
 
         results[j, 1] <- result[[1]]
         results[j, 2] <- result[[2]]
 
         cat(result[[1]], "+/-", result[[2]], "\n")
+
+        j <- j + 1
     }
 
     cat("               Estimated mean RMSPE:", mean(results[, 1]), "+/-", sd(results[, 1]) / sqrt(n_repeats), "\n")

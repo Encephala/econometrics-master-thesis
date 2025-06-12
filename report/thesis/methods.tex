@@ -422,8 +422,8 @@ the uncertainties in the estimates of $\mu_{\text{RMSPE}}$ and $\sigma_{\text{RM
 deviation of the respective estimates across the repetitions divided by the square root of $R$.
 The uncertainty of the decision rule threshold is then found by quadratically adding these two uncertainties.
 There is the possibility that the model used is not identified or numerically unstable for a given split due to the high
-degree of missingness. When this occurs, the fold is simply ignored for that repetition, i.e. $\mu_{\text{RMSPE}}$ is then
-simply calculated across 4 folds. In practice, this happened only very rarely.
+degree of missingness. When this occurs, the results for the current repetition are discarded and another repetition is
+done.
 
 \subsection{Fixed and Free Parameters}
 \label{sec:methods:fixed_free_parameters}
