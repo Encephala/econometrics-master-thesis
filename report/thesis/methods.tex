@@ -456,8 +456,8 @@ If for some observations $x_3$ is missing, their contribution to the likelihood 
 covariance matrix of the sub-vector $(x_1, x_2)'$.
 In this way, FIML uses all information available in the dataset, hence its name. It can be applied to regressors
 as well as to regressands, making it highly valuable for the present study.
-It is not, however, a solution to a variable completely missing from the data, due to for instance the missing Health
-study in 2014, as in that case there is no information in the sample altogether. In practical terms, the sample covariance
+It is not, however, a solution to a variable completely missing from the data, as is for instance the case with the
+missing Health study in 2014. In that case there is no information in the sample altogether, i.e. the sample covariance
 is not known and thus cannot be fit to.
 
 \textit{Lavaan} provides the option to apply FIML only to the endogenous variables or to all variables.
