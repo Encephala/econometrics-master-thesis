@@ -30,10 +30,12 @@ without an experimental design that explicitly controls for confounders. Mainly,
 from self-reported data in questionnaires cause a downward bias that compromise statistical power.
 
 In time series analysis, it is customary to examine the stability of the data, as stability is typically a necessary
-assumption for estimation. While SEM does not rely explicitly on this assumption, absence of stability would make the
-assumption that parameters are constant in time contentious. Based on the reported autoregressive coefficients,
-the roots of the characteristic polynomial are $z_1 = 1.10$, $z_2 = -1.16 + 1.78i$ and $z_3 = -1.16 - 1.78i$, which all
-fall decidedly outside of the unit circle, indicating a stable time series.
+assumption for estimation. While SEM does not rely explicitly on this assumption, absence of stability would at least make the
+assumption that parameters are constant in time contentious, and the derivation of the long-term effect as a change
+in equilibrium value (\cref{eq:methods:long_run_effect}) does rely on stability.
+Based on the reported autoregressive coefficients, the roots of the characteristic polynomial are $z_1 = 1.10$,
+$z_2 = -1.16 + 1.78i$ and $z_3 = -1.16 - 1.78i$, which all fall decidedly outside of the unit circle,
+indeed indicating a stable time series.
 
 \newcolumntype{L}{>{\hspace*{3mm}}l}
 \begin{table}[htbp]
