@@ -14,6 +14,12 @@ and presence of diagnosed diseases as additional mediators \cite{westcott2012res
 While the Health study also queries more nuanced variables like hospital admittance and medication use, these are
 highly correlated with general health and disease status (e.g. $\rho \approx 0.55$ for medication use and disease status),
 and are thus excluded for the sake of parsimony, noting the significant increase in complexity that mediators bring.
+Both of these mediators are binary variables (after dummy encoding), so a logit regression is preferred.
+However, while \textit{lavaan} does support binary variables, it is not possible to use the MLR estimator nor FIML,
+and crucially, numerical stability was poor when treating the mediators as binary variables.
+Thus, the approximation is made that they are linear variables (i.e. variables on a ratio scale).
+By virtue of the Taylor approximation, this approximation holds reasonably if the estimated effect sizes of the regressors
+are moderate.
 
 Body composition, aerobic fitness and disease have been found to affect exercise adherence \cite{abernethy2012biophysical}.
 For both mediators thus, the reverse effect of the mediator on sports engagement is of concern.
@@ -23,8 +29,6 @@ The same mechanism of also pertains to mediation through disease status, as diet
 significant determinant of immune function \cite{childs2019diet}.
 The conclusion is therefore that for both mediators, reverse causality is of concern for both steps of the mediation
 action, necessitating that only the lagged influence of regressors on regressands is considered.
-
-% TODO not doing logit analysis
 
 Because only the long-term effect of sports on mental health is considered (recall \cref{sec:methods:reverse_causality}),
 it would be natural to use the cumulative years that someone has exercised as the variable of interest, rather than the
