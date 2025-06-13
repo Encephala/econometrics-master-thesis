@@ -348,7 +348,8 @@ def make_disease_status(health_panel: pd.DataFrame) -> pd.DataFrame:
     disease = select_variable(health_panel, DISEASE_STATUS)
 
     # Making it an actual boolean instead of "yes"/"no"
-    return disease.apply(lambda column: column.map({"yes": True, "no": False}, na_action="ignore")).astype("boolean")
+    # Note the question is if you have no diseases, so disease status is the inverse of the question response
+    return disease.apply(lambda column: column.map({"yes": False, "no": True}, na_action="ignore")).astype("boolean")
 
 
 # Finding the first non-NA value of each variable within each column
