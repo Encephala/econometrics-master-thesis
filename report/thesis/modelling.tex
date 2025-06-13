@@ -79,12 +79,17 @@ given the mechanisms at play, and thus would likely be overfitting.
 \end{figure}
 
 For the autoregressive lags, the most complex model with AR lag order $L_y = 8$ performs best. The decision rule
-then indicates $L_y = 3$ is best, though the estimation uncertainty also allows for choosing $L_y = 4$.
+then indicates $L_y = 3$ is best, though the estimation uncertainty makes $L_y = 4$ also worth considering.
 Recalling that the cross validation findings may not generalise as it is only done on the data for 2023, and noting that
 simpler models generalise better, $L_y = 3$ is chosen.
-For the distributed lags, there is no appreciable difference in forecasting error across the models, indicating that
-the regression coefficients for higher order lags of sports are near zero.
-The simplest model with $L_x = 1$ is clearly chosen.
+For the distributed lags, while the prediction error trends downwards with increasing model complexity,
+the model with $L_x = 1$ is clearly favoured.
+
+It should be noted that both figures show that especially with more complex models, $\sigma_{\text{RMSPE}}$ and the estimation uncertainties
+are significantly larger. This is likely evidence for some of the testing folds having erratic values.
+While this can potentially be fixed by stratifying testing folds on missingness, experimenting with fold counts other than 5 or
+through increasing the number of repetitions $R$, the the impact of these outliers on the decision rule is minor and does
+not influence the outcome, so this was not done.
 
 \section{Fixing Parameters across Time}
 \label{sec:modelling:parameter_fixing}
