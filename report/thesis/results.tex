@@ -9,25 +9,18 @@ The regression parameters are listed in \cref{tab:results:basic_regression}. Sin
 terms each variable included is a binary variable, the parameters can be interpreted as the percentage point change
 in mental wellbeing (MHI5) as a result of that variable.
 In general, very few estimated parameters are significant, and even those that are represent only a marginal impact,
-no greater than $1.4$ points for an income above € 50\,000 as compared to no income. Compare this to the interquartile
+no greater than $1.4$ points for an income above € 50\,000 as compared to no income. Contrast this with the interquartile
 range in MHI5 of about $20$ (\cref{fig:data:sample_moments_y_x}).
-This is evidence for the impact of the various data quality issues discussed, but is perhaps also indicative of the
-complexities of mental wellbeing that make it hard to explain its variability in terms of the studied variables.
-The fit indices represent good to excellent fit.
+
+% TODO: Discuss fit indices
 
 The results may especially be put into question for the very small instantaneous association between sports and MHI5.
 While statistically significant, an average improvement of $0.48$ on a scale of 0 to 100 for individuals who exercise
 is in stark contrast with cross-sectional analyses in the literature. Recall for instance the 43\% decrease in days of poor mental
 health found in \citeA{chekroud2018association}, or the review by \citeA{noetel2024effect} who find effect sizes of between
 $0.2$ and $0.8$ times the sample standard deviation on various measures.
-The estimated long-term effect of exercise is highly insignificant ($p = 0.786$), and hence the null hypothesis that
-no such long-term benefit exists is maintained. In this sense, the present study is consistent with the outcomes
-of randomised controlled trials in the literature, many of which also do not find evidence for a beneficial effect
-(e.g. \citeA{chalder2012facilitated}).
-However, the data quality issues also lend credence to the idea that analysis of observational data will in general
-not be powered for the present causal analysis, as it may be infeasible to justify the ignorability assumption
-without an experimental design that explicitly controls for confounders. Mainly, the MNAR missingness and the issues resulting
-from self-reported data in questionnaires cause a downward bias that compromise statistical power.
+The estimated long-term effect of exercise is highly insignificant ($p = 0.888$), and hence the null hypothesis that
+no such long-term benefit exists is maintained.
 
 In time series analysis, it is customary to examine the stability of the data, as stability is typically a necessary
 assumption for estimation. While SEM does not rely explicitly on this assumption, absence of stability would at least make the
@@ -124,7 +117,7 @@ indeed indicating a stable time series.
 The lack of evidence for a long-term effect may be attributable to confounding due to the mediators that are not included,
 while they are very likely to play a role. Hence, to lend more credence to the findings, a proper mediation analysis
 should also be done.
-The analysis contains an overwhelming number of parameters, which would be difficult to interpret.
+The model contains an overwhelming number of parameters, which would be difficult to interpret.
 Hence, \cref{tab:results:mediation_regression} lists the main parameters of interest, namely those of sports
 in the mediation regressions and those of sports and the mediators in the main regression.
 For the complete parameter estimates, refer to \cref{chap:app:mediation_regression}.

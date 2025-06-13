@@ -61,7 +61,7 @@ because if mental health influences the probability to engage in exercise, the i
 If for instance better mental health makes one more likely to engage in exercise, and assuming the greater mental health
 does not disappear as soon as one engages in exercise, then the \textit{potential} outcomes $Y_i$ are increased
 for individuals with better mental health. That is, in the observed sample, $Y_i(T) - Y_j(C)$ will be inflated with respect to
-the average treatment effect.
+$Y_i(T) - Y_i(C)$.
 This holds true even if the treatment effect itself is not influenced by a priori mental health.
 \Cref{fig:methods:reverse_causality:cs} gives a graphical representation of how the forward and reverse effect
 are not simultaneously identified.
@@ -78,7 +78,8 @@ The elevated endorphin levels post-exercise for instance would likely last on th
 research on the exact duration), which is clearly not identifiable on the yearly time-scale of the LISS panel.
 Considering the various mechanisms for a positive short-term effect, and assuming a positive long-term effect is found,
 it is reasonable to postulate that the short-term effect would also be positive.
-Assuming positive autoregressive coefficients, both the aforementioned unidentified effects will be positive.
+Also assuming positive autoregressive coefficients, both the instantaneous effect and the effect through
+autoregressive behaviour will also be positive.
 To the end of answering the research question then, we may conclude that the total benefit of exercise is at least
 as large as the found long-term benefit. Thus, while the unidentified effects mean decreased power in answering
 the research question, but significance in the sense of the type I error rate is preserved.
@@ -383,7 +384,7 @@ extent to which the model-implied covariance matrix differs from the sample cova
 involve a different set of variables, the indices cannot be directly compared. That is, if model A fits the sample
 covariance matrix $S_A$ better than model B fits $S_B$, it does not necessarily follow that model A is better than model B.
 For example, a model which has no controls would likely yield better fit indices because it is a much simpler model
-in the sense that there are fewer parameters to be estimated,
+with fewer parameters to be estimated,
 but that does not make it the preferred model over a model which includes a set of relevant control variables.
 \Cref{sec:methods:cv} will discuss the alternative approach used in this work for model selection.
 
@@ -414,10 +415,10 @@ While what constitutes the baseline model is subjective (f.i. \citeA{van2021unde
 model in which the variances of all variables are estimated, whereas the covariances are not (i.e. fixed to 0).
 The statistic is then
 \begin{equation}
-    \text{CFI} = 1 - \frac{\max(\chi^2 - df, 0)}{max(\chi^2 - df, \chi^2_b - df_b, 0)}.
+    \text{CFI} = 1 - \frac{\max(\chi^2 - df, 0)}{\max(\chi^2 - df, \chi^2_b - df_b, 0)}.
 \end{equation}
-Here, $\chi^2$ and $df$ denote the test statistic and degrees of freedom of the model and the subscript of $b$ denotes
-those for the baseline model \cite{schermelleh2003evaluating}.
+Here, $\chi^2$ and $df$ denote the test statistic and degrees of freedom of the model and the same variables with a
+subscript $b$ are those of the baseline model \cite{schermelleh2003evaluating}.
 While no analytical distribution is available for this statistic, its value is in the range $[0, 1]$, with a
 higher value indicating better fit. It reaches a value of 1 if the ratio of $\chi^2$ to $df$ is less than 1,
 and a value of 0 if the baseline model fits the data better than the proposed model.
