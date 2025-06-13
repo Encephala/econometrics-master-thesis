@@ -470,7 +470,8 @@ Because mediators cannot be treated as fixed variables, a consideration is which
 to set as free parameters.
 While there may be autoregressive behaviour for the mediator variables, this is controlled for by
 setting the covariance between any two consecutive values of mediators as a free parameter, with these parameters
-being allowed to vary freely across time. As a result, if in reality there is AR behaviour to the mediators, the total
+being allowed to vary freely across time to eliminate all associated degrees of freedom.
+An implication of this is that if in reality there is AR behaviour to the mediators, the total
 effect of sports through them is underestimated (assuming positive AR coefficients).
 The approximation thus maintains type I significance.
 The AR nature could also be explicitly modelled, but doing so would make modelling much more complex and error-prone,
