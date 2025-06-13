@@ -359,6 +359,18 @@ For the interpretation of the long-run effect of $x$, \cref{eq:methods:long_run_
 has the same influence on the outcome. As such, regardless of the lag structure decided on in mediation, the sum of the
 direct and indirect effects can be meaningfully interpreted as the total effect.
 
+Because mediators cannot be treated as fixed variables, a consideration is which of their residual covariances
+to set as free parameters.
+While there may be autoregressive behaviour for the mediator variables, this is controlled for by
+setting the covariance between any two consecutive values of mediators as a free parameter, with these parameters
+being allowed to vary freely across time. As a result, if in reality there is AR behaviour to the mediators, the total
+effect of sports through them is underestimated (assuming positive AR coefficients).
+The approximation thus maintains type I significance.
+While the AR nature could be explicitly modelled, doing so would make modelling much more complex and error-prone,
+so the fact that $\alpha$-significance is maintained justifies taking the reduced statistical power as a compromise.
+Additionally, if a mediator is a categorical variable, there must be a negative correlation between its different
+dummy variables, so correlations between different dummy levels of the same variable are also set as free parameters.
+
 \subsection{Fit Indices}
 \label{sec:methods:fit_indices}
 There is an extensive set of fit indices for SEM models available in the literature. These derive from the degrees of freedom
