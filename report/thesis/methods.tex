@@ -348,7 +348,7 @@ Such mediation might be measured directly while still effectively controlling fo
 in the following, simplified example:
 \begin{align}
 \begin{split}
-    \label{eq:modelling:mediation_example}
+    \label{eq:methods:mediation_example}
     y_{it} &= \alpha_y + \beta x_{it} + \eta m_{it} + \epsilon_y; \\
     m_{it} &= \alpha_m + \zeta x_{it} + \epsilon_m.
 \end{split}
@@ -357,7 +357,7 @@ Then, the total effect of $x$ on $y$ is given as $\beta + \zeta \eta$, the sum o
 Conveniently, these two regressions may be estimated simultaneously in SEM.
 
 Thus, when determining the controls used, attention must be paid to which variables may be mediators and those should be
-modelled as in \cref{eq:modelling:mediation_example}. There is a significant price to be paid in terms of model parsimony
+modelled as in \cref{eq:methods:mediation_example}. There is a significant price to be paid in terms of model parsimony
 though, as a mediator cannot be a fixed variable, potentially adding many additional parameters to the model.
 If a mediator is simply excluded from the regression altogether, this model complexity is avoided, while the indirect
 effect (e.g. $\zeta \eta$) is absorbed into the main parameter ($\beta$). However, in doing so, the mediator, in so far
@@ -366,8 +366,96 @@ Because it is not clear a priori which approach is preferred, the results for bo
 In this way, it can also be directly examined to which degree the mediators are confounders by comparing
 the estimated coefficients $\beta$ between the two approaches.
 
+When multiple mediators are simultaneously modelled, there can be either parallel mediation or serial mediation \cite{hayes2017introduction}.
+In parallel mediation (\cref{fig:methods:mediation_forms:parallel}), the mediators do not influence each other,
+whereas in serial mediation (\cref{fig:methods:mediation_forms:serial}) one mediator causes the next mediator.
+If multiple mediators affect each other and the outcome variable as in \cref{fig:methods:mediation_forms:simultaneous},
+there is another form of simultaneity in the model. While this could be modelled with panel data just as the main
+simultaneity is modelled in the present study, that would entail significant model complexity.
+Instead, the present study models multiple mediators as parallel mediation, which effectively makes the assumption that,
+conditional on the set of controls and sports, there is no causal dependence between the mediators.
+The residual covariance of the mediators can be estimated in the SEM model to what extent this approximation holds.
+Clearly, different dummy levels of the same categorical mediator must be causally dependent, which necessarily
+compromises the findings.
+
+\begin{figure}[htbp]
+    \caption{Graph representations of different forms of mediation}
+    \label{fig:methods:mediation_forms}
+    \begin{subfigure}[t]{0.32\textwidth}
+        \centering
+        \begin{tikzpicture}[
+            node distance=0.4cm,
+            main node/.style={circle,draw,font=\scriptsize\sffamily\bfseries,minimum size=1cm},
+            every edge/.style={draw,thick,->},
+        ]
+            \node[main node] (m1) at (0, 2) {$m_1$};
+            \node[main node] (m2) at (0, 0) {$m_2$};
+            \node[main node] (x) at (-1.5, 1) {$x$};
+            \node[main node] (y) at (1.5, 1) {$y$};
+
+            \path (x) edge (m1);
+            \path (x) edge (m2);
+            \path (m1) edge (y);
+            \path (m2) edge (y);
+        \end{tikzpicture}
+        \subcaption{Parallel mediation}
+        \label{fig:methods:mediation_forms:parallel}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.32\textwidth}
+        \centering
+        \begin{tikzpicture}[
+            node distance=0.4cm,
+            main node/.style={circle,draw,font=\scriptsize\sffamily\bfseries,minimum size=1cm},
+            every edge/.style={draw,thick,->},
+            fading line/.style={draw, thick, dotted, dash pattern=on 2pt off 2pt},
+        ]
+            \node[main node] (m1) at (0, 2) {$m_1$};
+            \node[main node] (m2) at (0, 0) {$m_2$};
+            \node[main node] (x) at (-1.5, 1) {$x$};
+            \node[main node] (y) at (1.5, 1) {$y$};
+
+            \path (x) edge (m1);
+            \path (m2) edge (y);
+            \path (m1) edge (m2);
+        \end{tikzpicture}
+        \subcaption{Serial mediation}
+        \label{fig:methods:mediation_forms:serial}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.32\textwidth}
+        \centering
+        \begin{tikzpicture}[
+            node distance=0.4cm,
+            main node/.style={circle,draw,font=\scriptsize\sffamily\bfseries,minimum size=1cm},
+            every edge/.style={draw,thick,->},
+            fading line/.style={draw, thick, dotted, dash pattern=on 2pt off 2pt},
+        ]
+            \node[main node] (m1) at (0, 2) {$m_1$};
+            \node[main node] (m2) at (0, 0) {$m_2$};
+            \node[main node] (x) at (-1.5, 1) {$x$};
+            \node[main node] (y) at (1.5, 1) {$y$};
+
+            \path (x) edge (m1);
+            \path (x) edge (m2);
+            \path (m1) edge (y);
+            \path (m2) edge (y);
+            \path[bend left,color=red] (m1) edge (m2);
+            \path[bend left,color=red] (m2) edge (m1);
+        \end{tikzpicture}
+        \subcaption{Simultaneity in mediation}
+        \label{fig:methods:mediation_forms:simultaneous}
+    \end{subfigure}
+\end{figure}
+
+The simplified example in \cref{eq:methods:mediation_example} does not include controls or autoregression. In order for the parameters $\zeta$ and $\eta$
+to be meaningfully combined, the same set of controls should be present in the mediation regression as in the main
+regression. Because of this, all the regressors in the main regression are added to the mediation regression, including
+the lagged $y_{i,t-l}$. However, because of the modelling choice of parallel mediation, mediators are not included
+in the mediation regressions of other mediators.
+
 An additional concern in mediation is that the mediator may also be a vehicle for the reverse effect.
-Just as $\beta$ in \cref{eq:modelling:mediation_example} cannot differentiate between the forward- and reverse effects,
+Just as $\beta$ in \cref{eq:methods:mediation_example} cannot differentiate between the forward- and reverse effects,
 neither can $\eta$ nor $\zeta$. That is, in mediation, there is a concern for both the reverse effect of $y_{it}$ onto
 $m_{it}$ and the reverse effect of $m_{it}$ onto $x_{it}$. Just as in \cref{fig:methods:reverse_causality:panel},
 we may measure only lagged effects in both equations, at the cost of model parsimony and only being able to judge the
