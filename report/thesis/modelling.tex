@@ -1,35 +1,5 @@
 \section{Regressors}
 \label{sec:modelling:regressors}
-As discussed extensively already, the selection of controls is crucial to avoid unmeasured confounders. However,
-a second important consideration is the action of mediators. Mediators are variables that explain the effect
-of $x$ on $y$, in the sense that $x$ causes some mediator $m$ which causes $y$. An example of a mediator in the present
-study might be physical health. If physical health is included as a control in the regression, the interpretation of $\beta$
-becomes ``the effect of sports on MHI5-score, \textit{given} the physical health status of an individual.'' However,
-improvement of physical health may well be a strong mechanism through which sports affects mental health, which
-should very much be included in $\beta$ for the purpose of answering the research question. The subtleties of mediation
-are often not discussed in the literature \cite{imbens2024causal}, e.g. \citeA{chekroud2018association} simply include physical health as a control.
-Such mediation might be measured directly while still effectively controlling for confoundedness due to the mediator as
-in the following, simplified example:
-\begin{align}
-\begin{split}
-    \label{eq:modelling:mediation_example}
-    y_{it} &= \alpha_y + \beta x_{it} + \eta m_{it} + \epsilon_y; \\
-    m_{it} &= \alpha_m + \zeta x_{it} + \epsilon_m.
-\end{split}
-\end{align}
-Then, the total effect of $x$ on $y$ is given as $\beta + \zeta \eta$, the sum of the direct and the indirect effects.
-Conveniently, these two regressions may be estimated simultaneously in SEM.
-
-Thus, when determining the controls used, attention must be paid to which variables may be mediators and those should be
-modelled as in \cref{eq:modelling:mediation_example}. There is a significant price to be paid in terms of model parsimony
-though, as a mediator is necessarily an endogenous variable, adding many additional parameters to the model.
-If a mediator is simply excluded from the regression altogether, this model complexity is avoided, while the indirect
-effect (e.g. $\zeta \eta$) is absorbed into the main parameter ($\beta$). However, in doing so, the mediator, in so far
-as it is not fully explained by $x$, also functions as a potential unmeasured confounder.
-Because it is not clear a priori which approach is preferred, the results for both will be given in the present study.
-In this way, it can also be directly examined to which degree the mediators are confounders by comparing
-the estimated coefficients $\beta$ between the two approaches.
-
 As covariates, we include a basic set of sociodemographic variables available in the Background Variables of the LISS panel,
 namely age, ethnicity, gender, marital status, education level, employment status and net household income.
 Of these, the last four might be hypothesised as mediators based on the literature

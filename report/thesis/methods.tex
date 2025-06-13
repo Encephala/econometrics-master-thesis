@@ -304,6 +304,7 @@ has at time $t$ on $y$ (MHI5-score), due to the autoregressive behaviour. Howeve
 in the equilibrium value of $y_{it}$. Namely, if for an individual $x_{it}$ changes from 0 to 1, i.e. they did not
 engage in exercise but have started doing so, they equilibrium value of $y_{it}$ changes by
 \begin{equation}
+    \label{eq:methods:long_run_effect}
     \frac{\sum_{l=0}^{L_x} \beta_l}{1 - \sum_{l=1}^{L_y} \rho_l}
 \end{equation}
 where $L_x$ denotes the distributed lag order and $L_y$ denotes the autoregressive lag order.
@@ -313,6 +314,50 @@ To briefly note, \cref{eq:methods:model_formulation} assumes a linear influence 
 are included as dummies, i.e. on a binary scale. For such a scale, linearity holds exactly.
 The only exception is the autoregressive terms, but since even a small number of autoregressive terms can already
 model highly nonlinear temporal behaviour, it is likely a reasonable approximation.
+
+\subsection{Controls and Mediators}
+\label{sec:methods:controls_mediators}
+As discussed extensively already, the selection of controls is crucial to avoid unmeasured confounders. However,
+a second important consideration is the action of mediators. Mediators are variables that explain the effect
+of $x$ on $y$, in the sense that $x$ causes some mediator $m$ which causes $y$. An example of a mediator in the present
+study might be physical health. If physical health is included as a control in the regression, the interpretation of $\beta$
+becomes ``the effect of sports on MHI5-score, \textit{given} the physical health status of an individual.'' However,
+improvement of physical health may well be a strong mechanism through which sports affects mental health, which
+should very much be included in $\beta$ for the purpose of answering the research question. The subtleties of mediation
+are often not discussed in the literature \cite{imbens2024causal}, e.g. \citeA{chekroud2018association} simply include physical health as a control.
+Such mediation might be measured directly while still effectively controlling for confoundedness due to the mediator as
+in the following, simplified example:
+\begin{align}
+\begin{split}
+    \label{eq:modelling:mediation_example}
+    y_{it} &= \alpha_y + \beta x_{it} + \eta m_{it} + \epsilon_y; \\
+    m_{it} &= \alpha_m + \zeta x_{it} + \epsilon_m.
+\end{split}
+\end{align}
+Then, the total effect of $x$ on $y$ is given as $\beta + \zeta \eta$, the sum of the direct and the indirect effects.
+Conveniently, these two regressions may be estimated simultaneously in SEM.
+
+Thus, when determining the controls used, attention must be paid to which variables may be mediators and those should be
+modelled as in \cref{eq:modelling:mediation_example}. There is a significant price to be paid in terms of model parsimony
+though, as a mediator is necessarily an endogenous variable, adding many additional parameters to the model.
+If a mediator is simply excluded from the regression altogether, this model complexity is avoided, while the indirect
+effect (e.g. $\zeta \eta$) is absorbed into the main parameter ($\beta$). However, in doing so, the mediator, in so far
+as it is not fully explained by $x$, also functions as a potential unmeasured confounder.
+Because it is not clear a priori which approach is preferred, the results for both will be given in the present study.
+In this way, it can also be directly examined to which degree the mediators are confounders by comparing
+the estimated coefficients $\beta$ between the two approaches.
+
+An additional concern in mediation is that the mediator may also be a vehicle for the reverse effect.
+Just as $\beta$ in \cref{eq:modelling:mediation_example} cannot differentiate between the forward- and reverse effects,
+neither can $\eta$ nor $\zeta$. That is, in mediation, there is a concern for both the reverse effect of $y_{it}$ onto
+$m_{it}$ and the reverse effect of $m_{it}$ onto $x_{it}$. Just as in \cref{fig:methods:reverse_causality:panel},
+we may measure only lagged effects in both equations, at the cost of model parsimony and only being able to judge the
+effect of $x_{i,t-2}$ on $y_{it}$.
+If on mechanistic grounds the reverse causality in either equation is expected to be negligible, it can be justified
+to measure the instantaneous effect in that regression.
+For the interpretation of the long-run effect of $x$, \cref{eq:methods:long_run_effect} shows that each lag $\beta_l$
+has the same influence on the outcome. As such, regardless of the lag structure decided on in mediation, the sum of the
+direct and indirect effects can be meaningfully interpreted as the total effect.
 
 \subsection{Fit Indices}
 \label{sec:methods:fit_indices}
