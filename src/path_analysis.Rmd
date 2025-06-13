@@ -349,9 +349,9 @@ for (i in seq_along(cv_models_x)) {
     # Means and stds across the folds, for each repeat
     results <- matrix(nrow = n_repeats, ncol = 2)
 
-    j <- 0
+    j <- 1
 
-    while (j < n_repeats) {
+    while (j <= n_repeats) {
         cat("Repeat", j, "/", n_repeats, "- ")
         result <- cv(cv_models_x[[i]], do_print = FALSE)
 
