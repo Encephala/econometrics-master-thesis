@@ -279,6 +279,11 @@ but for a higher lag order more initial conditions are required. If distributed 
 A practical implication of this is that the higher the autoregressive (distributed) lag order, the fewer waves
 are available for analysis. This is especially relevant in the present study, because the missingness of the MHI5-score
 in 2014 means twice as many waves are lost as would be the case if the Health study had been conducted that year.
+The fact that time-invariant controls $z_i$ may be included is beneficial for controls that vary so little in time that
+treating subsequent values as separate variables causes numerical instability (colinearity). For such a variable,
+the first observed (non-NA) value of each individual is used as the time-invariant approximation. While this choice
+is ambiguous, the very fact that the variable must be modelled as a time-invariant implies that the exact
+choice of approximation matters very little.
 
 The main identifying assumption is \cite{moral2019dynamic}
 \begin{equation}
