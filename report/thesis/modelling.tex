@@ -2,11 +2,11 @@
 \label{sec:modelling:regressors}
 As covariates, we include a basic set of sociodemographic variables available in the Background Variables of the LISS panel,
 namely age, ethnicity, gender, marital status, education level, employment status and net household income.
-Of these, the last four might be hypothesised as mediators based on the literature
+While the first three are (largely) determined at birth, the last four might be hypothesised as mediators based on the literature
 (\citeA{spiker2014mental,hjorth2016mental,frijters2014effect,thomson2022income} respectively).
 However, all of these variables were found to vary so little in time that including them as time-variant covariates caused
 numerical instability, so they could only be included as time-invariants. This precludes modelling them as mediators
-of the time-variant sports,
+of the time-variant variable sports,
 but the fact that they vary so little indicates that their effect as mediators could only be weak ($\zeta$ must be small),
 so the error in estimating the total effect due to not modelling them as mediators could only be marginal.
 Beyond this set, based on the literature and availability in the data, we include (self-reported) physical health
@@ -14,6 +14,17 @@ and presence of diagnosed diseases as additional mediators \cite{westcott2012res
 While the Health study also queries more nuanced variables like hospital admittance and medication use, these are
 highly correlated with general health and disease status (e.g. $\rho \approx 0.55$ for medication use and disease status),
 and are thus excluded for the sake of parsimony, noting the significant increase in complexity that mediators bring.
+
+Body composition, aerobic fitness and disease have been found to affect exercise adherence \cite{abernethy2012biophysical}.
+For both mediators thus, the reverse effect of the mediator on sports engagement is of concern.
+Additionally, the reduced self-efficacy associated with poor mental health is associated
+with bad habits like eating disorders \cite{oellingrath2014eating}, influencing physical health.
+The same mechanism of also pertains to mediation through disease status, as diet is known to be a
+significant determinant of immune function \cite{childs2019diet}.
+The conclusion is therefore that for both mediators, reverse causality is of concern for both steps of the mediation
+action, necessitating that only the lagged influence of regressors on regressands is considered.
+
+% TODO not doing logit analysis
 
 Because only the long-term effect of sports on mental health is considered (recall \cref{sec:methods:reverse_causality}),
 it would be natural to use the cumulative years that someone has exercised as the variable of interest, rather than the
