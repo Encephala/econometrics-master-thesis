@@ -262,6 +262,24 @@ Additionally, AB estimation necessitates on a choice of instruments which compro
 \cite{bazzi2013blunt}, and SEM was empirically found to be more efficient than AB \cite{leszczensky2022deal}.
 Altogether, SEM is the preferred choice for the present study.
 
+\subsection{Fixed and Free Parameters}
+\label{sec:methods:fixed_free_parameters}
+In \textit{lavaan}, a parameter can either be fixed to a specific value or estimated freely.
+There are two forms of parameters, namely regression coefficients and additional (residual) covariances (i.e. $\phi_{x_1 x_2}$).
+If a variable is a regressand or if one of its covariances is set as a free parameter, then all of its covariances
+must be either estimated through free parameters or fixed to zero to ensure the model-implied covariance matrix is
+positive definite.
+In that sense, it is meaningful to talk about a variable as whole to be treated as fixed or not.
+
+Treating variables as fixed makes it impossible to examine the covariances between them,
+for instance to test whether $\text{Cov}(x_1, x_2) = 0$.
+However, for the present work, the choice to treat all regressors as fixed comes naturally,
+because the covariance structure between regressors is not relevant to the research question;
+doing so improves model parsimony;
+and considering fit indices are defined in terms of the degrees of freedom,
+a good model fit in terms of the regressors may obscure a poor model fit for the outcome variable,
+decreasing the indices' value to the present study.
+
 \subsection{Panel Model Formulation}
 \label{sec:methods:model_formulation}
 The following model formulation is adapted from \citeA{allison2017maximum}.
@@ -487,24 +505,6 @@ The uncertainty of the decision rule threshold is then found by quadratically ad
 There is the possibility that the model used is not identified or numerically unstable for a given split due to the high
 degree of missingness. When this occurs, the results for the current repetition are discarded and another repetition is
 done.
-
-\subsection{Fixed and Free Parameters}
-\label{sec:methods:fixed_free_parameters}
-In \textit{lavaan}, a parameter can either be fixed to a specific value or estimated freely.
-There are two forms of parameters, namely regression coefficients and additional (residual) covariances (i.e. $\phi_{x_1 x_2}$).
-If a variable is a regressand or if one of its covariances is set as a free parameter, then all of its covariances
-must be either estimated through free parameters or fixed to zero to ensure the model-implied covariance matrix is
-positive definite.
-In that sense, it is meaningful to talk about a variable as whole to be treated as fixed or not.
-
-Treating variables as fixed makes it impossible to examine the covariances between them,
-for instance to test whether $\text{Cov}(x_1, x_2) = 0$.
-However, for the present work, the choice to treat all regressors as fixed comes naturally,
-because the covariance structure between regressors is not relevant to the research question;
-doing so improves model parsimony;
-and considering fit indices are defined in terms of the degrees of freedom,
-a good model fit in terms of the regressors may obscure a poor model fit for the outcome variable,
-decreasing the indices' value to the present study.
 
 \subsection{Full Information Maximum Likelihood}
 \label{sec:methods:fiml}
