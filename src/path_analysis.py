@@ -120,7 +120,7 @@ model_definition_mediation = (
     .with_mediators(
         [
             VariableDefinition(variable, dummy_levels=available_dummy_levels(all_data, variable))
-            for variable in [PHYSICAL_HEALTH]
+            for variable in [PHYSICAL_HEALTH, BMI]
         ]
         + [VariableDefinition(variable) for variable in [DISEASE_STATUS]]
     )
@@ -129,10 +129,15 @@ model_definition_mediation = (
         free_covariance_across_time=True,
         within_dummy_covariance=False,  # False so that we can fix the parameter, ignoring "fix_variance_across_time"
         x_predetermined=False,
+        # Manually define all the between-regressor covariances to give them a named parameter
+        # The [1:]'s are to ignore the dummy levels left out for identification
         between_regressors=[
             CovarianceDefinition(
                 VariableDefinition(DISEASE_STATUS),
-                [VariableDefinition(PHYSICAL_HEALTH, dummy_levels=available_dummy_levels(all_data, PHYSICAL_HEALTH))],
+                [
+                    VariableDefinition(PHYSICAL_HEALTH, dummy_levels=available_dummy_levels(all_data, PHYSICAL_HEALTH)),
+                    VariableDefinition(BMI, dummy_levels=available_dummy_levels(all_data, BMI)),
+                ],
             ),
             CovarianceDefinition(
                 VariableDefinition(
@@ -141,7 +146,8 @@ model_definition_mediation = (
                 [
                     VariableDefinition(
                         PHYSICAL_HEALTH, dummy_levels=available_dummy_levels(all_data, PHYSICAL_HEALTH)[2:]
-                    )
+                    ),
+                    VariableDefinition(BMI, dummy_levels=available_dummy_levels(all_data, BMI)[1:]),
                 ],
             ),
             CovarianceDefinition(
@@ -151,7 +157,8 @@ model_definition_mediation = (
                 [
                     VariableDefinition(
                         PHYSICAL_HEALTH, dummy_levels=available_dummy_levels(all_data, PHYSICAL_HEALTH)[3:]
-                    )
+                    ),
+                    VariableDefinition(BMI, dummy_levels=available_dummy_levels(all_data, BMI)[1:]),
                 ],
             ),
             CovarianceDefinition(
@@ -161,8 +168,17 @@ model_definition_mediation = (
                 [
                     VariableDefinition(
                         PHYSICAL_HEALTH, dummy_levels=available_dummy_levels(all_data, PHYSICAL_HEALTH)[4:]
-                    )
+                    ),
+                    VariableDefinition(BMI, dummy_levels=available_dummy_levels(all_data, BMI)[1:]),
                 ],
+            ),
+            CovarianceDefinition(
+                VariableDefinition(BMI, dummy_levels=available_dummy_levels(all_data, BMI)[1:2]),
+                [VariableDefinition(BMI, dummy_levels=available_dummy_levels(all_data, BMI)[2:])],
+            ),
+            CovarianceDefinition(
+                VariableDefinition(BMI, dummy_levels=available_dummy_levels(all_data, BMI)[2:3]),
+                [VariableDefinition(BMI, dummy_levels=available_dummy_levels(all_data, BMI)[3:])],
             ),
         ],
     )
