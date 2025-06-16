@@ -643,7 +643,10 @@ class PanelModelDefinitionBuilder(_ModelDefinitionBuilder):
         if between_regressors is None:
             self._between_regressor_covariances = []
         else:
-            assert len({definition.lval.name for definition in between_regressors}) == len(between_regressors), (
+            assert len(
+                # str() the list to make it hashable. Great solution, I know
+                {(definition.lval.name, str(definition.lval.dummy_levels)) for definition in between_regressors}
+            ) == len(between_regressors), (
                 f"Duplicate lvals in between regressor covariance definitions: {between_regressors}"
             )
             self._between_regressor_covariances = between_regressors
@@ -1085,7 +1088,10 @@ class CSModelDefinitionBuilder(_ModelDefinitionBuilder):
         if between_regressors is None:
             self._between_regressor_covariances = []
         else:
-            assert len({definition.lval.name for definition in between_regressors}) == len(between_regressors), (
+            assert len(
+                # str() the list to make it hashable. Great solution, I know
+                {(definition.lval.name, str(definition.lval.dummy_levels)) for definition in between_regressors}
+            ) == len(between_regressors), (
                 f"Duplicate lvals in between regressor covariance definitions: {between_regressors}"
             )
             self._between_regressor_covariances = between_regressors
