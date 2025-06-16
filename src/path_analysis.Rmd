@@ -114,27 +114,34 @@ ch4_23.very.good ~ alpha_ch4.very.good_23*1 + eta_ch4.very.good_y1*mhi5_22 + eta
 ch98_23 ~ alpha_ch98_23*1 + eta_ch98_y1*mhi5_22 + eta_ch98_y2*mhi5_21 + eta_ch98_y3*mhi5_20 + eta_ch98_x0*cs104_23 + eta_ch98_x1*cs104_22 + eta_ch98_leeftijd.18.24*leeftijd_first.18.24 + eta_ch98_leeftijd.25.39*leeftijd_first.25.39 + eta_ch98_leeftijd.40.66*leeftijd_first.40.66 + eta_ch98_leeftijd.over.67*leeftijd_first.over.67 + eta_ch98_nettohh_f.under.15k*nettohh_f_first.under.15k + eta_ch98_nettohh_f.over.50k*nettohh_f_first.over.50k + eta_ch98_herkomstgroep.first.w*herkomstgroep_first.first.w + eta_ch98_herkomstgroep.first.nonw*herkomstgroep_first.first.nonw + eta_ch98_herkomstgroep.second.w*herkomstgroep_first.second.w + eta_ch98_herkomstgroep.second.nonw*herkomstgroep_first.second.nonw + eta_ch98_geslacht.male*geslacht_first.male + eta_ch98_burgstat.married*burgstat_first.married + eta_ch98_burgstat.never.been.married*burgstat_first.never.been.married + eta_ch98_burgstat.separated*burgstat_first.separated + eta_ch98_burgstat.widow.or.widower*burgstat_first.widow.or.widower + eta_ch98_oplcat.hbo*oplcat_first.hbo + eta_ch98_oplcat.mbo*oplcat_first.mbo + eta_ch98_oplcat.primary.school*oplcat_first.primary.school + eta_ch98_oplcat.vmbo*oplcat_first.vmbo + eta_ch98_oplcat.wo*oplcat_first.wo + eta_ch98_employment.homemaker*employment_first.homemaker + eta_ch98_employment.retired*employment_first.retired + eta_ch98_employment.student*employment_first.student + eta_ch98_employment.unable.to.work*employment_first.unable.to.work + eta_ch98_employment.unemployed*employment_first.unemployed
 
 # Additional covariances
-ch4_13.good ~~ ch4_13.moderate + ch4_13.poor + ch4_13.very.good
-ch4_13.moderate ~~ ch4_13.poor + ch4_13.very.good
-ch4_13.poor ~~ ch4_13.very.good
-ch4_18.good ~~ ch4_18.moderate + ch4_18.poor + ch4_18.very.good
-ch4_18.moderate ~~ ch4_18.poor + ch4_18.very.good
-ch4_18.poor ~~ ch4_18.very.good
-ch4_19.good ~~ ch4_19.moderate + ch4_19.poor + ch4_19.very.good
-ch4_19.moderate ~~ ch4_19.poor + ch4_19.very.good
-ch4_19.poor ~~ ch4_19.very.good
-ch4_20.good ~~ ch4_20.moderate + ch4_20.poor + ch4_20.very.good
-ch4_20.moderate ~~ ch4_20.poor + ch4_20.very.good
-ch4_20.poor ~~ ch4_20.very.good
-ch4_21.good ~~ ch4_21.moderate + ch4_21.poor + ch4_21.very.good
-ch4_21.moderate ~~ ch4_21.poor + ch4_21.very.good
-ch4_21.poor ~~ ch4_21.very.good
-ch4_22.good ~~ ch4_22.moderate + ch4_22.poor + ch4_22.very.good
-ch4_22.moderate ~~ ch4_22.poor + ch4_22.very.good
-ch4_22.poor ~~ ch4_22.very.good
-ch4_23.good ~~ ch4_23.moderate + ch4_23.poor + ch4_23.very.good
-ch4_23.moderate ~~ ch4_23.poor + ch4_23.very.good
-ch4_23.poor ~~ ch4_23.very.good
+ch98_13 ~~ gamma0_ch98_ch4.good*ch4_13.good + gamma0_ch98_ch4.moderate*ch4_13.moderate + gamma0_ch98_ch4.poor*ch4_13.poor + gamma0_ch98_ch4.very.good*ch4_13.very.good
+ch4_13.good ~~ gamma0_ch4.good_ch4.moderate*ch4_13.moderate + gamma0_ch4.good_ch4.poor*ch4_13.poor + gamma0_ch4.good_ch4.very.good*ch4_13.very.good
+ch4_13.moderate ~~ gamma0_ch4.moderate_ch4.poor*ch4_13.poor + gamma0_ch4.moderate_ch4.very.good*ch4_13.very.good
+ch4_13.poor ~~ gamma0_ch4.poor_ch4.very.good*ch4_13.very.good
+ch98_18 ~~ gamma0_ch98_ch4.good*ch4_18.good + gamma0_ch98_ch4.moderate*ch4_18.moderate + gamma0_ch98_ch4.poor*ch4_18.poor + gamma0_ch98_ch4.very.good*ch4_18.very.good
+ch4_18.good ~~ gamma0_ch4.good_ch4.moderate*ch4_18.moderate + gamma0_ch4.good_ch4.poor*ch4_18.poor + gamma0_ch4.good_ch4.very.good*ch4_18.very.good
+ch4_18.moderate ~~ gamma0_ch4.moderate_ch4.poor*ch4_18.poor + gamma0_ch4.moderate_ch4.very.good*ch4_18.very.good
+ch4_18.poor ~~ gamma0_ch4.poor_ch4.very.good*ch4_18.very.good
+ch98_19 ~~ gamma0_ch98_ch4.good*ch4_19.good + gamma0_ch98_ch4.moderate*ch4_19.moderate + gamma0_ch98_ch4.poor*ch4_19.poor + gamma0_ch98_ch4.very.good*ch4_19.very.good
+ch4_19.good ~~ gamma0_ch4.good_ch4.moderate*ch4_19.moderate + gamma0_ch4.good_ch4.poor*ch4_19.poor + gamma0_ch4.good_ch4.very.good*ch4_19.very.good
+ch4_19.moderate ~~ gamma0_ch4.moderate_ch4.poor*ch4_19.poor + gamma0_ch4.moderate_ch4.very.good*ch4_19.very.good
+ch4_19.poor ~~ gamma0_ch4.poor_ch4.very.good*ch4_19.very.good
+ch98_20 ~~ gamma0_ch98_ch4.good*ch4_20.good + gamma0_ch98_ch4.moderate*ch4_20.moderate + gamma0_ch98_ch4.poor*ch4_20.poor + gamma0_ch98_ch4.very.good*ch4_20.very.good
+ch4_20.good ~~ gamma0_ch4.good_ch4.moderate*ch4_20.moderate + gamma0_ch4.good_ch4.poor*ch4_20.poor + gamma0_ch4.good_ch4.very.good*ch4_20.very.good
+ch4_20.moderate ~~ gamma0_ch4.moderate_ch4.poor*ch4_20.poor + gamma0_ch4.moderate_ch4.very.good*ch4_20.very.good
+ch4_20.poor ~~ gamma0_ch4.poor_ch4.very.good*ch4_20.very.good
+ch98_21 ~~ gamma0_ch98_ch4.good*ch4_21.good + gamma0_ch98_ch4.moderate*ch4_21.moderate + gamma0_ch98_ch4.poor*ch4_21.poor + gamma0_ch98_ch4.very.good*ch4_21.very.good
+ch4_21.good ~~ gamma0_ch4.good_ch4.moderate*ch4_21.moderate + gamma0_ch4.good_ch4.poor*ch4_21.poor + gamma0_ch4.good_ch4.very.good*ch4_21.very.good
+ch4_21.moderate ~~ gamma0_ch4.moderate_ch4.poor*ch4_21.poor + gamma0_ch4.moderate_ch4.very.good*ch4_21.very.good
+ch4_21.poor ~~ gamma0_ch4.poor_ch4.very.good*ch4_21.very.good
+ch98_22 ~~ gamma0_ch98_ch4.good*ch4_22.good + gamma0_ch98_ch4.moderate*ch4_22.moderate + gamma0_ch98_ch4.poor*ch4_22.poor + gamma0_ch98_ch4.very.good*ch4_22.very.good
+ch4_22.good ~~ gamma0_ch4.good_ch4.moderate*ch4_22.moderate + gamma0_ch4.good_ch4.poor*ch4_22.poor + gamma0_ch4.good_ch4.very.good*ch4_22.very.good
+ch4_22.moderate ~~ gamma0_ch4.moderate_ch4.poor*ch4_22.poor + gamma0_ch4.moderate_ch4.very.good*ch4_22.very.good
+ch4_22.poor ~~ gamma0_ch4.poor_ch4.very.good*ch4_22.very.good
+ch98_23 ~~ gamma0_ch98_ch4.good*ch4_23.good + gamma0_ch98_ch4.moderate*ch4_23.moderate + gamma0_ch98_ch4.poor*ch4_23.poor + gamma0_ch98_ch4.very.good*ch4_23.very.good
+ch4_23.good ~~ gamma0_ch4.good_ch4.moderate*ch4_23.moderate + gamma0_ch4.good_ch4.poor*ch4_23.poor + gamma0_ch4.good_ch4.very.good*ch4_23.very.good
+ch4_23.moderate ~~ gamma0_ch4.moderate_ch4.poor*ch4_23.poor + gamma0_ch4.moderate_ch4.very.good*ch4_23.very.good
+ch4_23.poor ~~ gamma0_ch4.poor_ch4.very.good*ch4_23.very.good
 ch4_13.good ~~ ch4_18.good + ch4_18.moderate + ch4_18.poor + ch4_18.very.good + ch4_19.good + ch4_19.moderate + ch4_19.poor + ch4_19.very.good + ch4_20.good + ch4_20.moderate + ch4_20.poor + ch4_20.very.good + ch4_21.good + ch4_21.moderate + ch4_21.poor + ch4_21.very.good + ch4_22.good + ch4_22.moderate + ch4_22.poor + ch4_22.very.good + ch4_23.good + ch4_23.moderate + ch4_23.poor + ch4_23.very.good
 ch4_13.moderate ~~ ch4_18.good + ch4_18.moderate + ch4_18.poor + ch4_18.very.good + ch4_19.good + ch4_19.moderate + ch4_19.poor + ch4_19.very.good + ch4_20.good + ch4_20.moderate + ch4_20.poor + ch4_20.very.good + ch4_21.good + ch4_21.moderate + ch4_21.poor + ch4_21.very.good + ch4_22.good + ch4_22.moderate + ch4_22.poor + ch4_22.very.good + ch4_23.good + ch4_23.moderate + ch4_23.poor + ch4_23.very.good
 ch4_13.poor ~~ ch4_18.good + ch4_18.moderate + ch4_18.poor + ch4_18.very.good + ch4_19.good + ch4_19.moderate + ch4_19.poor + ch4_19.very.good + ch4_20.good + ch4_20.moderate + ch4_20.poor + ch4_20.very.good + ch4_21.good + ch4_21.moderate + ch4_21.poor + ch4_21.very.good + ch4_22.good + ch4_22.moderate + ch4_22.poor + ch4_22.very.good + ch4_23.good + ch4_23.moderate + ch4_23.poor + ch4_23.very.good
@@ -193,25 +200,27 @@ ch4_17.very.good ~ alpha_ch4.very.good_17*1 + eta_ch4.very.good_y1*mhi5_16 + eta
 ch98_17 ~ alpha_ch98_17*1 + eta_ch98_y1*mhi5_16 + eta_ch98_y2*mhi5_15 + eta_ch98_y3*mhi5_14 + eta_ch98_x0*cs104_17 + eta_ch98_x1*cs104_16 + eta_ch98_leeftijd.18.23*leeftijd_first.18.25 + eta_ch98_leeftijd.25.39*leeftijd_first.25.39 + eta_ch98_leeftijd.40.66*leeftijd_first.40.66 + eta_ch98_leeftijd.over.67*leeftijd_first.over.67 + eta_ch98_nettohh_f.under.15k*nettohh_f_first.under.15k + eta_ch98_nettohh_f.over.50k*nettohh_f_first.over.50k + eta_ch98_herkomstgroep.first.w*herkomstgroep_first.first.w + eta_ch98_herkomstgroep.first.nonw*herkomstgroep_first.first.nonw + eta_ch98_herkomstgroep.second.w*herkomstgroep_first.second.w + eta_ch98_herkomstgroep.second.nonw*herkomstgroep_first.second.nonw + eta_ch98_geslacht.male*geslacht_first.male + eta_ch98_burgstat.married*burgstat_first.married + eta_ch98_burgstat.never.been.married*burgstat_first.never.been.married + eta_ch98_burgstat.separated*burgstat_first.separated + eta_ch98_burgstat.widow.or.widower*burgstat_first.widow.or.widower + eta_ch98_oplcat.hbo*oplcat_first.hbo + eta_ch98_oplcat.mbo*oplcat_first.mbo + eta_ch98_oplcat.primary.school*oplcat_first.primary.school + eta_ch98_oplcat.vmbo*oplcat_first.vmbo + eta_ch98_oplcat.wo*oplcat_first.wo + eta_ch98_employment.homemaker*employment_first.homemaker + eta_ch98_employment.retired*employment_first.retired + eta_ch98_employment.student*employment_first.student + eta_ch98_employment.unable.to.work*employment_first.unable.to.work + eta_ch98_employment.unemployed*employment_first.unemployed
 
 # Add additional covariances for extra introduced mediators
-ch4_12.good ~~ ch4_12.moderate + ch4_12.poor + ch4_12.very.good
-ch4_12.moderate ~~ ch4_12.poor + ch4_12.very.good
-ch4_12.poor ~~ ch4_12.very.good
+ch98_12 ~~ gamma0_ch98_ch4.good*ch4_12.good + gamma0_ch98_ch4.moderate*ch4_12.moderate + gamma0_ch98_ch4.poor*ch4_12.poor + gamma0_ch98_ch4.very.good*ch4_12.very.good
+ch4_12.good ~~ gamma0_ch4.good_ch4.moderate*ch4_12.moderate + gamma0_ch4.good_ch4.poor*ch4_12.poor + gamma0_ch4.good_ch4.very.good*ch4_12.very.good
+ch4_12.moderate ~~ gamma0_ch4.moderate_ch4.poor*ch4_12.poor + gamma0_ch4.moderate_ch4.very.good*ch4_12.very.good
+ch4_12.poor ~~ gamma0_ch4.poor_ch4.very.good*ch4_12.very.good
 ch4_12.good ~~ ch4_13.good + ch4_13.moderate + ch4_13.poor + ch4_13.very.good + ch4_17.good + ch4_17.moderate + ch4_17.poor + ch4_17.very.good + ch4_18.good + ch4_18.moderate + ch4_18.poor + ch4_18.very.good + ch4_19.good + ch4_19.moderate + ch4_19.poor + ch4_19.very.good + ch4_20.good + ch4_20.moderate + ch4_20.poor + ch4_20.very.good + ch4_21.good + ch4_21.moderate + ch4_21.poor + ch4_21.very.good + ch4_22.good + ch4_22.moderate + ch4_22.poor + ch4_22.very.good + ch4_23.good + ch4_23.moderate + ch4_23.poor + ch4_23.very.good
 ch4_12.moderate ~~ ch4_13.good + ch4_13.moderate + ch4_13.poor + ch4_13.very.good + ch4_17.good + ch4_17.moderate + ch4_17.poor + ch4_17.very.good + ch4_18.good + ch4_18.moderate + ch4_18.poor + ch4_18.very.good + ch4_19.good + ch4_19.moderate + ch4_19.poor + ch4_19.very.good + ch4_20.good + ch4_20.moderate + ch4_20.poor + ch4_20.very.good + ch4_21.good + ch4_21.moderate + ch4_21.poor + ch4_21.very.good + ch4_22.good + ch4_22.moderate + ch4_22.poor + ch4_22.very.good + ch4_23.good + ch4_23.moderate + ch4_23.poor + ch4_23.very.good
 ch4_12.poor ~~ ch4_13.good + ch4_13.moderate + ch4_13.poor + ch4_13.very.good + ch4_17.good + ch4_17.moderate + ch4_17.poor + ch4_17.very.good + ch4_18.good + ch4_18.moderate + ch4_18.poor + ch4_18.very.good + ch4_19.good + ch4_19.moderate + ch4_19.poor + ch4_19.very.good + ch4_20.good + ch4_20.moderate + ch4_20.poor + ch4_20.very.good + ch4_21.good + ch4_21.moderate + ch4_21.poor + ch4_21.very.good + ch4_22.good + ch4_22.moderate + ch4_22.poor + ch4_22.very.good + ch4_23.good + ch4_23.moderate + ch4_23.poor + ch4_23.very.good
 ch4_12.very.good ~~ ch4_13.good + ch4_13.moderate + ch4_13.poor + ch4_13.very.good + ch4_17.good + ch4_17.moderate + ch4_17.poor + ch4_17.very.good + ch4_18.good + ch4_18.moderate + ch4_18.poor + ch4_18.very.good + ch4_19.good + ch4_19.moderate + ch4_19.poor + ch4_19.very.good + ch4_20.good + ch4_20.moderate + ch4_20.poor + ch4_20.very.good + ch4_21.good + ch4_21.moderate + ch4_21.poor + ch4_21.very.good + ch4_22.good + ch4_22.moderate + ch4_22.poor + ch4_22.very.good + ch4_23.good + ch4_23.moderate + ch4_23.poor + ch4_23.very.good
 ch98_12 ~~ ch98_13 + ch98_17 + ch98_18 + ch98_19 + ch98_20 + ch98_21 + ch98_22 + ch98_23
 
-ch4_17.good ~~ ch4_17.moderate + ch4_17.poor + ch4_17.very.good
-ch4_17.moderate ~~ ch4_17.poor + ch4_17.very.good
-ch4_17.poor ~~ ch4_17.very.good
+ch98_17 ~~ gamma0_ch98_ch4.good*ch4_17.good + gamma0_ch98_ch4.moderate*ch4_17.moderate + gamma0_ch98_ch4.poor*ch4_17.poor + gamma0_ch98_ch4.very.good*ch4_17.very.good
+ch4_17.good ~~ gamma0_ch4.good_ch4.moderate*ch4_17.moderate + gamma0_ch4.good_ch4.poor*ch4_17.poor + gamma0_ch4.good_ch4.very.good*ch4_17.very.good
+ch4_17.moderate ~~ gamma0_ch4.moderate_ch4.poor*ch4_17.poor + gamma0_ch4.moderate_ch4.very.good*ch4_17.very.good
+ch4_17.poor ~~ gamma0_ch4.poor_ch4.very.good*ch4_17.very.good
 ch4_17.good ~~ ch4_17.moderate + ch4_17.poor + ch4_17.very.good + ch4_18.good + ch4_18.moderate + ch4_18.poor + ch4_18.very.good + ch4_19.good + ch4_19.moderate + ch4_19.poor + ch4_19.very.good + ch4_20.good + ch4_20.moderate + ch4_20.poor + ch4_20.very.good + ch4_21.good + ch4_21.moderate + ch4_21.poor + ch4_21.very.good + ch4_22.good + ch4_22.moderate + ch4_22.poor + ch4_22.very.good + ch4_23.good + ch4_23.moderate + ch4_23.poor + ch4_23.very.good
 ch4_17.moderate ~~ ch4_17.moderate + ch4_17.poor + ch4_17.very.good + ch4_18.good + ch4_18.moderate + ch4_18.poor + ch4_18.very.good + ch4_19.good + ch4_19.moderate + ch4_19.poor + ch4_19.very.good + ch4_20.good + ch4_20.moderate + ch4_20.poor + ch4_20.very.good + ch4_21.good + ch4_21.moderate + ch4_21.poor + ch4_21.very.good + ch4_22.good + ch4_22.moderate + ch4_22.poor + ch4_22.very.good + ch4_23.good + ch4_23.moderate + ch4_23.poor + ch4_23.very.good
 ch4_17.poor ~~ ch4_17.moderate + ch4_17.poor + ch4_17.very.good + ch4_18.good + ch4_18.moderate + ch4_18.poor + ch4_18.very.good + ch4_19.good + ch4_19.moderate + ch4_19.poor + ch4_19.very.good + ch4_20.good + ch4_20.moderate + ch4_20.poor + ch4_20.very.good + ch4_21.good + ch4_21.moderate + ch4_21.poor + ch4_21.very.good + ch4_22.good + ch4_22.moderate + ch4_22.poor + ch4_22.very.good + ch4_23.good + ch4_23.moderate + ch4_23.poor + ch4_23.very.good
 ch4_17.very.good ~~ ch4_17.moderate + ch4_17.poor + ch4_17.very.good + ch4_18.good + ch4_18.moderate + ch4_18.poor + ch4_18.very.good + ch4_19.good + ch4_19.moderate + ch4_19.poor + ch4_19.very.good + ch4_20.good + ch4_20.moderate + ch4_20.poor + ch4_20.very.good + ch4_21.good + ch4_21.moderate + ch4_21.poor + ch4_21.very.good + ch4_22.good + ch4_22.moderate + ch4_22.poor + ch4_22.very.good + ch4_23.good + ch4_23.moderate + ch4_23.poor + ch4_23.very.good
 ch98_17 ~~ ch98_18 + ch98_19 + ch98_20 + ch98_21 + ch98_22 + ch98_23
 
-# Correct additional covariances for wave 13 mediators
+# Correction of additional covariances for wave 13 mediators
 ch4_13.good ~~ ch4_17.good + ch4_17.moderate + ch4_17.poor + ch4_17.very.good
 ch4_13.moderate ~~ ch4_17.good + ch4_17.moderate + ch4_17.poor + ch4_17.very.good
 ch4_13.poor ~~ ch4_17.good + ch4_17.moderate + ch4_17.poor + ch4_17.very.good

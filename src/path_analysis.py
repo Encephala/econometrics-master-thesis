@@ -14,7 +14,7 @@ from lib.data import Column
 
 # ruff: noqa: F403, F405
 from lib.data.variables import *
-from lib.model import PanelModelDefinitionBuilder, VariableDefinition
+from lib.model import CovarianceDefinition, PanelModelDefinitionBuilder, VariableDefinition
 
 logging.getLogger().setLevel(logging.INFO)
 
@@ -127,8 +127,44 @@ model_definition_mediation = (
     .with_additional_covariances(
         fix_variance_across_time=False,
         free_covariance_across_time=True,
-        within_dummy_covariance=True,
+        within_dummy_covariance=False,  # False so that we can fix the parameter, ignoring "fix_variance_across_time"
         x_predetermined=False,
+        between_regressors=[
+            CovarianceDefinition(
+                VariableDefinition(DISEASE_STATUS),
+                [VariableDefinition(PHYSICAL_HEALTH, dummy_levels=available_dummy_levels(all_data, PHYSICAL_HEALTH))],
+            ),
+            CovarianceDefinition(
+                VariableDefinition(
+                    PHYSICAL_HEALTH, dummy_levels=available_dummy_levels(all_data, PHYSICAL_HEALTH)[1:2]
+                ),
+                [
+                    VariableDefinition(
+                        PHYSICAL_HEALTH, dummy_levels=available_dummy_levels(all_data, PHYSICAL_HEALTH)[2:]
+                    )
+                ],
+            ),
+            CovarianceDefinition(
+                VariableDefinition(
+                    PHYSICAL_HEALTH, dummy_levels=available_dummy_levels(all_data, PHYSICAL_HEALTH)[2:3]
+                ),
+                [
+                    VariableDefinition(
+                        PHYSICAL_HEALTH, dummy_levels=available_dummy_levels(all_data, PHYSICAL_HEALTH)[3:]
+                    )
+                ],
+            ),
+            CovarianceDefinition(
+                VariableDefinition(
+                    PHYSICAL_HEALTH, dummy_levels=available_dummy_levels(all_data, PHYSICAL_HEALTH)[3:4]
+                ),
+                [
+                    VariableDefinition(
+                        PHYSICAL_HEALTH, dummy_levels=available_dummy_levels(all_data, PHYSICAL_HEALTH)[4:]
+                    )
+                ],
+            ),
+        ],
     )
     .with_excluded_regressors(
         [
