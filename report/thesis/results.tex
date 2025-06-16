@@ -147,6 +147,7 @@ of $2.6\%\,(p < 0.001)$. Interesting is the finding that the probabilities of re
 are only weakly influenced by instantaneous and lagged sports, indicating that at the extremes of physical health,
 the effect of sports is overwhelmed by the effects of other (unmeasured) factors.
 The total effect of sports on MHI5 mediated by physical health is found to be $x \pm y$. % TODO
+% TODO BMI
 
 Combining the direct effect and the effect through the mediators, we conclude that engaging in exercise \textit{increases/decreases}
 MHI5 on average by \textit{TODO}, equivalent to a long-run effect of \textit{TODO * 4.55}.
@@ -157,6 +158,7 @@ of using linear models over a logit analysis.
 % TODO discuss parallel mediation
 
 \begin{table}[htbp]
+    \small
     \centering
     \caption{Parameters of interest in the mediation analysis.
     Regressands are in bold.
@@ -191,6 +193,11 @@ of using linear models over a logit analysis.
     poor                            & -14.008   & 0.806 & -17.379   & 0.000 *** \\
     very good                       & -1.735    & 0.244 & -7.107    & 0.000 *** \\
 
+    \multicolumn{5}{l}{\textit{BMI} (underweight)} \\
+    normal weight                   & -4.437    & 0.243 & -18.256   & 0.000 *** \\
+    overweight                      & -9.004    & 0.328 & -27.480   & 0.000 *** \\
+    obese                           & -14.008   & 0.806 & -17.379   & 0.000 *** \\
+
     \midrule
 
     \multicolumn{5}{l}{\textbf{Disease status}} \\
@@ -218,10 +225,18 @@ of using linear models over a logit analysis.
 
     \midrule
 
-    Direct effect                   & -0.303    & 0.173 & -1.751    & 0.080 $^+$ \\
-    Effect physical health          & \multicolumn{4}{l}{} \\
-    Effect disease status           & \multicolumn{4}{l}{} \\
-    Total effect                    & \multicolumn{4}{l}{} \\
+    \multicolumn{5}{l}{\textbf{BMI} (underweight)} \\
+    normal weight                   & \multicolumn{4}{l}{} \\
+    \hspace{3mm} sports$_t$         & -0.021    & 0.007 & -3.153    & 0.002 ** \\
+    \hspace{3mm} sports$_{t-1}$     & -0.011    & 0.007 & -1.615    & 0.106 \\
+
+    overweight                      & \multicolumn{4}{l}{} \\
+    \hspace{3mm} sports$_t$         & -0.022    & 0.005 & -4.722    & 0.000 *** \\
+    \hspace{3mm} sports$_{t-1}$     & -0.025    & 0.005 & -5.175    & 0.000 *** \\
+
+    obese                           & \multicolumn{4}{l}{} \\
+    \hspace{3mm} sports$_t$         & -0.007    & 0.002 & -4.824    & 0.000 *** \\
+    \hspace{3mm} sports$_{t-1}$     & 0.001     & 0.002 & 0.599     & 0.549 \\
 
     \midrule
 
@@ -235,7 +250,37 @@ of using linear models over a logit analysis.
     \bottomrule
 
     \multicolumn{5}{l}{\textit{Significance levels:} $^+$ 0.10, * 0.05, ** 0.01, *** 0.001} \\
-\end{tabular}
+    \end{tabular}
+\end{table}
+
+\begin{table}
+    \centering
+    \caption{Effect through each mediator and direct effect, as derived from \cref{tab:results:mediation_regression}}
+    \label{tab:results:mediation_total_effect}
+    \begin{tabular}{
+        L
+        S[table-format=2.3]
+        S[table-format=2.3]
+        S[table-format=2.3]
+        S[table-format=1.3]
+    }
+
+    \toprule
+
+    \textbf{Regressor} & \textbf{Estimate} & \textbf{Std. Error} & \textbf{z-value} & \textbf{p-value} \\
+
+    \midrule
+
+    Direct effect                   & -0.303    & 0.173 & -1.751    & 0.080 $^+$ \\
+    Effect physical health          & \multicolumn{4}{l}{} \\
+    Effect disease status           & \multicolumn{4}{l}{} \\
+    Effect BMI                      & \multicolumn{4}{l}{} \\
+    Total effect                    & \multicolumn{4}{l}{} \\
+
+    \bottomrule
+
+    \multicolumn{5}{l}{\textit{Significance levels:} $^+$ 0.10, * 0.05, ** 0.01, *** 0.001} \\
+    \end{tabular}
 \end{table}
 
 \section{Discussion and Future Research}
