@@ -41,7 +41,7 @@ indeed indicating a stable time series.
         L
         S[table-format=2.3] % three decimals, two digits before
         S[table-format=2.3]
-        S[table-format=1.2]
+        S[table-format=2.3]
         S[table-format=1.3]
     }
     \toprule
@@ -107,30 +107,66 @@ indeed indicating a stable time series.
 
     \bottomrule
 
-    \multicolumn{5}{l}{\textit{Significance levels:} $^+$ $p < 0.10$, * $p < 0.05$, ** $p < 0.01$, *** $p < 0.001$} \\
+    \multicolumn{5}{l}{\textit{Significance levels:} $^+$ 0.10, * 0.05, ** 0.01, *** 0.001} \\
 \end{tabular}
 \end{table}
 
 \section{Including Mediation}
 \label{sec:results:mediation}
 
-The lack of evidence for a long-term effect may be attributable to confounding due to the mediators that are not included,
-while they are very likely to play a role. Hence, to lend more credence to the findings, a proper mediation analysis
-should also be done.
+The main findings of interest in the mediation analysis are to what extent the effect is explained by the mediators,
+and the degree to which the mediators confounded the result as indicated by the change in the estimated total effect.
 The model contains an overwhelming number of parameters, which would be difficult to interpret.
 Hence, \cref{tab:results:mediation_regression} lists the main parameters of interest, namely those of sports
 in the mediation regressions and those of sports and the mediators in the main regression.
 For the complete parameter estimates, refer to \cref{chap:app:mediation_regression}.
 
+% TODO update with numbers with lagged mediators-numbers!
+The instantaneous effect of sports as well as the (direct) lagged effect are now notably more negative than when no mediators
+are included, changing by $-0.455 \pm 0.24$ and $-0.278 \pm 0.25$ respectively. This indicates there is indeed a
+positive effect through the mediators, with the large estimated effects of physical health showing it especially is an important
+factor. The change in the instantaneous association also provides some evidence for mediation of the reverse
+action, i.e. that being sick or being in poor physical health decreases chance to exercise, although the difference
+is only weakly significant ($p = 0.057$).
+Curious is the negative effect of sports last year of $-0.303$, although it is only weakly significant at $p = 0.08$,
+so it should be interpreted with caution. Note that this estimate is controlled for disease status and physical health
+that year, and for sports, disease status and physical health in the present year. A potential explanation may be that
+failure to adhere to an exercise regime is in itself a cause for distress, although e.g. \citeA{sullins2019exercise}
+do not find significant evidence for this association.
+
+Disease status appears only of minor impact to mental wellbeing ($p = 0.061$),
+and neither does it appear influenced significantly by exercise ($p = 0.188, 0.139$).
+That being said, illness is of course strongly associated with physical health,
+which is by far the most impactful variable in the present study, with the average difference in
+MHI5 score of $14.008\,(p < 0.001)$ between individuals with poor and excellent physical health.
+We also find some significant associations between sports and physical health, with the expected outcome that
+exercise generally increases the probability to report higher levels of physical health.
+Focusing on the well-identified effect of lagged sports, there is a decrease in the probability of moderate physical
+health of $-2.5\%\,(p < 0.001)$, combined with a increase in the probability of very good physical health
+of $2.6\%\,(p < 0.001)$. Interesting is the finding that the probabilities of reporting poor or excellent health
+are only weakly influenced by instantaneous and lagged sports, indicating that at the extremes of physical health,
+the effect of sports is overwhelmed by the effects of other (unmeasured) factors.
+The total effect of sports on MHI5 mediated by physical health is found to be $x \pm y$. % TODO
+
+Combining the direct effect and the effect through the mediators, we conclude that engaging in exercise \textit{increases/decreases}
+MHI5 on average by \textit{TODO}, equivalent to a long-run effect of \textit{TODO * 4.55}.
+% TODO compare to nonmediation
+
+The largest effect size found in mediation regressions is $0.044$, which is quite small, justifying the approximation
+of using linear models over a logit analysis.
+% TODO discuss parallel mediation
+
 \begin{table}[htbp]
     \centering
-    \caption{Numbers are not definitive. Regressands are in bold}
+    \caption{Parameters of interest in the mediation analysis.
+    Regressands are in bold.
+    Standard errors in total effect are determined by the delta method}
     \label{tab:results:mediation_regression}
     \begin{tabular}{
         L
-        S[table-format=2.3] % three decimals, two digits before
         S[table-format=2.3]
-        S[table-format=1.2]
+        S[table-format=2.3]
+        S[table-format=2.3]
         S[table-format=1.3]
     }
     \toprule
@@ -140,48 +176,87 @@ For the complete parameter estimates, refer to \cref{chap:app:mediation_regressi
     \midrule
 
     \multicolumn{5}{l}{\textbf{MHI5}} \\
-    MHI5$_{t-1}$                    & 0.382     & 0.012 & 31.918    & 0.000 *** \\
-    MHI5$_{t-2}$                    & 0.244     & 0.013 & 19.475    & 0.000 *** \\
-    MHI5$_{t-3}$                    & 0.184     & 0.012 & 15.047    & 0.000 *** \\
+    MHI5$_{t-1}$                    & 0.369     & 0.007 & 51.366    & 0.000 *** \\
+    MHI5$_{t-2}$                    & 0.228     & 0.008 & 29.190    & 0.000 *** \\
+    MHI5$_{t-3}$                    & 0.183     & 0.007 & 24.908    & 0.000 *** \\
 
-    sports$_t$                      & -0.064    & 0.278 & -0.231    & 0.818 \\
-    sports$_{t-1}$                  & -0.360    & 0.282 & -1.276    & 0.202 \\
+    sports$_t$                      & -0.023    & 0.169 & -0.133    & 0.894 \\
+    sports$_{t-1}$                  & -0.303    & 0.173 & -1.751    & 0.080 $^+$ \\
 
-    disease status$_t$              & -0.551    & 0.205 & -2.682    & 0.007 ** \\
+    disease status$_t$              & -0.229    & 0.122 & -1.873    & 0.061 $^+$ \\
 
     \multicolumn{5}{l}{\textit{physical health} (excellent)} \\
-    good                            & -3.246    & 0.479 & -6.777    & 0.000 *** \\
-    moderate                        & -7.509    & 0.632 & -11.874   & 0.000 *** \\
-    poor                            & -13.300   & 1.705 & -7.800    & 0.000 *** \\
-    very good                       & -1.182    & 0.473 & -2.497    & 0.013 *\\
+    good                            & -4.437    & 0.243 & -18.256   & 0.000 *** \\
+    moderate                        & -9.004    & 0.328 & -27.480   & 0.000 *** \\
+    poor                            & -14.008   & 0.806 & -17.379   & 0.000 *** \\
+    very good                       & -1.735    & 0.244 & -7.107    & 0.000 *** \\
 
     \midrule
 
     \multicolumn{5}{l}{\textbf{Disease status}} \\
-    sports$_t$                      & -0.022    & 0.008 & -2.751    & 0.006 ** \\
-    sports$_{t-1}$                  & 0.011     & 0.008 & 1.403     & 0.161 \\
+    sports$_t$                      & 0.006     & 0.004 & 1.3181    & 0.188 \\
+    sports$_{t-1}$                  & 0.007     & 0.005 & 1.478     & 0.139 \\
 
     \midrule
 
-    \multicolumn{5}{l}{\textbf{Physical health}} \\
-    good & \multicolumn{4}{l}{} \\
-    \hspace{3mm} sports$_t$         & -0.008    & 0.012 & -0.655    & 0.513 \\
-    \hspace{3mm} sports$_{t-1}$     & -0.014    & 0.012 & -1.173    & 0.241 \\
+    \multicolumn{5}{l}{\textbf{Physical health} (excellent)} \\
+    good                            & \multicolumn{4}{l}{} \\
+    \hspace{3mm} sports$_t$         & -0.021    & 0.007 & -3.153    & 0.002 ** \\
+    \hspace{3mm} sports$_{t-1}$     & -0.011    & 0.007 & -1.615    & 0.106 \\
 
-    moderate & \multicolumn{4}{l}{} \\
-    \hspace{3mm} sports$_t$         & -0.023    & 0.009 & -2.669    & 0.008 ** \\
-    \hspace{3mm} sports$_{t-1}$     & -0.008    & 0.009 & -0.893    & 0.372 \\
+    moderate                        & \multicolumn{4}{l}{} \\
+    \hspace{3mm} sports$_t$         & -0.022    & 0.005 & -4.722    & 0.000 *** \\
+    \hspace{3mm} sports$_{t-1}$     & -0.025    & 0.005 & -5.175    & 0.000 *** \\
 
-    poor & \multicolumn{4}{l}{} \\
-    \hspace{3mm} sports$_t$         & -0.003    & 0.002 & -1.503    & 0.133 \\
-    \hspace{3mm} sports$_{t-1}$     & -0.002    & 0.002 & -0.879    & 0.380 \\
+    poor                            & \multicolumn{4}{l}{} \\
+    \hspace{3mm} sports$_t$         & -0.007    & 0.002 & -4.824    & 0.000 *** \\
+    \hspace{3mm} sports$_{t-1}$     & 0.001     & 0.002 & 0.599     & 0.549 \\
 
-    very good & \multicolumn{4}{l}{} \\
-    \hspace{3mm} sports$_t$         & 0.031     & 0.009 & 3.488     & 0.000 *** \\
-    \hspace{3mm} sports$_{t-1}$     & 0.021     & 0.009 & 2.498     & 0.012 ** \\
+    very good                       & \multicolumn{4}{l}{} \\
+    \hspace{3mm} sports$_t$         & 0.044     & 0.005 & 8.427     & 0.000 *** \\
+    \hspace{3mm} sports$_{t-1}$     & 0.026     & 0.005 & 4.897     & 0.000 *** \\
+
+    \midrule
+
+    Direct effect                   & -0.303    & 0.173 & -1.751    & 0.080 $^+$ \\
+    Effect physical health          & \multicolumn{4}{l}{} \\
+    Effect disease status           & \multicolumn{4}{l}{} \\
+    Total effect                    & \multicolumn{4}{l}{} \\
+
+    \midrule
+
+    Observations    & \multicolumn{4}{l}{12920} \\
+    $\chi^2$        & \multicolumn{4}{l}{6547.9 ($df = 1956$, $p = 0.000$)} \\
+    CFI             & \multicolumn{4}{l}{0.969 (cutoff = 0.95)} \\
+    TLI             & \multicolumn{4}{l}{0.960 (cutoff = 0.95)} \\
+    RMSEA           & \multicolumn{4}{l}{0.013 (cutoff = 0.06)} \\
+    SRMR            & \multicolumn{4}{l}{0.039 (cutoff = 0.08)} \\
 
     \bottomrule
 
-    \multicolumn{5}{l}{\textit{Significance levels:} $^+$ $p < 0.10$, * $p < 0.05$, ** $p < 0.01$, *** $p < 0.001$} \\
+    \multicolumn{5}{l}{\textit{Significance levels:} $^+$ 0.10, * 0.05, ** 0.01, *** 0.001} \\
 \end{tabular}
 \end{table}
+
+\section{Discussion and Future Research}
+\label{sec:results:discussion}
+% TODO: make good text go be good
+There are two possible interpretations of the results. First, the null hypothesis that there is no long-term effect of
+exercise on mental health cannot be rejected based on the data.
+Alternatively, neither can the null hypothesis that observational data does not provide sufficient evidence to
+answer the research question. Both interpretations will now be discussed.
+
+In this sense, the present study is consistent with the outcomes
+of randomised controlled trials in the literature, many of which also do not find evidence for a beneficial effect
+(e.g. \citeA{chalder2012facilitated}).
+
+This is evidence for the impact of the various data quality issues discussed, but is perhaps also indicative of the
+complexities of mental wellbeing that make it hard to explain its variability in terms of the studied variables.
+The fit indices represent good to excellent fit.
+
+However, the data quality issues also lend credence to the idea that analysis of observational data will in general
+not be powered for the present causal analysis, as it may be infeasible to justify the ignorability assumption
+without an experimental design that explicitly controls for confounders. Mainly, the MNAR missingness and the issues resulting
+from self-reported data in questionnaires cause a downward bias that compromise statistical power.
+
+% TODO future research angles based on the interpretation
