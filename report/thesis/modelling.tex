@@ -10,7 +10,8 @@ of the time-variant variable sports,
 but the fact that they vary so little indicates that their effect as mediators could only be weak ($\zeta$ must be small),
 so the error in estimating the total effect due to not modelling them as mediators could only be marginal.
 Beyond this set, based on the literature and availability in the data, we include (self-reported) physical health
-and presence of diagnosed diseases as additional mediators \cite{westcott2012resistance}.
+and presence of diagnosed diseases as additional mediators \cite{westcott2012resistance},
+as well as BMI as a proxy for body-image \cite{westcott2012resistance}.
 While the Health study also queries more nuanced variables like hospital admittance and medication use, these are
 highly correlated with general health and disease status (e.g. $\rho \approx 0.55$ for medication use and disease status),
 and are thus excluded for the sake of parsimony, noting the significant increase in complexity that mediators bring.
@@ -22,13 +23,15 @@ By virtue of the Taylor approximation, this approximation holds reasonably if th
 are moderate.
 
 Body composition, aerobic fitness and disease have been found to affect exercise adherence \cite{abernethy2012biophysical}.
-For both mediators thus, the reverse effect of the mediator on sports engagement is of concern.
-Additionally, the reduced self-efficacy associated with poor mental health is associated
-with bad habits like eating disorders \cite{oellingrath2014eating}, influencing physical health.
+Additionally, \citeA{ingledew2002effects} find BMI is a predictor of some exercise motives.
+For all mediators thus, the reverse effect of the mediator on sports engagement is of concern.
+Additionally, the reduced self-efficacy associated with poor mental health is a known cause for
+eating disorders and general bad diet habits \cite{oellingrath2014eating}, influencing physical health.
 The same mechanism of also pertains to mediation through disease status, as diet is known to be a
-significant determinant of immune function \cite{childs2019diet}.
-The conclusion is therefore that for both mediators, reverse causality is of concern for both steps of the mediation
-action, necessitating that only the lagged influence of regressors on regressands is considered.
+significant determinant of immune function \cite{childs2019diet}, and naturally eating habits influence BMI.
+The conclusion is therefore that for each of the three mediators,
+reverse causality is of concern for both steps of the mediation action,
+necessitating that only the lagged influence of regressors on regressands is considered.
 
 Because only the long-term effect of sports on mental health is considered (recall \cref{sec:methods:reverse_causality}),
 it would be natural to use the cumulative years that someone has exercised as the variable of interest, rather than the
