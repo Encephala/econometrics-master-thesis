@@ -288,22 +288,26 @@ of using linear models over a logit analysis.
 \section{Discussion and Future Research}
 \label{sec:results:discussion}
 % TODO: make good text go be good
-There are two possible interpretations of the results. First, the null hypothesis that there is no long-term effect of
+There are two competing interpretations of the results. First, the null hypothesis that there is no long-term effect of
 exercise on mental health cannot be rejected based on the data.
 Alternatively, neither can the null hypothesis that observational data does not provide sufficient evidence to
 answer the research question. Both interpretations will now be discussed.
+
+% Long term effect
+% Implies: mechanisms that don't have significant impact (relate to mediation estimates), mechanisms that do
+% Consistent with some RCT, although RCT only measure short-term effect I suppose
 
 In this sense, the present study is consistent with the outcomes
 of randomised controlled trials in the literature, many of which also do not find evidence for a beneficial effect
 (e.g. \citeA{chalder2012facilitated}).
 
-This is evidence for the impact of the various data quality issues discussed, but is perhaps also indicative of the
-complexities of mental wellbeing that make it hard to explain its variability in terms of the studied variables.
-The fit indices represent good to excellent fit.
-
-However, the data quality issues also lend credence to the idea that analysis of observational data will in general
-not be powered for the present causal analysis, as it may be infeasible to justify the ignorability assumption
-without an experimental design that explicitly controls for confounders. Mainly, the MNAR missingness and the issues resulting
-from self-reported data in questionnaires cause a downward bias that compromise statistical power.
+% Analysis impossible
+% Major impacts: Lags due to reverse causality (long term effect likely much shorter). Would be solved by RCT with DID design
+% Lesser impacts: data quality (MNAR, self-reporting). They bias effect towards zero, but not big enough to eliminate
+% Find citation for size of bias due to self-report, reiterate number of MNAR
 
 % TODO future research angles based on the interpretation
+% Both interpretations inform choice for RCT, emphasis on not self-reported data and avoiding MNAR
+% long-run harder, perhaps DID
+% but long-run perhaps just observational data, at least prospective questionnaire, be satisfied with Granger
+% causality combined with mechanistic arguments
