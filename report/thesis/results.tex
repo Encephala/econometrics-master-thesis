@@ -161,6 +161,7 @@ of using linear models over a logit analysis.
 % TODO discuss parallel mediation
 
 \begin{table}[htbp]
+    \scriptsize
     \centering
     \caption{Parameters of interest in the mediation analysis.
     Regressands are in bold.
@@ -187,14 +188,24 @@ of using linear models over a logit analysis.
     sports$_t$                      & 0.042     & 0.168 & 0.249     & 0.803 \\
     sports$_{t-1}$                  & -0.167    & 0.172 & -0.969    & 0.332 \\
 
+    disease status$_t$              & -1.384    & 0.216 & -6.398    & 0.000 *** \\
     disease status$_{t-1}$          & 1.474     & 0.221 & 6.677     & 0.000 *** \\
 
+    \multicolumn{5}{l}{\textit{physical health}$_t$ (excellent)} \\
+    good                            & -6.366    & 0.310 & -20.566   & 0.000 *** \\
+    moderate                        & -12.818   & 0.402 & -31.907   & 0.000 *** \\
+    poor                            & -19.840   & 0.861 & -23.050   & 0.000 *** \\
+    very good                       & -2.785    & 0.283 & -9.859    & 0.000 *** \\
     \multicolumn{5}{l}{\textit{physical health}$_{t-1}$ (excellent)} \\
     good                            & 2.952     & 0.342 & 8.631     & 0.000 *** \\
     moderate                        & 6.176     & 0.422 & 14.642    & 0.000 *** \\
     poor                            & 10.746    & 0.820 & 13.102    & 0.000 *** \\
     very good                       & 1.694     & 0.320 & 5.288     & 0.000 *** \\
 
+    \multicolumn{5}{l}{\textit{BMI}$_t$ (underweight)} \\
+    normal weight                   & 0.306     & 0.518 & 0.591     & 0.554 \\
+    overweight                      & 1.241     & 0.552 & 2.247     & 0.025 * \\
+    obese                           & 1.232     & 0.603 & 2.042     & 0.041 * \\
     \multicolumn{5}{l}{\textit{BMI}$_{t-1}$ (underweight)} \\
     normal weight                   & 0.347     & 0.567 & 0.612     & 0.541 \\
     overweight                      & -0.020    & 0.602 & -0.033    & 0.973 \\
@@ -203,33 +214,41 @@ of using linear models over a logit analysis.
     \midrule
 
     \multicolumn{5}{l}{\textbf{Disease status$_t$}} \\
+    sports$_t$                      & -0.007    & 0.004 & -1.608    & 0.108 \\
     sports$_{t-1}$                  & -0.006    & 0.004 & -1.423    & 0.155 \\
 
     \midrule
 
     \multicolumn{5}{l}{\textbf{Physical health$_t$} (excellent)} \\
     good                            & \multicolumn{4}{l}{} \\
+    \hspace{3mm} sports$_t$         & -0.009    & 0.007 & -1.400    & 0.162 \\
     \hspace{3mm} sports$_{t-1}$     & -0.009    & 0.007 & -1.400    & 0.162 \\
 
     moderate                        & \multicolumn{4}{l}{} \\
+    \hspace{3mm} sports$_t$         & -0.020    & 0.007 & -3.007    & 0.003 ** \\
     \hspace{3mm} sports$_{t-1}$     & -0.024    & 0.005 & -4.906    & 0.000 *** \\
 
     poor                            & \multicolumn{4}{l}{} \\
+    \hspace{3mm} sports$_t$         & -0.007    & 0.002 & -4.610    & 0.000 *** \\
     \hspace{3mm} sports$_{t-1}$     & 0.001     & 0.002 & 0.957     & 0.339 \\
 
     very good                       & \multicolumn{4}{l}{} \\
+    \hspace{3mm} sports$_t$         & 0.040     & 0.005 & 7.810     & 0.000 *** \\
     \hspace{3mm} sports$_{t-1}$     & 0.023     & 0.005 & 4.422     & 0.000 *** \\
 
     \midrule
 
     \multicolumn{5}{l}{\textbf{BMI$_t$} (underweight)} \\
     normal weight                   & \multicolumn{4}{l}{} \\
+    \hspace{3mm} sports$_t$         & 0.017     & 0.004 & 4.011     & 0.009 ** \\
     \hspace{3mm} sports$_{t-1}$     & 0.009     & 0.005 & 2.075     & 0.038 * \\
 
     overweight                      & \multicolumn{4}{l}{} \\
+    \hspace{3mm} sports$_t$         & 0.003     & 0.005 & 0.632     & 0.527 \\
     \hspace{3mm} sports$_{t-1}$     & -0.002    & 0.005 & -0.329    & 0.742 \\
 
     obese                           & \multicolumn{4}{l}{} \\
+    \hspace{3mm} sports$_t$         & -0.004    & 0.003 & -1.372    & 0.170 *** \\
     \hspace{3mm} sports$_{t-1}$     & -0.004    & 0.003 & -1.372    & 0.170 \\
 
     \midrule
