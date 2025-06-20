@@ -269,7 +269,12 @@ indirect_ch4_poor := eta_ch4.poor_x1 * zeta1_ch4.poor
 indirect_ch4_very.good := eta_ch4.very.good_x1 * zeta1_ch4.very.good
 indirect_ch4 := indirect_ch4_good + indirect_ch4_moderate + indirect_ch4_poor + indirect_ch4_very.good
 
-total := direct + indirect_disease + indirect_ch4
+indirect_bmi_normal := eta_bmi.normal.weight_x1 * zeta1_bmi_normal.weight
+indirect_bmi_overweight := eta_bmi.overweight_x1 * zeta1_bmi_overweight
+indirect_bmi_obese := eta_bmi.obese_x1 * zeta1_bmi_obese
+indirect_bmi := indirect_bmi_normal + indirect_bmi_overweight + indirect_bmi_obese
+
+total := direct + indirect_disease + indirect_ch4 + indirect_bmi
 
 ")
 ```
