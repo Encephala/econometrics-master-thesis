@@ -34,6 +34,12 @@ def print_correlations(left: pd.DataFrame, right: pd.DataFrame):
         print(pd.concat([left_var, right_var], axis=1).corr())
 
 
+# %% MHI5 and sports
+mhi5 = select_variable(all_data, MHI5)
+sports = select_variable(all_data, SPORTS)
+
+print_correlations(mhi5, sports)
+
 # %% Disease and medication
 disease = select_variable(all_data, DISEASE_STATUS)
 medication = select_variable(health, "ch184")
