@@ -337,18 +337,32 @@ so the approximation of using linear models over a logit analysis is largely jus
 \section{Discussion and Future Research}
 \label{sec:results:discussion}
 % TODO: make good text go be good
-There are two competing interpretations of the results. First, the null hypothesis that there is no long-term effect of
-exercise on mental health cannot be rejected based on the data.
-Alternatively, neither can the null hypothesis that observational data does not provide sufficient evidence to
-answer the research question. Both interpretations will now be discussed.
 
-% Long term effect
-% Implies: mechanisms that don't have significant impact (relate to mediation estimates), mechanisms that do
-% Consistent with some RCT, although RCT only measure short-term effect I suppose
+There are two main conclusions that can be drawn from the results. First, we do not find strong evidence for a
+long-term benefit of exercise on mental health. Second, the complex model design combined with the quality issues
+in the data obscure many of the effects of exercise that are very much of real-world interest.
+Both conclusions inform import decisions in future research and will thus be discussed in the following.
 
-In this sense, the present study is consistent with the outcomes
-of randomised controlled trials in the literature, many of which also do not find evidence for a beneficial effect
-(e.g. \citeA{chalder2012facilitated}).
+The absence of a strong long-term effect means that the associated mechanisms through which exercise may have a lasting
+effect on mental wellbeing are weak. These include structural changes to the brain, physiological adaptations to for instance
+improve body image and improve sleep, and better habits through improved self-efficacy.
+Improvements in these factors due to exercise are either small, or they do not persist when one stops exercising.
+However, there is an extensive literature on the persistency of benefits of exercise on cognition, referred to as
+cognitive reserve \cite{cheng2016cognitive,stern2009cognitive}, so the prior interpretation is favoured.
+While this finding is consistent with some literature which find no strong benefit (e.g. \cite{chalder2012facilitated}),
+it stands in stark contrast with other research (e.g. \cite{philippot2022impact}) and even with this extensive literature
+on cognitive reserve.
+The present finding of an insignificant effect, in fact one that is negative if anything, may be partially attributable
+to the biases resulting from self-reporting and MNAR data.
+Varying impacts of this bias have been found in the literature, from a negligible impact in \citeA{leroux2012role}
+to effects frequently switching from significantly positive to significantly negative and vice versa in \citeA{brown2018mental}.
+Beyond these biases, a more appropriate set of mediators than the small presently used set of three may help
+in finding an effect. For instance, body image may be measured directly as opposed to BMI for better precision,
+and especially the very broad concept of "physical health" may be refined.
+There is thus a need for further research in a similar vein to the present study but with more precise ways of measuring
+relevant mediators and outcomes, as well as close attention paid to avoiding missingness.
+However, absence of a long-term effect also informs an emphasis in future research on the short-term effect, noting
+the instantaneous association in \cref{tab:results:mediation_regression} are consistently larger than the lagged effects.
 
 % Analysis impossible
 % Major impacts: Lags due to reverse causality (long term effect likely much shorter). Would be solved by RCT with DID design
