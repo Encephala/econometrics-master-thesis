@@ -121,6 +121,7 @@ The model contains an overwhelming number of parameters, which would be difficul
 Hence, \cref{tab:results:mediation_regression} lists the main parameters of interest, namely those of sports
 in the mediation regressions and those of sports and the mediators in the main regression.
 For the complete parameter estimates, refer to \cref{chap:app:mediation_regression}.
+\Cref{tab:results:mediation_total_effect} reports the total effects derived from the results.
 
 % TODO update with numbers with lagged mediators-numbers!
 The instantaneous effect of sports as well as the (direct) lagged effect are now notably more negative than when no mediators
@@ -129,6 +130,7 @@ positive effect through the mediators, with the large estimated effects of physi
 factor. The change in the instantaneous association also provides some evidence for mediation of the reverse
 action, i.e. that being sick or being in poor physical health decreases chance to exercise, although the difference
 is not significant ($p = 0.110$ based on the above numbers).
+The effect of lagged sports is insignificant at $-0.167 \pm 0.172$ with a p-value of $0.332$.
 
 Being ill decreases mental wellbeing ($p < 0.001$), but only moderately with a $-1.384$ percentage point change
 in MHI5 on average.
@@ -163,7 +165,16 @@ Combined with the large detrimental effect of last year's physical health on MHI
 of $-0.117 \pm 0.022$ percentage points MHI5 ($p < 0.001$). The negative sign of this effect is contrary to expectations based on the
 literature, which find a positive effect if any. This oddity is due to the aforementioned rebound effect.
 
-% TODO BMI
+MHI5 is found to be positively predicted instantaneously by being overweight ($1.241$, $p = 0.025$) and
+being obese ($1.232$, $p = 0.041$), both as compared to being underweight. These associations are actually more positive
+than the effect of being normal weight, though not statistically significantly so.
+Because we are controlling for physical health and disease status, these findings suggest that the effects of a negative
+body image are more significant in underweight individuals than in overweight or obese individuals.
+There is a significant instantaneous association between sports and being normal weight ($1.7\%$, $p = 0.009$)
+as well as being obese ($-1.8\%$, $p < 0.001$), with no association found for being underweight or overweight.
+Lagged exercise only has a significant effect on the probability of being normal weight, increasing it by $0.9\%$ ($p = 0.038$),
+with all other effects trending towards decreased probabilities.
+This small change leads to a total effect of sports on MHI5 as mediated by BMI of $0.002$ with an associated p-value of $0.095$.
 
 Combining the direct effect and the effect through the mediators, we conclude that engaging in exercise \textit{increases/decreases}
 MHI5 on average by \textit{TODO}, equivalent to a long-run effect of \textit{TODO * 4.55}.
@@ -178,7 +189,7 @@ of using linear models over a logit analysis.
 \begin{table}[htbp]
     \scriptsize
     \centering
-    \caption{Parameters of interest in the mediation analysis.
+    \caption{Parameters of interest in the mediation analysis; controls are not reported.
     Regressands are in bold.
     Standard errors in total effect are determined by the delta method}
     \label{tab:results:mediation_regression}
