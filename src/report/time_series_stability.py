@@ -36,5 +36,8 @@ def analytical(coefs):
     plt.show()
 
 
-# %%
+# %% nonmediation regression
 analytical([0.396, 0.247, 0.202])
+
+# %% medation regression
+analytical([0.391, 0.227, 0.182])
