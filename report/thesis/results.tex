@@ -12,8 +12,6 @@ In general, very few estimated parameters are significant, and even those that a
 no greater than $1.4$ points for an income above € 50\,000 as compared to no income. Contrast this with the interquartile
 range in MHI5 of about $20$ (\cref{fig:data:sample_moments_y_x}).
 
-% TODO: Discuss fit indices
-
 The results may especially be put into question for the very small instantaneous association between sports and MHI5.
 While statistically significant, an average improvement of $0.48$ on a scale of 0 to 100 for individuals who exercise
 is in stark contrast with cross-sectional analyses in the literature. Recall for instance the 43\% decrease in days of poor mental
@@ -22,7 +20,9 @@ $0.2$ and $0.8$ times the sample standard deviation on various measures.
 The estimated long-term effect of exercise is highly insignificant ($p = 0.888$), and hence the null hypothesis that
 no such long-term benefit exists is maintained.
 
-In time series analysis, it is customary to examine the stability of the data, as stability is typically a necessary
+The CFI and TLI are just above $0.95$, indicating good fit, while the RMSEA and SRMR are far below their respective
+cutoff values, which reflects excellent fit. Altogether, the model fit then appears quite good.
+In time series analysis, it is also customary to examine the stability of the data, as stability is typically a necessary
 assumption for estimation. While SEM does not rely explicitly on this assumption, absence of stability would at least make the
 assumption that parameters are constant in time contentious, and the derivation of the long-term effect as a change
 in equilibrium value (\cref{eq:methods:long_run_effect}) does rely on stability.
@@ -181,21 +181,33 @@ MHI5 on average by $-0.290 \pm 0.174$ percentage points ($p = 0.095$), equivalen
 percentage points.
 The total effect is but weakly significant because the effect through physical health is overshadowed by the uncertainty
 in the direct effect.
-This is a small impact as compared to the IQR of $20$ percentage points, and considering the weak significance
+$-0.290$ is a small impact as compared to the IQR of $20$ percentage points, and considering the weak significance
 the negative sign should not be given much interpretation beyond the aforementioned rebound effect in physical health.
 The total effect is not very different from the direct effect of $-0.025$ found in in the analysis without mediation
 (\cref{tab:results:basic_regression}), from which we may conclude that the mediators did not appear to have a significant
 effect as unmeasured confounders.
 
-% quality of results:
-% TODO fit indices
-% TODO largest effect size in all the mediation regressions, not just in the variables of interest?
-% or justify that the approximation is most relevant among the variables of interest
+In terms of the model quality, the fit indices are appreciably worse than in the simpler model, as is to be expected
+considering the significantly increased complexity. Note there are 3100 model parameters compared to the 225 before.
+While the RMSEA of $0.027$ still indicates good and in fact excellent fit, the SRMR of $0.089$ barely does not and the
+CFI and TLI are around $0.85$ which is decidedly smaller than the cutoff value for good fit of $0.95$.
+Considering the majority of the non-fixed variables are the mediators, the relatively poor fit is already an indicator
+that the assumption of parallel mediation is not accurate,
+i.e. that there are a lot of relationships between the mediators that are not accurately modelled.
+This is confirmed in the estimated residual covariances between different dummy levels of the same mediator,
+which are all statistically significant with $p \ll 0.01$ and z-scores as high as $70$.
+That being said, the relationships between mediators are only of interest in so far as they alter estimations
+of the parameters of interest (\cref{tab:results:mediation_regression}), which is likely not an overwhelming influence.
+Combined with the acceptable to great SRMR and RMSEA, the results are taken to be sufficiently accurate for the
+purpose of answering the research question.
+
 Out of the parameters of interest, the largest effect size found in mediation regressions is $0.044$.
 Some other parameters are larger, like $0.283$ for the effect of being over 67 years old on disease status,
 but none of the parameters of interest are as large and the vast majority of parameters is below $0.050$,
 so the approximation of using linear models over a logit analysis is largely justified.
-% TODO discuss parallel mediation
+The AR parameters are very similar to those in the model without mediation, so again time series stability is
+expected, confirmed by the roots of the characteristic polynomial $z_{1, 2} = -1.19 \pm 1.85i$ and $z_3 = 1.13$
+falling outside the unit circle again.
 
 \begin{table}[htbp]
     \scriptsize
