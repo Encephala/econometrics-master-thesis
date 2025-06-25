@@ -182,7 +182,7 @@ def make_income(background_vars: pd.DataFrame) -> pd.DataFrame:
 
 # Employment
 # Derived from primary occupation
-def merge_and_map_categories(column: pd.Series) -> pd.Series:
+def employment_merge_and_map_categories(column: pd.Series) -> pd.Series:
     # It would be nice to have fewer levels here for sparsity and stuff,
     # but I don't think it gets any less than this.
     EMPLOYED = "employed"
@@ -223,7 +223,7 @@ def make_employment(background_vars: pd.DataFrame) -> pd.DataFrame:
     EMPLOYMENT = "employment"
 
     # Apply column-wise to have cohesive datatype
-    employment = occupation.apply(merge_and_map_categories)
+    employment = occupation.apply(employment_merge_and_map_categories)
 
     columns: list[Column] = employment.columns  # pyright: ignore[reportAssignmentType]
     employment.columns = [Column(EMPLOYMENT, column.wave) for column in columns]
