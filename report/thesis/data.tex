@@ -122,17 +122,13 @@ Additionally, opposed to endogeneity caused by unmeasured confounders is endogen
 that would occur if such individuals were left out.
 The choice is thus made to include such observations.
 
-\subsubsection{Employment status}
-TODO why not just primary occupation (parsimony)
-TODO how it was derived from primary occupation
-
 \subsubsection{Dummy Encoding}
 Many questions in the study are measured on a categorical or ordinal scale (f.i. a Likert scale), which cannot be
 meaningfully included directly as regressors, for example primary occupation, ethnicity and education level.
 Naturally, such variables are expanded to dummy variables, with one dummy variable for each level of the original variable
 (also known as one-hot encoding).
 
-Additionally, even for variables that are measured on an ordinal scale, for instance age, income and bmi, the effect on mental wellbeing is very unlikely to
+Additionally, even for variables that are measured on an ordinal scale, for instance age, income and bmi, the effePt on mental wellbeing is very unlikely to
 be linear. Without expert knowledge on the exact relationship between each variable
 and mental health and in order to avoid model complexity, these variables are stratified into categories and then also
 included as dummy variables. While this involves some loss of information, it also simultaneously provides robustness
@@ -171,6 +167,15 @@ data will then be naturally handled by the method explained in \cref{sec:methods
 An alternative would be to assign 0 to each dummy level. However, that would imply that on average, mental wellbeing of non-respondents
 is equal to the mental wellbeing in the dummy level that is left out for identification, which is an assumption that
 clearly need not hold in general.
+
+\subsubsection{Employment status}
+Employment status is the only covariate for which noteworthy preprocessing is done.
+Namely, it is derived from a multiple-choice question on primary occupation with 14 different possible answers,
+which would entail a lot of dummy variables.
+For the sake of parsimony, these answers are grouped into Employed, Unemployed, Student, Homemaker, Retired and
+Unable to work. This captures the most major forms of employment, while losing the nuance of for instance
+the difference between general employment versus employment in a family business or voluntary work, a nuance which
+is assumed to be of lesser relevance.
 
 \section{Missingness}
 \label{sec:data:missingness}
