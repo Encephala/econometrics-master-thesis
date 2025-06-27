@@ -82,13 +82,21 @@ Also assuming positive autoregressive coefficients, both the instantaneous effec
 autoregressive behaviour will also be positive.
 To the end of answering the research question then, we may conclude that the total benefit of exercise is at least
 as large as the found long-term benefit. Thus, while the unidentified effects mean decreased power in answering
-the research question, but significance in the sense of the type I error rate is preserved.
+the research question, significance in the sense of the type I error rate is preserved.
 Do note that in a regression context, in order for the effect of SPORTS$_{t-1}$ to be identified with respect to the simultaneous
 effects, SPORTS$_t$ should be included as a regressor, as the autoregressive patterns otherwise obscure its effect.
+An important implication of this is that the effect represented by the green arrow is the long-term effect
+only in so far as it is not controlled for by the direct effect, that is, it only measures the effects of long-term
+mechanisms that are cumulative with total engagement in exercise across the years.
+An example would be the improvement to one's body image due to cumulative physiological adaptation.
+On the other hand, an mechanism that cannot be measured might be the satisfaction with oneself for the fact that
+one is exercising currently, as for that purpose there is likely no additional benefit to having exercised
+last year given that one is presently engaging in exercise.
 
 \begin{figure}[htbp]
-    \caption{Graph representations of the interactions between MHI5-score and sports. Controls are left out for
-    simplicity. Red arrows indicate unidentified effects}
+    \caption{Graph representations of the hypothesised interactions between MHI5-score and sports.
+    Controls are left out for simplicity.
+    Red arrows indicate unidentified effects}
     \label{fig:methods:reverse_causality}
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
@@ -135,7 +143,7 @@ effects, SPORTS$_t$ should be included as a regressor, as the autoregressive pat
             \draw[fading line] (sports_t.east) -- ([xshift=0.6cm]sports_t.east);
         \end{tikzpicture}
         \subcaption{Panel data. Note the effect of MHI5$_{t-1}$ on SPORTS$_t$ is identified,
-        but is considered a nuisance parameter}
+        but is considered a nuisance parameter. The green arrow represents the effect of interest}
         \label{fig:methods:reverse_causality:panel}
     \end{subfigure}
 \end{figure}
