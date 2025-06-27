@@ -27,7 +27,7 @@ treatment effect
 which thanks to the representativeness of the sample is assumed to estimate the population average treatment.
 This is where SUTVA is crucial, as without it the potential outcomes are not simply a function of individual $i$'s treatment,
 but also of individual $j$'s treatment (where $j \neq i$), and so we could not meaningfully interpret the average
-treatment effect calculated as in \cref{eq:methods:sate}.
+treatment effect calculated as in \Cref{eq:methods:sate}.
 For any one individual the treatment effect may deviate from the average effect, in the sense that it may be moderated by
 for instance personal circumstances or genetics, but such analysis is left to further research.
 
@@ -67,7 +67,7 @@ This holds true even if the treatment effect itself is not influenced by a prior
 are not simultaneously identified.
 
 On the other hand, with panel data, we can exploit the fact that cause must precede effect. The graphical representation
-in \cref{fig:methods:reverse_causality:panel} shows the instantaneous effects, along with presumed
+in \Cref{fig:methods:reverse_causality:panel} shows the instantaneous effects, along with presumed
 autoregressive effects and a lagged effect.
 The latter is now identified. Crucially, the instantaneous effect of sports on MHI5 is not identified, nor is the effect
 of lagged sports through the autoregressive behaviour of MHI5.
@@ -187,12 +187,12 @@ the sample mean $\bar{x}$ and covariance matrix $S$ \cite{preacher2016ml} as
 \end{equation}
 with tr($\cdot$) denoting the trace of a matrix and the minimum of $F$ coincides with the maximum likelihood estimate.
 Note this fit function does not directly involve any observation $z_i$. Rather it is defined purely in terms of the
-sample moments $\bar{z}$ and $S$, which is to say that while \cref{eq:methods:sample_likelihood} and
-\cref{eq:methods:objective_function} are theoretically equivalent, the latter operates on a higher level of abstraction.
+sample moments $\bar{z}$ and $S$, which is to say that while \Cref{eq:methods:sample_likelihood} and
+\Cref{eq:methods:objective_function} are theoretically equivalent, the latter operates on a higher level of abstraction.
 
 At this stage, the elements of $\mu$ and $\Sigma$ may be estimated directly through numerical optimisation.
 Firstly, note that $\mu$ can always be estimated as $\hat{\mu} = \bar{z}$, such that the last term in
-\cref{eq:methods:objective_function} vanishes. It can thus be estimated separately from $\Sigma$,
+\Cref{eq:methods:objective_function} vanishes. It can thus be estimated separately from $\Sigma$,
 and because the research question pertains specifically to the variability of variables,
 the mean term is ignored in further discussion.
 To see how this general multivariate likelihood approach relates to the linear model, consider the very simple example
@@ -230,7 +230,7 @@ can be estimated simultaneously. Consider for instance
 Note the subscripts in $y_1$ and $y_2$ denote different variables altogether,
 not necessarily the same variable at different points in time.
 Now, the model-implied $\Sigma_{y_1 x} = \gamma \beta \Sigma_x$.
-However, because in general the second equation in \cref{eq:methods:simultaneous_regression} does not fully explain the
+However, because in general the second equation in \Cref{eq:methods:simultaneous_regression} does not fully explain the
 variance in $y_2$ ($R^2 < 1$), this may not fully explain the covariance between $y_1$ and $x$.
 That is, there may be a residual covariance $\phi_{y_1 x}$, such that $\Sigma_{y_1 x} = \gamma \beta \Sigma_x + \phi_{y_1 x}$.
 Note also that with three total variables, there are three covariance elements in $\Sigma$, but $\{\gamma, \beta\}$
@@ -242,13 +242,13 @@ just defined in terms of its regressors, but also in terms of its regressors' re
 A general implication of the higher level of abstraction is that while canonically, the linear model has $N - k$ degrees
 of freedom if there are $k$ parameters to be estimated, in SEM there are $\frac{p(p+1)}{2} - k$ degrees of freedom
 for a model that involves $p$ variables. Note $\frac{p(p+1)}{2}$ is the number of unique elements in the covariance matrix.
-For example, the model in \cref{eq:methods:simple_regression} involves three variables (again, neglecting the mean component),
-so again three covariance elements in $\Sigma$. Two of these are implied as in \cref{eq:methods:covariance_simple_regression},
+For example, the model in \Cref{eq:methods:simple_regression} involves three variables (again, neglecting the mean component),
+so again three covariance elements in $\Sigma$. Two of these are implied as in \Cref{eq:methods:covariance_simple_regression},
 but because both $x_1$ and $x_2$ only show up as regressors, the model does not imply any structure to their covariance,
 and it is simply estimated as $\Sigma_{x_1 x_2} = \phi_{x_1 x_2}$. The residual variance of $y$ is also estimated along
 with the two variances of the regressors, which leaves $\frac{p(p + 1)}{2} - k = 6 - 6 = 0$ degrees of freedom. This is
 referred to as a model that is just identified.
-The model in \cref{eq:methods:simultaneous_regression} differs in that it implies all three covariances, but with only two
+The model in \Cref{eq:methods:simultaneous_regression} differs in that it implies all three covariances, but with only two
 parameters. If the model is not supplemented with $\phi_{y_1 x}$, there is $6 - 5 = 1$ degree of freedom, which is to
 say that the model is overidentified.
 While the example is trivial, in a more complex model we may exploit overidentification to quantify
@@ -300,7 +300,7 @@ $y_{it}$ is the MHI5-score of individual $i$ at time $t$ while $\alpha_t$ repres
 $x_{it}$ exercise status, $w_{it}$ is a vector of time-varying controls and $z_i$ a vector of time-invariant controls.
 This equation is simplified in the sense that it only contains a single autoregressive (AR) term and a single lag of $x$,
 i.e. no distributed lags (DL). This is not a necessary restriction, but is done here for simplicity.
-The selection of lags for the final model is discussed in \cref{sec:modelling:lags}. The model has to be complemented
+The selection of lags for the final model is discussed in \Cref{sec:modelling:lags}. The model has to be complemented
 with the initial conditions for $y$. If only one autoregressive lag is included, only $y_{i,1}$ is required,
 but for a higher lag order more initial conditions are required. If distributed lags are included, then likewise for $x$.
 A practical implication of this is that the higher the autoregressive (distributed) lag order, the fewer waves
@@ -319,14 +319,14 @@ The main identifying assumption is \cite{moral2019dynamic}
 \end{equation}
 where a superscript $t$ denotes all observations of the corresponding variable up to time $t$.
 Verbally, the assumption entails that all included regressors are exogenous.
-Note the exogeneity of $x$ is also implied by the ignorability assumption (\cref{eq:methods:ignorability_assumption}).
+Note the exogeneity of $x$ is also implied by the ignorability assumption (\Cref{eq:methods:ignorability_assumption}).
 Furthermore, while all regressors are included in the identifying assumption, if a control is endogenous it simply
 leads to inconsistent estimation of the corresponding parameter, that has a weaker influence on the estimation
 of the parameter of interest ($\beta$) than endogeneity of $x$ itself, and is thus of lesser concern in practice.
-Beyond \cref{eq:methods:identifying_assumption}, in a random effects specification, the time-invariant controls
+Beyond \Cref{eq:methods:identifying_assumption}, in a random effects specification, the time-invariant controls
 must also be uncorrelated with the individual-specific effects, in order to differentiate between $\alpha_i$ and $\delta$.
 
-The effect $\beta$ in \cref{eq:methods:model_formulation} cannot be interpreted directly as the effect that $x$ (exercise)
+The effect $\beta$ in \Cref{eq:methods:model_formulation} cannot be interpreted directly as the effect that $x$ (exercise)
 has at time $t$ on $y$ (MHI5-score), due to the autoregressive behaviour. However, it can be interpreted as a change
 in the equilibrium value of $y_{it}$. Namely, if for an individual $x_{it}$ changes from 0 to 1, i.e. they did not
 engage in exercise but have started doing so, they equilibrium value of $y_{it}$ changes by
@@ -335,9 +335,9 @@ engage in exercise but have started doing so, they equilibrium value of $y_{it}$
     \frac{\sum_{l=0}^{L_x} \beta_l}{1 - \sum_{l=1}^{L_y} \rho_l}
 \end{equation}
 where $L_x$ denotes the distributed lag order and $L_y$ denotes the autoregressive lag order.
-Refer to \cref{chap:app:long_run_effect} for a derivation.
+Refer to \Cref{chap:app:long_run_effect} for a derivation.
 
-To briefly note, \cref{eq:methods:model_formulation} assumes a linear influence of all regressors onto $y$. However, all regressors
+To briefly note, \Cref{eq:methods:model_formulation} assumes a linear influence of all regressors onto $y$. However, all regressors
 are included as dummies, i.e. on a binary scale. For such a scale, linearity holds exactly.
 The only exception is the autoregressive terms, but since even a small number of autoregressive terms can already
 model highly nonlinear temporal behaviour, it is likely a reasonable approximation.
@@ -365,7 +365,7 @@ Then, the total effect of $x$ on $y$ is given as $\beta + \zeta \eta$, the sum o
 Conveniently, these two regressions may be estimated simultaneously in SEM.
 
 Thus, when determining the controls used, attention must be paid to which variables may be mediators and those should be
-modelled as in \cref{eq:methods:mediation_example}. There is a significant price to be paid in terms of model parsimony
+modelled as in \Cref{eq:methods:mediation_example}. There is a significant price to be paid in terms of model parsimony
 though, as a mediator cannot be a fixed variable, potentially adding many additional parameters to the model.
 If a mediator is simply excluded from the regression altogether, this model complexity is avoided, while the indirect
 effect (e.g. $\zeta \eta$) is absorbed into the main parameter ($\beta$). However, in doing so, the mediator, in so far
@@ -375,9 +375,9 @@ In this way, it can also be directly examined to which degree the mediators are 
 the estimated coefficients $\beta$ between the two approaches.
 
 When multiple mediators are simultaneously modelled, there can be either parallel mediation or serial mediation \cite{hayes2017introduction}.
-In parallel mediation (\cref{fig:methods:mediation_forms:parallel}), the mediators do not influence each other,
-whereas in serial mediation (\cref{fig:methods:mediation_forms:serial}) one mediator causes the next mediator.
-If multiple mediators affect each other and the outcome variable as in \cref{fig:methods:mediation_forms:simultaneous},
+In parallel mediation (\Cref{fig:methods:mediation_forms:parallel}), the mediators do not influence each other,
+whereas in serial mediation (\Cref{fig:methods:mediation_forms:serial}) one mediator causes the next mediator.
+If multiple mediators affect each other and the outcome variable as in \Cref{fig:methods:mediation_forms:simultaneous},
 there is another form of simultaneity in the model. While this could be modelled with panel data just as the main
 simultaneity is modelled in the present study, that would entail significant model complexity.
 Instead, the present study models multiple mediators as parallel mediation, which effectively makes the assumption that,
@@ -456,21 +456,21 @@ compromises the findings.
     \end{subfigure}
 \end{figure}
 
-The simplified example in \cref{eq:methods:mediation_example} does not include controls or autoregression. In order for the parameters $\zeta$ and $\eta$
+The simplified example in \Cref{eq:methods:mediation_example} does not include controls or autoregression. In order for the parameters $\zeta$ and $\eta$
 to be meaningfully combined, the same set of controls should be present in the mediation regression as in the main
 regression. Because of this, all the regressors in the main regression are added to the mediation regression, including
 the lagged $y_{i,t-l}$. However, because of the modelling choice of parallel mediation, mediators are not included
 in the mediation regressions of other mediators.
 
 An additional concern in mediation is that the mediator may also be a vehicle for the reverse effect.
-Just as $\beta$ in \cref{eq:methods:mediation_example} cannot differentiate between the forward- and reverse effects,
+Just as $\beta$ in \Cref{eq:methods:mediation_example} cannot differentiate between the forward- and reverse effects,
 neither can $\eta$ nor $\zeta$. That is, in mediation, there is a concern for both the reverse effect of $y_{it}$ onto
-$m_{it}$ and the reverse effect of $m_{it}$ onto $x_{it}$. Just as in \cref{fig:methods:reverse_causality:panel},
+$m_{it}$ and the reverse effect of $m_{it}$ onto $x_{it}$. Just as in \Cref{fig:methods:reverse_causality:panel},
 we may measure only lagged effects in both equations, at the cost of model parsimony and only being able to judge the
 effect of $x_{i,t-2}$ on $y_{it}$.
 If on mechanistic grounds the reverse causality in either equation is expected to be negligible, it can be justified
 to measure the instantaneous effect in that regression.
-For the interpretation of the long-run effect of $x$, \cref{eq:methods:long_run_effect} shows that each lag $\beta_l$
+For the interpretation of the long-run effect of $x$, \Cref{eq:methods:long_run_effect} shows that each lag $\beta_l$
 has the same influence on the outcome. As such, regardless of the lag structure decided on in mediation, the sum of the
 direct and indirect effects can be meaningfully interpreted as the total effect.
 
@@ -513,7 +513,7 @@ In practice with ML estimation, the test statistic is calculated as
     \label{eq:methods:chi2_test_stat}
     \chi^2 = (N - 1) F(\hat{\Sigma}),
 \end{equation}
-where $F(\cdot)$ is the objective function as in \cref{eq:methods:objective_function}.
+where $F(\cdot)$ is the objective function as in \Cref{eq:methods:objective_function}.
 Under the null, the statistic is distributed as $\chi^2_{df}$ if the model has $df = \frac{p(p + 1)}{2} - k$ degrees of freedom
 \cite{zheng2025enhancing}.
 
@@ -610,7 +610,7 @@ form of Full Information Maximum Likelihood (FIML) \cite{arbuckle2013full}.
 The basic premise of FIML is that if a variable is missing for some observation, that observation provides no information
 as to how the missing variable relates to other variables, but it still provides information for the remaining variables.
 Formally, consider estimation of the covariance matrix $\Sigma$ of the vector $x' = (x_1, x_2, x_3)$.
-Because the total sample likelihood (\cref{eq:methods:sample_likelihood}) is the product of the likelihood of each observation,
+Because the total sample likelihood (\Cref{eq:methods:sample_likelihood}) is the product of the likelihood of each observation,
 we need not necessarily use the same likelihood specification for each observation.
 If for some observations $x_3$ is missing, their contribution to the likelihood is simply calculated with the two-dimensional
 covariance matrix of the sub-vector $(x_1, x_2)'$.
@@ -626,7 +626,7 @@ variables are missing. As doing so would eliminate a large portion of the data, 
 
 \subsection{Normality and Robust Maximum Likelihood}
 \label{sec:methods:normality_mlr}
-The derivation of the objective function in \cref{eq:methods:objective_function} relies heavily on the assumption
+The derivation of the objective function in \Cref{eq:methods:objective_function} relies heavily on the assumption
 of normality. However, while this assumption might hold approximately for the MHI5-score, it clearly does not hold
 for all the binary regressors. This is of no concern for exogenous variables, as their covariances are simply fixed
 to the sample covariance, but it does implicate the parameter of interest, namely the effect of exercise on MHI5.

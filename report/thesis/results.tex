@@ -1,16 +1,16 @@
-For the definitive models in \textit{lavaan} syntax, refer to the programming code (\cref{chap:app:code}).
+For the definitive models in \textit{lavaan} syntax, refer to the programming code (\Cref{chap:app:code}).
 
 \section{Excluding Mediation}
 \label{sec:results:no_mediation}
 
 To reiterate, in this approach mediation regressions are not included and neither are the mediators included as regressors,
 gaining model parsimony at risk of violating the ignorability assumption.
-The regression parameters are listed in \cref{tab:results:basic_regression}. Since besides the autoregressive
+The regression parameters are listed in \Cref{tab:results:basic_regression}. Since besides the autoregressive
 terms each variable included is a binary variable, the parameters can be interpreted as the percentage point change
 in mental wellbeing (MHI5) as a result of that variable.
 In general, very few estimated parameters are significant, and even those that are represent only a marginal impact,
 no greater than $1.4$ points for an income above € 50\,000 as compared to no income. Contrast this with the interquartile
-range in MHI5 of about $20$ (\cref{fig:data:sample_moments_y_x}).
+range in MHI5 of about $20$ (\Cref{fig:data:sample_moments_y_x}).
 
 The results may especially be put into question for the very small instantaneous association between sports and MHI5.
 While statistically significant, an average improvement of $0.48$ on a scale of 0 to 100 for individuals who exercise
@@ -25,7 +25,7 @@ cutoff values, which reflects excellent fit. Altogether, the model fit then appe
 In time series analysis, it is also customary to examine the stability of the data, as stability is typically a necessary
 assumption for estimation. While SEM does not rely explicitly on this assumption, absence of stability would at least make the
 assumption that parameters are constant in time contentious, and the derivation of the long-term effect as a change
-in equilibrium value (\cref{eq:methods:long_run_effect}) does rely on stability.
+in equilibrium value (\Cref{eq:methods:long_run_effect}) does rely on stability.
 Based on the reported autoregressive coefficients, the roots of the characteristic polynomial are $z_1 = 1.10$,
 $z_2 = -1.16 + 1.78i$ and $z_3 = -1.16 - 1.78i$, which all fall decidedly outside of the unit circle,
 indeed indicating a stable time series.
@@ -118,9 +118,9 @@ indeed indicating a stable time series.
 The main findings of interest in the mediation analysis are to what extent the effect is explained by the mediators,
 and the degree to which the mediators confounded the result as indicated by the change in the estimated total effect.
 The model contains an overwhelming number of parameters, which would be difficult to interpret.
-Hence, \cref{tab:results:mediation_regression} lists the main parameters of interest, namely those of sports
+Hence, \Cref{tab:results:mediation_regression} lists the main parameters of interest, namely those of sports
 in the mediation regressions and those of sports and the mediators in the main regression.
-For the complete parameter estimates, refer to \cref{chap:app:mediation_regression}.
+For the complete parameter estimates, refer to \Cref{chap:app:mediation_regression}.
 \Cref{tab:results:mediation_total_effect} reports the total effects derived from the results.
 
 The instantaneous effect of sports as well as the (direct) lagged effect are now notably more negative than when no mediators
@@ -183,7 +183,7 @@ in the direct effect.
 $-0.290$ is a small impact as compared to the IQR of $20$ percentage points, and considering the weak significance
 the negative sign should not be given much interpretation beyond the aforementioned rebound effect in physical health.
 The total effect is not very different from the direct effect of $-0.025$ found in in the analysis without mediation
-(\cref{tab:results:basic_regression}), from which we may conclude that the mediators did not appear to have a significant
+(\Cref{tab:results:basic_regression}), from which we may conclude that the mediators did not appear to have a significant
 effect as unmeasured confounders.
 
 In terms of the model quality, the fit indices are appreciably worse than in the simpler model, as is to be expected
@@ -196,7 +196,7 @@ i.e. that there are a lot of relationships between the mediators that are not ac
 This is confirmed in the estimated residual covariances between different dummy levels of the same mediator,
 which are all statistically significant with $p \ll 0.01$ and z-scores as high as $70$.
 That being said, the relationships between mediators are only of interest in so far as they alter estimations
-of the parameters of interest (\cref{tab:results:mediation_regression}), which is likely not an overwhelming influence.
+of the parameters of interest (\Cref{tab:results:mediation_regression}), which is likely not an overwhelming influence.
 Combined with the acceptable to great SRMR and RMSEA, the results are taken to be sufficiently accurate for the
 purpose of answering the research question.
 
@@ -316,7 +316,7 @@ falling outside the unit circle again.
 
 \begin{table}
     \centering
-    \caption{Effect through each mediator and direct effect, as derived from \cref{tab:results:mediation_regression}.
+    \caption{Effect through each mediator and direct effect, as derived from \Cref{tab:results:mediation_regression}.
     Standard errors in total effect are determined by the delta method}
     \label{tab:results:mediation_total_effect}
     \begin{tabular}{
@@ -394,7 +394,7 @@ permanent cannot be quantified in this approach, yet these mechanisms are manifo
 Considering the literature either reports an insignificant effect or a benefit for exercise, yet the present finding is
 a negative effect through physical health and a weakly negative total effect, it is likely that these
 mechanisms are important to consider.
-In fact, because the instantaneous associations in \cref{tab:results:mediation_regression} are consistently larger
+In fact, because the instantaneous associations in \Cref{tab:results:mediation_regression} are consistently larger
 than the lagged effects and point consistently towards a positive association,
 the present data leaves much room for these effects.
 This informs an emphasis in future research on the short-term or direct effect of exercise over the long-term effect.

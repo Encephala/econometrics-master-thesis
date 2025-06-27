@@ -33,7 +33,7 @@ The conclusion is therefore that for each of the three mediators,
 reverse causality is of concern for both steps of the mediation action,
 necessitating that only the lagged influence of regressors on regressands is considered.
 
-Because only the long-term effect of sports on mental health is considered (recall \cref{sec:methods:reverse_causality}),
+Because only the long-term effect of sports on mental health is considered (recall \Cref{sec:methods:reverse_causality}),
 it would be natural to use the cumulative years that someone has exercised as the variable of interest, rather than the
 yearly exercise status. However, because it is not known how many years one has exercised at the time of joining this panel,
 this variable can only be roughly approximated through a running sum. Additionally, information missing in one year would
@@ -56,7 +56,7 @@ These were a gender of ``other'' and, perhaps surprisingly, a household income b
 \section{Lag Selection}
 \label{sec:modelling:lags}
 For determining the autoregressive lag order $L_y$ and the distributed lag order $L_x$, cross validation was run as
-described in \cref{sec:methods:cv}.
+described in \Cref{sec:methods:cv}.
 However, for computational tractability, mediators were not modelled explicitly as such but simply included as controls.
 This should have only a minor impact on forecasting MHI5, but makes a higher number of repeats $R = 50$ feasible.
 It is assumed that the optimal model structure found in this way also applies when mediation regressions are also
@@ -130,7 +130,7 @@ that fixing the (regression) parameters across time is appropriate.
 It is assumed that this finding generalises to the model with mediators.
 
 However, the same cannot be said for the residual variances of $y$. Because of the way that SEM estimates the
-parameters when regressands are also used as regressors (as in \cref{eq:methods:simultaneous_regression}),
+parameters when regressands are also used as regressors (as in \Cref{eq:methods:simultaneous_regression}),
 the residual variance of MHI5 in 2023 is smaller than that the earlier waves. The model could be adjusted
 to prevent this by setting the residual variances between MHI5-values that don't occur in the same regression as free
 parameters (eliminating associated degrees of freedom). However, the residual variances are not of interest for the present
