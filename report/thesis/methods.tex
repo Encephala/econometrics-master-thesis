@@ -636,7 +636,7 @@ to the sample covariance, but it does implicate the parameter of interest, namel
 Even so, \citeA{knief2021violating} find that the normal estimator still behaves well in terms of bias and
 efficiency. They even argue that it may be preferable to violate the assumption of normality over using specific
 techniques to adjust for non-normality, as those are error prone.
-Nevertheless, it would seem worthwhile to use robust approach to maximum likelihood estimation that are readily
+Nevertheless, it would seem worthwhile to use a robust approach to maximum likelihood estimation that are readily
 available in \textit{lavaan}. While multiple choices exist, ML with Huber-White standard errors is used (often
 referred to as ``MLR''), as it was found to perform well in the face of nonnormality \cite{zhong2011bias}, while
 still allowing for the use of FIML which some robust alternatives prohibit.
