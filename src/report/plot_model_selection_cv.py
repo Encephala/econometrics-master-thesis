@@ -20,7 +20,7 @@ def plot(  # noqa: PLR0913
 
     x = np.arange(len(estimates)) + 1
 
-    plt.errorbar(x, estimates, yerr=stds, capsize=4)
+    plt.errorbar(x, estimates, yerr=stds, capsize=4, color="black")
 
     index_min = np.argmin(estimates)
     plt.axhline(estimates[index_min] + stds[index_min], color="red", alpha=0.5)
