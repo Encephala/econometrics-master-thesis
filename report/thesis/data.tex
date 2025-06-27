@@ -19,7 +19,7 @@ since 2008.
 Respondents are asked how often, over the past four weeks,
 they felt very anxious; so down that nothing could cheer them up; calm and peaceful; depressed and gloomy; and happy.
 Responses are measured on a 6-point Likert scale ranging from ``never'' to ``continuously'', and the scores are combined
-linearly to create the MHI5-score from 0 to 100 with increments of 4, where a higher score indicates superior mental health.
+linearly to create the MHI5 score from 0 to 100 with increments of 4, where a higher score indicates superior mental health.
 Refer to \Cref{chap:app:liss_questions} for a description of all of the variables studied,
 including the controls and mediators that are selected in \Cref{sec:modelling:regressors}.
 
@@ -88,8 +88,8 @@ for this work.
         \centering
         \includesvg[width=\textwidth]{figures/data/boxplot_mhi5.svg}
         \vspace{0.1em}
-        \subcaption{Boxplot of the MHI5-score for each available year. Whiskers are 10th and 90th percentiles.
-        Note the appreciable varability in the median is simply because the MHI5-score has an interval of 4}
+        \subcaption{Boxplot of the MHI5 score for each available year. Whiskers are 10th and 90th percentiles.
+        Note the appreciable varability in the median is simply because the MHI5 score has an interval of 4}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.49\textwidth}
@@ -98,17 +98,17 @@ for this work.
         \vspace{0.1em}
         \subcaption{Rate of engagement in exercise for each available year. Errorbars are sample standard deviations}
     \end{subfigure}
-    \caption{Distributions of the MHI5-score and sports engagement across years}
+    \caption{Distributions of the MHI5 score and sports engagement across years}
     \label{fig:data:sample_moments_y_x}
 \end{figure}
 
 \section{Preprocessing}
 \label{sec:data:preprocessing}
 \subsubsection{MHI5}
-As said, the MHI5-score is derived linearly from the responses to the five relevant questions. It was found that
+As said, the MHI5 score is derived linearly from the responses to the five relevant questions. It was found that
 there is no partial missingness, in the sense that either all five questions were answered or none of them were answered.
 The score is then simply calculated when all responses are given, and missing otherwise.
-Listwise deletion is performed for those individuals for whom the MHI5-score is always missing, as they provide no
+Listwise deletion is performed for those individuals for whom the MHI5 score is always missing, as they provide no
 information towards the relationship being studied.
 
 \subsubsection{Sports}
@@ -196,14 +196,14 @@ which is something to be considered.
 Lastly, an individual may give a partial response, either in the form of not answering some of the questions in a study,
 or in the form of not responding to an entire study for a year (even if they did respond to other studies).
 
-A noteworthy quantity is the coverage between sports and the MHI5-score, defined as the percentage of observations
-(for each year) for which both sports and the MHI5-score is available.
+A noteworthy quantity is the coverage between sports and the MHI5 score, defined as the percentage of observations
+(for each year) for which both sports and the MHI5 score is available.
 This can be found in \Cref{tab:data:coverage}. It is found to be quite low, just over 15\% for each year. As a result,
 out of the almost 13\,000 individuals each year, only about 2\,000 contribute direct information to the relationship of interest.
 
 \begin{table}[htbp]
     \centering
-    \caption{Coverage of sports and MHI5-score each year, i.e. percentage of observations for which both are available}
+    \caption{Coverage of sports and MHI5 score each year, i.e. percentage of observations for which both are available}
     \label{tab:data:coverage}
     \begin{tabular}{lc}
         \toprule
@@ -261,8 +261,8 @@ poor mental wellbeing is known to be associated with worse self-efficacy.
 self-efficacy, and the association is corroborated in other literature, f.i. \citeA{schonfeld2016effects,najafi2007relationship}.
 Lower self-efficacy would almost by definition decrease the probability of responding to the survey, thus providing
 a significant mechanism for MNAR missingness of mental health.
-To study this, I examine what percentage of MHI5-scores is missing in between each individual's first and last
-available MHI5-score, which is just over 9\%. This slightly underestimates the true number, as nonresponse
+To study this, I examine what percentage of MHI5 scores is missing in between each individual's first and last
+available MHI5 score, which is just over 9\%. This slightly underestimates the true number, as nonresponse
 in the first or last year of panel participation would not be measured. Nevertheless, it should be a reasonable
 estimate. Some proportion of this will be just MCAR or MAR missingness, but it cannot be known what proportion.
 Since self-efficacy is not directly measured in the panel and due to a lack of expert knowledge on this association,

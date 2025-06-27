@@ -142,7 +142,7 @@ last year given that one is presently engaging in exercise.
         but is considered a nuisance parameter. The green arrow represents the effect of interest}
         \label{fig:methods:reverse_causality:panel}
     \end{subfigure}
-    \caption{Graph representations of the hypothesised interactions between MHI5-score and sports.
+    \caption{Graph representations of the hypothesised interactions between MHI5 score and sports.
     Controls are left out for simplicity.
     Red arrows indicate unidentified effects}
     \label{fig:methods:reverse_causality}
@@ -296,7 +296,7 @@ In a simplified form, the central regression equation is
     \label{eq:methods:model_formulation}
     y_{it} = \alpha_t + \alpha_i + \rho y_{i,t-1} + \beta x_{it} + \omega' w_{it} + \delta' z_i + \epsilon_{it}.
 \end{equation}
-$y_{it}$ is the MHI5-score of individual $i$ at time $t$ while $\alpha_t$ represents a time dummy,
+$y_{it}$ is the MHI5 score of individual $i$ at time $t$ while $\alpha_t$ represents a time dummy,
 $x_{it}$ exercise status, $w_{it}$ is a vector of time-varying controls and $z_i$ a vector of time-invariant controls.
 This equation is simplified in the sense that it only contains a single autoregressive (AR) term and a single lag of $x$,
 i.e. no distributed lags (DL). This is not a necessary restriction, but is done here for simplicity.
@@ -304,7 +304,7 @@ The selection of lags for the final model is discussed in \Cref{sec:modelling:la
 with the initial conditions for $y$. If only one autoregressive lag is included, only $y_{i,1}$ is required,
 but for a higher lag order more initial conditions are required. If distributed lags are included, then likewise for $x$.
 A practical implication of this is that the higher the autoregressive (distributed) lag order, the fewer waves
-are available for analysis. This is especially relevant in the present study, because the missingness of the MHI5-score
+are available for analysis. This is especially relevant in the present study, because the missingness of the MHI5 score
 in 2014 means twice as many waves are lost as would be the case if the Health study had been conducted that year.
 The fact that time-invariant controls $z_i$ may be included is beneficial for controls that vary so little in time that
 treating subsequent values as separate variables causes numerical instability (colinearity). For such a variable,
@@ -327,7 +327,7 @@ Beyond \Cref{eq:methods:identifying_assumption}, in a random effects specificati
 must also be uncorrelated with the individual-specific effects, in order to differentiate between $\alpha_i$ and $\delta$.
 
 The effect $\beta$ in \Cref{eq:methods:model_formulation} cannot be interpreted directly as the effect that $x$ (exercise)
-has at time $t$ on $y$ (MHI5-score), due to the autoregressive behaviour. However, it can be interpreted as a change
+has at time $t$ on $y$ (MHI5 score), due to the autoregressive behaviour. However, it can be interpreted as a change
 in the equilibrium value of $y_{it}$. Namely, if for an individual $x_{it}$ changes from 0 to 1, i.e. they did not
 engage in exercise but have started doing so, they equilibrium value of $y_{it}$ changes by
 \begin{equation}
@@ -348,7 +348,7 @@ As discussed extensively already, the selection of controls is crucial to avoid 
 a second important consideration is the action of mediators. Mediators are variables that explain the effect
 of $x$ on $y$, in the sense that $x$ causes some mediator $m$ which causes $y$. An example of a mediator in the present
 study might be physical health. If physical health is included as a control in the regression, the interpretation of $\beta$
-becomes ``the effect of sports on MHI5-score, \textit{given} the physical health status of an individual.'' However,
+becomes ``the effect of sports on MHI5 score, \textit{given} the physical health status of an individual.'' However,
 improvement of physical health may well be a strong mechanism through which sports affects mental health, which
 should very much be included in $\beta$ for the purpose of answering the research question. The subtleties of mediation
 are often not discussed in the literature \cite{imbens2024causal}, e.g. \citeA{chekroud2018association} simply include physical health as a control.
@@ -627,7 +627,7 @@ variables are missing. As doing so would eliminate a large portion of the data, 
 \subsection{Normality and Robust Maximum Likelihood}
 \label{sec:methods:normality_mlr}
 The derivation of the objective function in \Cref{eq:methods:objective_function} relies heavily on the assumption
-of normality. However, while this assumption might hold approximately for the MHI5-score, it clearly does not hold
+of normality. However, while this assumption might hold approximately for the MHI5 score, it clearly does not hold
 for all the binary regressors. This is of no concern for exogenous variables, as their covariances are simply fixed
 to the sample covariance, but it does implicate the parameter of interest, namely the effect of exercise on MHI5.
 Even so, \citeA{knief2021violating} find that the normal estimator still behaves well in terms of bias and
