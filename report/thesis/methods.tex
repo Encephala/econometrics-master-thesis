@@ -172,7 +172,8 @@ likelihood (density) of a single observation
 \begin{equation}
     f(z_i; \mu, \Sigma) = (2\pi)^{-\frac{p}{2}} |\Sigma|^{-\frac{1}{2}} e^{-\frac{1}{2}(z_i - \mu)' \Sigma^{-1}(z_i - \mu)},
 \end{equation}
-where $p$ denotes the dimension of $z_i$.
+where $p$ denotes the dimension of $z_i$ and $\mu$ and $\Sigma$ are respectively the mean and covariance of $z_i$,
+and lastly $\pi \approx 3.14$.
 Assuming independent observations and dropping the constant, the sample log likelihood is
 \begin{equation}
     \label{eq:methods:sample_likelihood}
