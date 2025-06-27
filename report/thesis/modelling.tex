@@ -77,10 +77,6 @@ given the mechanisms at play, and thus would likely be overfitting.
 
 \begin{figure}[htbp]
     \centering
-    \caption{Cross validated out-of-sample forecasting accuracy for varying lag orders, measured by root mean square error.
-    Errorbars are standard deviations of accuracy across folds. The horizontal line represents the 1-$\sigma$ decision rule.
-    The smaller errorbars represent uncertainty in $\mu_{\text{RMSPE}} + \sigma_{\text{RMSPE}}$}
-    \label{fig:modelling:cv_lags}
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
         \includesvg[width=\textwidth]{figures/modelling/cv_AR.svg}
@@ -94,6 +90,10 @@ given the mechanisms at play, and thus would likely be overfitting.
         \vspace{0.1em}
         \subcaption{$\mu_{\text{RMSPE}}$ for varying maximum distributed lag $L_x$}
     \end{subfigure}
+    \caption{Cross validated out-of-sample forecasting accuracy for varying lag orders, measured by root mean square error.
+    Errorbars are standard deviations of accuracy across folds. The horizontal line represents the 1-$\sigma$ decision rule.
+    The smaller errorbars represent uncertainty in $\mu_{\text{RMSPE}} + \sigma_{\text{RMSPE}}$}
+    \label{fig:modelling:cv_lags}
 \end{figure}
 
 For the autoregressive lags, the most complex model with AR lag order $L_y = 8$ performs best. The decision rule

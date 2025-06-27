@@ -94,10 +94,6 @@ one is exercising currently, as for that purpose there is likely no additional b
 last year given that one is presently engaging in exercise.
 
 \begin{figure}[htbp]
-    \caption{Graph representations of the hypothesised interactions between MHI5-score and sports.
-    Controls are left out for simplicity.
-    Red arrows indicate unidentified effects}
-    \label{fig:methods:reverse_causality}
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
         \begin{tikzpicture}[
@@ -146,6 +142,10 @@ last year given that one is presently engaging in exercise.
         but is considered a nuisance parameter. The green arrow represents the effect of interest}
         \label{fig:methods:reverse_causality:panel}
     \end{subfigure}
+    \caption{Graph representations of the hypothesised interactions between MHI5-score and sports.
+    Controls are left out for simplicity.
+    Red arrows indicate unidentified effects}
+    \label{fig:methods:reverse_causality}
 \end{figure}
 
 While many alternatives exist, for the present research, the package \textit{lavaan} in R is used \cite{rosseel2012lavaan}.
@@ -387,8 +387,6 @@ Clearly, different dummy levels of the same categorical mediator must be causall
 compromises the findings.
 
 \begin{figure}[htbp]
-    \caption{Graph representations of different forms of mediation}
-    \label{fig:methods:mediation_forms}
     \begin{subfigure}[t]{0.32\textwidth}
         \centering
         \begin{tikzpicture}[
@@ -454,6 +452,8 @@ compromises the findings.
         \subcaption{Simultaneity in mediation}
         \label{fig:methods:mediation_forms:simultaneous}
     \end{subfigure}
+    \caption{Graph representations of different forms of mediation}
+    \label{fig:methods:mediation_forms}
 \end{figure}
 
 The simplified example in \Cref{eq:methods:mediation_example} does not include controls or autoregression. In order for the parameters $\zeta$ and $\eta$
