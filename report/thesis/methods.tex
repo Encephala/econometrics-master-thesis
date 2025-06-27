@@ -327,15 +327,17 @@ of the parameter of interest ($\beta$) than endogeneity of $x$ itself, and is th
 Beyond \Cref{eq:methods:identifying_assumption}, in a random effects specification, the time-invariant controls
 must also be uncorrelated with the individual-specific effects, in order to differentiate between $\alpha_i$ and $\delta$.
 
-The effect $\beta$ in \Cref{eq:methods:model_formulation} cannot be interpreted directly as the effect that $x$ (exercise)
+The coefficient $\beta$ in \Cref{eq:methods:model_formulation} cannot be interpreted directly as the effect that $x$ (exercise)
 has at time $t$ on $y$ (MHI5 score), due to the autoregressive behaviour. However, it can be interpreted as a change
-in the equilibrium value of $y_{it}$. Namely, if for an individual $x_{it}$ changes from 0 to 1, i.e. they did not
+in the equilibrium value of $y_{it}$.
+In a generalised model with autoregressive coefficients $\{\rho_{l_y} | l_y \in [1, L_y]\}$,
+and distributed lag coefficients $\{\beta_{l_x} | l_x \in [0, L_x]\}$, The total effect can be interpreted as follows.
+If for an individual $x_{it}$ changes from 0 to 1, i.e. they did not
 engage in exercise but have started doing so, they equilibrium value of $y_{it}$ changes by
 \begin{equation}
     \label{eq:methods:long_run_effect}
-    \frac{\sum_{l=0}^{L_x} \beta_l}{1 - \sum_{l=1}^{L_y} \rho_l}
+    \frac{\sum_{l_x=0}^{L_x} \beta_{l_x}}{1 - \sum_{l_y=1}^{L_y} \rho_{l_y}}.
 \end{equation}
-where $L_x$ denotes the distributed lag order and $L_y$ denotes the autoregressive lag order.
 Refer to \Cref{chap:app:long_run_effect} for a derivation.
 
 To briefly note, \Cref{eq:methods:model_formulation} assumes a linear influence of all regressors onto $y$. However, all regressors
