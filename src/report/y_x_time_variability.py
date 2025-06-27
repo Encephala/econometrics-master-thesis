@@ -12,8 +12,10 @@ data = make_all_data(cache=True)
 mhi5 = select_variable(data, MHI5)
 mhi5_means = mhi5.mean()
 
+mhi5_years = [f"20{year}" for year in list(available_waves(mhi5))]
+
 plt.figure()
-plt.plot(list(available_waves(mhi5)), mhi5_means, "-o")
+plt.plot(mhi5_years, mhi5_means, "-o")
 plt.title("Mean MHI5 score over time")
 plt.ylim(0, 100)
 plt.ylabel("MHI5")
@@ -24,7 +26,7 @@ plt.show()
 mhi5_stds = mhi5.std()
 
 plt.figure()
-plt.plot(list(available_waves(mhi5)), mhi5_stds, "-o")
+plt.plot(mhi5_years, mhi5_stds, "-o")
 plt.title("Std of MHI5 score over time")
 plt.ylim(0, 30)
 plt.ylabel(r"$\sigma_{MHI5}$")
@@ -35,8 +37,10 @@ plt.show()
 sports = select_variable(data, SPORTS)
 sports_means = sports.mean()
 
+sports_years = [f"20{year}" for year in list(available_waves(sports))]
+
 plt.figure()
-plt.plot(list(available_waves(sports)), sports_means, "-o")
+plt.plot(sports_years, sports_means, "-o")
 plt.title("Sports engagement rate over time")
 plt.ylim(0, 1)
 plt.ylabel(r"$p_{sports}$")
@@ -47,7 +51,7 @@ plt.show()
 sports_stds = sports.std()
 
 plt.figure()
-plt.plot(list(available_waves(sports)), sports_stds, "-o")
+plt.plot(sports_years, sports_stds, "-o")
 plt.title("Std of MHI5 score over time")
 plt.ylim(0, 1)
 plt.ylabel(r"$\sigma_{p_{sports}}$")
@@ -59,7 +63,7 @@ mhi5_no_nan = [mhi5[col].dropna() for col in mhi5]
 
 plt.figure(figsize=(4, 3))
 plt.boxplot(mhi5_no_nan, positions=list(available_waves(mhi5)), whis=(10, 90), showfliers=False)
-plt.title("Mean MHI5 score over time")
+plt.title("MHI5 score distribution over time")
 plt.ylim(-4, 104)
 plt.ylabel("MHI5")
 plt.xlabel("Year")
