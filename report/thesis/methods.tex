@@ -48,10 +48,11 @@ only either $Y_i(T)$ or $Y_i(C)$ is observed, and thus we cannot directly observ
 However, under the ignorability assumption, this difference can be estimated by $Y_i(T) - Y_j(C)$ for $j \neq i$,
 which is a quantity that can be observed directly.
 
-Considering the research question at hand is whether physical exercise is an effective intervention, the aim is not to
-quantify the exact effect, but rather to find whether a significant effect exists. To that end, the ignorability assumption
-can be relaxed slightly to assuming that in so far as there are unmeasured confounders, they do not change the statistical
-significance (nor the sign) of the estimated effect.
+Considering the research question at hand is whether physical exercise is an effective intervention for mental wellbeing,
+the aim is not to quantify the exact effect, but rather to find whether a significant effect exists.
+To that end, the ignorability assumption
+can be relaxed slightly to assuming that in so far as there are unmeasured confounders,
+they do not change the statistical significance (nor the sign) of the estimated effect.
 
 \subsection{Reverse Causality}
 \label{sec:methods:reverse_causality}
@@ -144,11 +145,13 @@ last year given that one is presently engaging in exercise.
     \end{subfigure}
     \caption{Graph representations of the hypothesised interactions between MHI5 score and sports.
     Controls are left out for simplicity.
-    Red arrows indicate unidentified effects}
+    The green arrow indicates the effect of interest,
+    while red arrows indicate unidentified effects}
     \label{fig:methods:reverse_causality}
 \end{figure}
 
-While many alternatives exist, for the present research, the package \textit{lavaan} in R is used \cite{rosseel2012lavaan}.
+While many alternative software pacakges exist, for the present research,
+the package \textit{lavaan} in R is used \cite{rosseel2012lavaan}.
 This choice was made because \textit{lavaan} is a mature and feature-rich project, whose reliability is exemplified by its
 extensive use in the literature.
 
@@ -157,8 +160,8 @@ extensive use in the literature.
 SEM can be considered a generalisation of the linear model, where rather than one regression equation which explains
 the variability of the regressand with regards to a set of regressors, multiple regression equations are estimated simultaneously
 to explain the total covariance structure of all variables involved.
-The following will be a minimal introduction for the purpose of this work, in which accuracy is sacrificed to some degree
-in favour of simplicity.
+The following will be a minimal introduction into SEM for the purpose of this work,
+in which accuracy is sacrificed to some degree in favour of simplicity.
 For a full introduction, consider textbooks such as \citeA{kline2023principles}.
 While SEM also allows for modelling latent variables in its general form, such constructs are not considered
 in this work. This is because the author possesses no a priori knowledge as to what latent constructs might exist, and
@@ -267,8 +270,9 @@ i.e. $y_{i,1} = \ldots; y_{i, 2} = \ldots$, and so on. The framework then allows
 Fundamentally, the only restriction imposed by SEM is that the covariance matrix is sufficient to identify the parameters.
 Notably, while Arellano-Bond (AB) estimation of dynamic panel models relies on first-differencing the model for identification,
 SEM does not and as such it is possible to include time-invariant controls beyond just the catch-all individual-specific effect.
-Additionally, AB estimation necessitates on a choice of instruments which compromise model validity if inappropriate
-\cite{bazzi2013blunt}, and SEM was empirically found to be more efficient than AB \cite{leszczensky2022deal}.
+Additionally, AB estimation necessitates a choice of instruments which model validity crucially depends on
+\cite{bazzi2013blunt}, and SEM was empirically found by \citeA{leszczensky2022deal} to be more efficient than AB
+while also being unbiased in all situations where the model was correctly specified.
 Altogether, SEM is the preferred choice for the present study.
 
 \subsection{Fixed and Free Parameters}
@@ -298,11 +302,12 @@ In a simplified form, the central regression equation is
     y_{it} = \alpha_t + \alpha_i + \rho y_{i,t-1} + \beta x_{it} + \omega' w_{it} + \delta' z_i + \epsilon_{it}.
 \end{equation}
 $y_{it}$ is the MHI5 score of individual $i$ at time $t$ while $\alpha_t$ represents a time dummy,
-$x_{it}$ exercise status, $w_{it}$ is a vector of time-varying controls and $z_i$ a vector of time-invariant controls.
+$x_{it}$ the exercise status, $w_{it}$ is a vector of time-varying controls and $z_i$ a vector of time-invariant controls.
 This equation is simplified in the sense that it only contains a single autoregressive (AR) term and a single lag of $x$,
-i.e. no distributed lags (DL). This is not a necessary restriction, but is done here for simplicity.
-The selection of lags for the final model is discussed in \Cref{sec:modelling:lags}. The model has to be complemented
-with the initial conditions for $y$. If only one autoregressive lag is included, only $y_{i,1}$ is required,
+i.e. no distributed lags (DL). This is not a necessary restriction, but is done here for simplicity of
+the introduction; the restriction is done away with when developping the model for the present study (\Cref{chap:modelling}).
+\Cref{eq:methods:model_formulation} has to be complemented with the initial conditions for $y$.
+If only one autoregressive lag is included, only $y_{i,1}$ is required,
 but for a higher lag order more initial conditions are required. If distributed lags are included, then likewise for $x$.
 A practical implication of this is that the higher the autoregressive (distributed) lag order, the fewer waves
 are available for analysis. This is especially relevant in the present study, because the missingness of the MHI5 score
@@ -320,7 +325,7 @@ The main identifying assumption is \cite{moral2019dynamic}
 \end{equation}
 where a superscript $t$ denotes all observations of the corresponding variable up to time $t$.
 Verbally, the assumption entails that all included regressors are exogenous.
-Note the exogeneity of $x$ is also implied by the ignorability assumption (\Cref{eq:methods:ignorability_assumption}).
+Note the exogeneity of $x$ is also implied by the ignorability condition (\Cref{eq:methods:ignorability_assumption}).
 Furthermore, while all regressors are included in the identifying assumption, if a control is endogenous it simply
 leads to inconsistent estimation of the corresponding parameter, that has a weaker influence on the estimation
 of the parameter of interest ($\beta$) than endogeneity of $x$ itself, and is thus of lesser concern in practice.
@@ -342,7 +347,7 @@ Refer to \Cref{chap:app:long_run_effect} for a derivation.
 
 To briefly note, \Cref{eq:methods:model_formulation} assumes a linear influence of all regressors onto $y$. However, all regressors
 are included as dummies, i.e. on a binary scale. For such a scale, linearity holds exactly.
-The only exception is the autoregressive terms, but since even a small number of autoregressive terms can already
+The only exceptions are the autoregressive terms, but since even a small number of autoregressive terms can already
 model highly nonlinear temporal behaviour, it is likely a reasonable approximation.
 
 \subsection{Controls and Mediators}
@@ -354,7 +359,7 @@ study might be physical health. If physical health is included as a control in t
 becomes ``the effect of sports on MHI5 score, \textit{given} the physical health status of an individual.'' However,
 improvement of physical health may well be a strong mechanism through which sports affects mental health, which
 should very much be included in $\beta$ for the purpose of answering the research question. The subtleties of mediation
-are often not discussed in the literature \cite{imbens2024causal}, e.g. \citeA{chekroud2018association} simply include physical health as a control.
+are not often discussed in the literature \cite{imbens2024causal}, e.g. \citeA{chekroud2018association} simply include physical health as a control.
 Such mediation might be measured directly while still effectively controlling for confoundedness due to the mediator as
 in the following, simplified example:
 \begin{align}
@@ -385,9 +390,10 @@ there is another form of simultaneity in the model. While this could be modelled
 simultaneity is modelled in the present study, that would entail significant model complexity.
 Instead, the present study models multiple mediators as parallel mediation, which effectively makes the assumption that,
 conditional on the set of controls and sports, there is no causal dependence between the mediators.
-The residual covariance of the mediators can be estimated in the SEM model to what extent this approximation is violated.
+The residual covariance of the mediators can be estimated in the SEM model to quantify to what extent this approximation
+is violated.
 Clearly, different dummy levels of the same categorical mediator must be causally dependent, which necessarily
-compromises the findings.
+poses a limitation of this study.
 
 \begin{figure}[htbp]
     \begin{subfigure}[t]{0.32\textwidth}
@@ -493,9 +499,9 @@ dummy variables, so correlations between different dummy levels of the same vari
 \subsection{Fit Indices}
 \label{sec:methods:fit_indices}
 There is an extensive set of fit indices for SEM models available in the literature. These derive from the degrees of freedom
-in various ways. No single fit index is definitive for model fit, so it is prudent to consider multiple together
-for a more complete view. A canonical set of fit indices is described hereafter. However, two general remarks are in order.
-Firstly, if a model is just identified, each of these fit indices will always indicate a perfect fit, which is to
+in various ways. No single fit index is definitive for model fit, so it is prudent to consider multiple indices together
+for a more complete view. A canonical set of fit indices is described hereafter. However, first two general remarks are in order.
+For one, if a model is just identified, each of these fit indices will always indicate a perfect fit, which is to
 say there is then no value in interpreting the indices.
 Secondly, these tests do not necessarily provide a way to compare competing models. Considering they all measure the
 extent to which the model-implied covariance matrix differs from the sample covariance matrix, if two competing models
@@ -509,15 +515,15 @@ but that does not make it the preferred model over a model which includes a set 
 \subsubsection{$\chi^2$ test}
 The $\chi^2$ test is the most general (and the original) fit index used \cite{smith2001primer}. It is a badness-of-fit
 test, in the sense that the null hypothesis is that the model explains the data perfectly. To be precise,
-the test statistic is the discrepancy between the model-implied covariance matrix, and a significant test result
-thus implies the null is rejected, implying a significant discrepancy.
+the test statistic is the discrepancy between the model-implied covariance matrix and the real covariance matrix,
+and a significant test result thus implies a significant discrepancy.
 In practice with ML estimation, the test statistic is calculated as
 \begin{equation}
     \label{eq:methods:chi2_test_stat}
     \chi^2 = (N - 1) F(\hat{\Sigma}),
 \end{equation}
 where $F(\cdot)$ is the objective function as in \Cref{eq:methods:objective_function}.
-Under the null, the statistic is distributed as $\chi^2_{df}$ if the model has $df = \frac{p(p + 1)}{2} - k$ degrees of freedom
+Under the null hypothesis, the statistic is distributed as $\chi^2_{df}$ if the model has $df = \frac{p(p + 1)}{2} - k$ degrees of freedom
 \cite{zheng2025enhancing}.
 
 However, a shortcoming of the $\chi^2$ test is that it is sensitive to sample size, in the sense that as
@@ -527,8 +533,8 @@ As an alternative, \citeA{joreskog1993lisrel} propose using the ratio $\chi^2 / 
 where a ratio below 2 represents ``good'' fit and below 3 ``acceptable''. However, this does not fundamentally eliminate
 the sensitivity to sample size; rather, it just proposes more lenient critical values.
 
-\subsubsection{Comparative Fit Index (CFI)}
-The CFI derives from the $\chi^2$ test. It compares the $\chi^2$ test statistic of the model to that of a baseline model.
+\subsubsection{Comparative Fit Index}
+The Comparative Fit Index (CFI) derives from the $\chi^2$ test. It compares the $\chi^2$ test statistic of the model to that of a baseline model.
 While what constitutes the baseline model is subjective (f.i. \citeA{van2021understanding}), typically the baseline model is a
 model in which the variances of all variables are estimated, whereas the covariances are not (i.e. fixed to 0).
 The statistic is then
@@ -542,17 +548,18 @@ higher value indicating better fit. It reaches a value of 1 if the ratio of $\ch
 and a value of 0 if the baseline model fits the data better than the proposed model.
 Typically a cutoff value of $0.95$ is taken to indicate good model fit \cite{hu1999cutoff}.
 
-\subsubsection{Tucket-Lews Index (TLI)}
-Similar to the CFI, \citeA{schermelleh2003evaluating} define the TLI as
+\subsubsection{Tucker-Lewis Index}
+Similar to the CFI, \citeA{schermelleh2003evaluating} define the Tucker-Lewis Index (TLI) as
 \begin{equation}
     \text{TLI} = \frac{\chi_b^2 / df_b - \chi^2 / df}{\chi_b^2 / df_b - 1}.
 \end{equation}
 While not strictly confined to the range of $[0, 1]$, the TLI is typically in that range, only exceeding it
 if the baseline model outperforms the proposed model, or if model fit is so good as to make $\chi^2 < df$.
-Again, higher is better, and the cutoff for good fit is taken from \citeA{hu1999cutoff} as 0.95.
+Again, a higher TLI is better, and the cutoff for good fit is taken from \citeA{hu1999cutoff} as 0.95.
 
-\subsubsection{Root Mean Square Error of Approximation (RMSEA)}
-The RMSEA measures the discrepancy between the model-implied- and sample covariance matrices per degree of freedom,
+\subsubsection{Root Mean Square Error of Approximation}
+The Root Mean Square Error of Approximation (RMSEA) measures the discrepancy between the model-implied- and
+sample covariance matrices per degree of freedom,
 roughly defined as the root mean square difference between the two \cite{schermelleh2003evaluating}.
 It improves on the $\chi^2$ statistic by compensating for the degrees of freedom and the sample size.
 \begin{equation}
@@ -561,9 +568,9 @@ It improves on the $\chi^2$ statistic by compensating for the degrees of freedom
 The RMSEA has a lower bound of 0 and no upper bound, with a lower RMSEA representing better fit.
 We use a cutoff of 0.06 to indicate good fit \cite{hu1999cutoff}.
 
-\subsubsection{Standardised Root Mean Square Residual (SRMR)}
-Lastly, the SRMR is defined most explicitly in terms of $S - \hat{\Sigma}$ without considering degrees of freedom,
-namely as \cite{schermelleh2003evaluating}
+\subsubsection{Standardised Root Mean Square Residual}
+Lastly, the Standardised Root Mean Square Residual (SRMR) is defined most explicitly in terms of $S - \hat{\Sigma}$
+without considering degrees of freedom, namely as \cite{schermelleh2003evaluating}
 \begin{equation}
     \text{SRMR}^2 = \frac{\sum_{i=1}^p\sum_{j=1}^i (\frac{S_{ij} - \hat{\Sigma}_{ij}}{S_i S_j})^2}{p(p+1)/2}.
 \end{equation}
@@ -629,19 +636,20 @@ variables are missing. As doing so would eliminate a large portion of the data, 
 
 \subsection{Normality and Robust Maximum Likelihood}
 \label{sec:methods:normality_mlr}
-The derivation of the objective function in \Cref{eq:methods:objective_function} relies heavily on the assumption
+The derivation of the objective function in \Cref{eq:methods:objective_function} heavily relies on the assumption
 of normality. However, while this assumption might hold approximately for the MHI5 score, it clearly does not hold
-for all the binary regressors. This is of no concern for exogenous variables, as their covariances are simply fixed
+for all binary regressors. This is of no concern for exogenous variables, as their covariances are simply fixed
 to the sample covariance, but it does implicate the parameter of interest, namely the effect of exercise on MHI5.
 Even so, \citeA{knief2021violating} find that the normal estimator still behaves well in terms of bias and
 efficiency. They even argue that it may be preferable to violate the assumption of normality over using specific
 techniques to adjust for non-normality, as those are error prone.
 Nevertheless, it would seem worthwhile to use a robust approach to maximum likelihood estimation that are readily
-available in \textit{lavaan}. While multiple choices exist, ML with Huber-White standard errors is used (often
-referred to as ``MLR''), as it was found to perform well in the face of nonnormality \cite{zhong2011bias}, while
-still allowing for the use of FIML which some robust alternatives prohibit.
+available in \textit{lavaan}. While multiple choices exist, ML with Huber-White standard errors is used in
+this study (often referred to as ``MLR''),
+as it was found to perform well in the face of nonnormality \cite{zhong2011bias},
+while still allowing for the use of FIML which some robust alternatives prohibit.
 With MLR in \textit{lavaan}, a robust alternative to the $\chi^2$ statistic is also calculated as in \citeA{satorra2001scaled},
-which means it and the fit indices that derive from it are also robust.
+which means the $\chi^2$ statistic but also all the fit indices that derive from it are robust.
 In practice it was found that bootstrap standard errors align well with the standard errors implied by MLR estimation,
-whereas SEs with regular maximum likelihood were appreciably smaller, which corroborates the decision to prefer
+whereas standard errors with regular maximum likelihood were appreciably smaller, which corroborates the decision to prefer
 robust estimation.
