@@ -1,9 +1,12 @@
-The LISS panel \cite{scherpenzeel2010liss} started in 2007 in the Netherlands. It takes the form of an online questionnaire
+ehe LISS panel \cite{scherpenzeel2010liss} started in 2007 in the Netherlands. It takes the form of an online questionnaire
 which is held yearly, on various topics such as health, religion, leisure, family, work and so on.
 Its data is freely available for the purposes of research and policymaking.
 Besides these studies, background variables are collected on a monthly basis, like age, household composition,
 income and primary occupation.
-Recruitment is done invite-only to limit self-selection, although it cannot be wholly prevented as
+Recruitment is done to make the panel representative of the Netherlands as a whole in terms of sociodemographics.
+Only adults are recruited, but they are asked to respond on behalf of themselves and all other household members,
+so the data includes people of all ages.
+The panel is invite-only to limit self-selection, although it cannot be wholly prevented as
 participation is still voluntary and motivated by a financial incentive. Additionally, some self-selection might occur
 in the roughly 80\% response rate, despite efforts to contact inactive panel members. Due to a yearly attrition of 12\%,
 refreshment samples were occasionally introduced, selected such as to balance representativeness of household type,
@@ -32,7 +35,8 @@ mental health is typically overreported, leading to a bias towards zero when est
 Self-reporting bias in general is a well-established phenomenon \cite{rosenman2011measuring}, but in practice it is a
 necessary price to pay when gathering data at such a large scale. The large sample size of the LISS panel might
 help to preserve statistical power in the face of the increased variance, but the resulting bias cannot be overcome
-without explicitly modelling the bias-inducing effect, which is a psychological phenomenon that is beyond the scope of this study.
+without explicitly modelling the bias-inducing effect, which is a psychological phenomenon that is beyond the scope of the
+present study.
 
 Another risk factor for poor data quality is the extensiveness of the questionnaire. The total yearly LISS study
 comprises multiple thousands of questions, and it is likely that this causes respondents to not answer each question
@@ -46,7 +50,7 @@ do not find significant evidence for improved response rate and data quality wit
 also note ease of administration may compensate for length, in which regard the online nature and typically multiple-choice
 questions of the panel do well. The impact of the length of the panel is thus likely not a major concern.
 
-The fact that the Leisure and Health study aren't held at the same time of year means it has to be chosen whether
+Because of the fact that the Leisure and Health study are not held at the same time of year, it has to be chosen whether
 a wave of the panel is considered to be a Health study with the most recent Leisure study, or with the first upcoming
 Leisure study.
 Sports has only been included in the panel since 2012, whereas the MHI5 score has been recorded since earlier.
@@ -63,8 +67,8 @@ between $\rho = 0.042$ and $\rho = 0.095$, even before controlling for covariate
 This is very different from for instance \citeA{endrawan2023relationship} who find $\rho = 0.893$ between
 physical activity and mental health.
 Such a small correlation leaves very little statistical power to find a causal effect, and may be a result of
-the very general phrasing of the question for sports which may cause noisy data, but even considering that effect
-the correlation coefficient is strikingly small.
+the very general phrasing of the question for sports which may cause noisy data.
+That being said, the correlation coefficient is strikingly small even considering this general phrasing.
 
 A worthwhile consideration is the impact of the Covid-19 pandemic on the data. The negative effect of the pandemic on public
 mental health has been the topic of much discussion \cite{cullen2020mental,kumar2021covid} and has been empirically verified \cite{kupcova2023effects}.
@@ -130,7 +134,7 @@ meaningfully included directly as regressors, for example primary occupation, et
 Naturally, such variables are expanded to dummy variables, with one dummy variable for each level of the original variable
 (also known as one-hot encoding).
 
-Additionally, even for variables that are measured on an ordinal scale, for instance age, income and bmi, the effePt on mental wellbeing is very unlikely to
+Additionally, even for variables that are measured on an ordinal scale, for instance age, income and bmi, the effect on mental wellbeing is very unlikely to
 be linear. Without expert knowledge on the exact relationship between each variable
 and mental health and in order to avoid model complexity, these variables are stratified into categories and then also
 included as dummy variables. While this involves some loss of information, it also simultaneously provides robustness
@@ -144,8 +148,8 @@ Additionally, for BMI, individuals who reported a weight or height that was exce
 Lower cutoffs were 5\,cm and 1\,kg and upper cutoffs were 270\,cm (the height of the tallest man ever) and 635\,kg
 (the weight of the heaviest man ever). These are conservative bounds so as to eliminate outliers due to for instance
 mistyping, but with minimal subjective judgment to avoid researches biases.
-While technically, this introduces MNAR missingness with respect to BMI, even though only about 0.14\% of the observations are
-assigned to be NA by this, these extreme outliers are likely due to mistyping and are thus only weakly related to the
+Technically, this introduces MNAR missingness with respect to BMI, even though only about 0.14\% of the observations are
+assigned to be NA by this. However, these extreme outliers are likely due to mistyping and are thus only weakly related to the
 true values, which means the impact of the MNAR data should be very minimal.
 
 \begin{table}[htbp]
@@ -201,7 +205,7 @@ A noteworthy quantity is the coverage between sports and the MHI5 score, defined
 This can be found in \Cref{tab:data:coverage}. It is still somewhat low even after removing individuals for whom MHI5
 or sports are always missing, around 40\% each year.
 As a result, out of the almost 13\,000 individuals each year, only about 5\,000 contribute direct information
-to the relationship of interest.
+to the relationship of interest in this study.
 
 \begin{table}[htbp]
     \centering
