@@ -46,8 +46,8 @@ the ignorability assumption through eliminating unmeasured confounders, they als
 which equally invalidate the findings. The approach is thus instead to model individual-specific variability through the
 time-invariant controls $z_i$. Additionally, inclusion of fixed effects entails estimating $N$ additional parameters
 (the incidental parameter problem). Since it is likely that $N > \frac{p(p + 1)}{2}$, the model would not be identified.
-That being said, nothing prevents modelling random effects. In fact, this is commonly done in
-SEM, see for instance \citeA{heck2001multilevel}. However, the author leaves it as an avenue for further research.
+Nothing prevents modelling random effects however, and in fact this is commonly done in SEM
+(for instance \citeA{heck2001multilevel}). The author leaves it as an avenue for further research.
 
 As a minor final comment, some dummy levels of controls were excluded, because they occurred so infrequently in the data
 that including them as regressors led to numerical instability.
@@ -146,3 +146,5 @@ elements also imposes a restriction on associated off-diagonal elements in the s
 in the same column).
 Because the residual variances are not of interest for the present research question, the variability of
 the residual variance across time will not be examined further.
+
+For the definitive models in \textit{lavaan} syntax, refer to the programming code (\Cref{chap:app:code}).

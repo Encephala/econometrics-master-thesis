@@ -1,15 +1,14 @@
-For the definitive models in \textit{lavaan} syntax, refer to the programming code (\Cref{chap:app:code}).
-
 \section{Excluding Mediation}
 \label{sec:results:no_mediation}
 
-To reiterate, in this approach mediation regressions are not included and neither are the mediators included as regressors,
+The regression estimates for the model without mediation are first discussed.
+In this approach, mediation regressions are not included and neither are the mediators included as regressors,
 gaining model parsimony at risk of violating the ignorability assumption.
 The regression parameters are listed in \Cref{tab:results:basic_regression}. Since besides the autoregressive
 terms each variable included is a binary variable, the parameters can be interpreted as the percentage point change
 in mental wellbeing (MHI5) as a result of that variable.
-In general, very few estimated parameters are significant, and even those that are represent only a marginal impact,
-no greater than $1.4$ points for an income above € 50\,000 as compared to no income. Contrast this with the interquartile
+In general, very few estimated parameters are significant, and even those that are significant represent only a marginal impact,
+no greater than $1.4$ points MHI5 for an income above € 50\,000 as compared to no income. Contrast this with the interquartile
 range in MHI5 of about $20$ (\Cref{fig:data:sample_moments_y_x}).
 
 The results may especially be put into question for the very small instantaneous association between sports and MHI5.
@@ -35,7 +34,7 @@ indeed indicating a stable time series.
     \centering
     \caption{Parameter estimates and fit indices for the base regression.
     Estimates are increases in mean MHI5 scores with respect to the dummy level in parentheses.
-    Fit indices are robust variants where applicable}
+    Fit indices are robust where applicable}
     \label{tab:results:basic_regression}
     \begin{tabular}{
         L
@@ -57,39 +56,39 @@ indeed indicating a stable time series.
     sports$_t$                      & 0.432     & 0.177 & 2.746     & 0.013 * \\
     sports$_{t-1}$                  & -0.025    & 0.177 & -0.140    & 0.888 \\
 
-    \multicolumn{5}{l}{\textit{age} (below 18 years)} \\
+    \multicolumn{5}{l}{\textit{Age} (below 18 years)} \\
     18-24 years                     & -0.343    & 0.372 & -0.923    & 0.356 \\
     25-39 years                     & -0.107    & 0.438 & -0.244    & 0.807 \\
     40-66 years                     & 0.700     & 0.443 & 1.579     & 0.114 \\
     over 67 years                   & 0.331     & 0.490 & 0.676     & 0.499 \\
 
-    \multicolumn{5}{l}{\textit{income} (none)} \\
+    \multicolumn{5}{l}{\textit{Income} (none)} \\
     below € 15\,000                 & 1.042     & 0.536 & 1.944     & 0.052 $^+$ \\
     over € 50\,000                  & 1.331     & 1.178 & 1.129     & 0.259 \\
 
-    \multicolumn{5}{l}{\textit{immigration status} (Dutch)} \\
+    \multicolumn{5}{l}{\textit{Immigration status} (Dutch)} \\
     first generation western        & -0.688    & 0.257 & -2.683    & 0.007 ** \\
     first generation non-western    & -0.959    & 0.268 & -3.576    & 0.000 *** \\
     second generation western       & -0.403    & 0.223 & -1.809    & 0.070 $^+$ \\
     second generation non-western   & -0.245    & 0.277 & -0.885    & 0.376 \\
 
-    \multicolumn{5}{l}{\textit{gender} (female)} \\
+    \multicolumn{5}{l}{\textit{Gender} (female)} \\
     male                            & 0.562     & 0.103 & 5.474     & 0.000 *** \\
 
-    \multicolumn{5}{l}{\textit{marital status} (divorced)} \\
+    \multicolumn{5}{l}{\textit{Marital status} (divorced)} \\
     married                         & 0.155     & 0.178 & 0.873     & 0.383 \\
     never been married              & -0.651    & 0.207 & -3.139    & 0.002 ** \\
     separated                       & -0.813    & 0.859 & -0.947    & 0.344 \\
     widow or widower                & 0.337     & 0.289 & 1.167     & 0.243 \\
 
-    \multicolumn{5}{l}{\textit{education level} (havo-vwo)} \\
+    \multicolumn{5}{l}{\textit{Education level} (havo-vwo)} \\
     hbo                             & -0.176    & 0.193 & -0.914    & 0.361 \\
     mbo                             & 0.021     & 0.196 & 0.110     & 0.913 \\
     primary school                  & -0.382    & 0.273 & -1.401    & 0.161 \\
     vmbo                            & -0.056    & 0.205 & -0.273    & 0.785 \\
     university (wo)                 & -0.436    & 0.218 & -0.273    & 0.046 * \\
 
-    \multicolumn{5}{l}{\textit{employment status} (employed)} \\
+    \multicolumn{5}{l}{\textit{Employment status} (employed)} \\
     homemaker                       & -0.510    & 0.195 & -2.618    & 0.009 ** \\
     retired                         & 0.063     & 0.191 & 0.327     & 0.744 \\
     student                         & -0.594    & 0.337 & -1.764    & 0.078 $^+$ \\
@@ -115,7 +114,9 @@ indeed indicating a stable time series.
 \section{Including Mediation}
 \label{sec:results:mediation}
 
-The main findings of interest in the mediation analysis are to what extent the effect is explained by the mediators,
+To examine the relevance of mediators and build a more robust view of the effect of interest, the regression estimates
+for the analysis that explicitly models mediation will now be discussed.
+The main findings of interest in this analysis are to what extent the found effect is explained by the mediators,
 and the degree to which the mediators confounded the result as indicated by the change in the estimated total effect.
 The model contains an overwhelming number of parameters, which would be difficult to interpret.
 Hence, \Cref{tab:results:mediation_regression} lists the main parameters of interest, namely those of sports
@@ -124,17 +125,17 @@ For the complete parameter estimates, refer to \Cref{chap:app:mediation_regressi
 \Cref{tab:results:mediation_total_effect} reports the total effects derived from the results.
 
 The instantaneous effect of sports as well as the (direct) lagged effect are now notably more negative than when no mediators
-are included, changing by $-0.390 \pm 0.24$ and $-0.142 \pm 0.25$ respectively. This points towards there indeed being a
+are included, changing by $-0.390 \pm 0.244$ and $-0.142 \pm 0.247$ respectively. This points towards there indeed being a
 positive effect through the mediators, with the large estimated effects of physical health showing it especially is an important
 factor. The change in the instantaneous association also provides some evidence for mediation of the reverse
 action, i.e. that being sick or being in poor physical health decreases chance to exercise, although the difference
 is not significant ($p = 0.110$ based on the above numbers).
-The effect of lagged sports is insignificant at $-0.167 \pm 0.172$ with a p-value of $0.332$.
+The effect of lagged sports is insignificant at $-0.167 \pm 0.172$ with a $p$-value of $0.332$.
 
 Being ill decreases mental wellbeing ($p < 0.001$), but only moderately with a $-1.384$ percentage point change
 in MHI5 on average.
-Interesting is that being being ill last year has a similarly large but positive effect of $1.474$ percentage points,
-indicating that having recovered from a disease improves wellbeing and/or that having just fallen ill is associated
+Interesting is that having been ill last year has a similarly large but positive effect of $1.474$ percentage points,
+indicating that having recovered from a disease improves mental wellbeing and/or that having just fallen ill is associated
 with a larger mental burden than having been ill for a longer time.
 We do not find a significant long-term effect of exercise on disease status ($p = 0.155$).
 This indicates that exercise does not seem to strengthen the immune system in the long run,
@@ -161,7 +162,7 @@ Interesting is the finding that the probabilities of reporting poor or excellent
 are only weakly influenced by instantaneous and lagged sports, indicating that at the extremes of physical health,
 the effects of sports are overwhelmed by the effects of other (unmeasured) factors.
 Combined with the large detrimental effect of last year's physical health on MHI5, we find a causal effect
-of $-0.117 \pm 0.022$ percentage points MHI5 ($p < 0.001$). The negative sign of this effect is contrary to expectations based on the
+of $(-0.117 \pm 0.022)$ percentage points MHI5 ($p < 0.001$). The negative sign of this effect is contrary to expectations based on the
 literature, which find a positive effect if any. This oddity is due to the aforementioned rebound effect.
 
 MHI5 is found to be positively predicted instantaneously by being overweight ($1.241$, $p = 0.025$) and
@@ -173,7 +174,7 @@ There is a significant instantaneous association between sports and being normal
 as well as being obese ($-1.8\%$, $p < 0.001$), with no association found for being underweight or overweight.
 Lagged exercise only has a significant effect on the probability of being normal weight, increasing it by $0.9\%$ ($p = 0.038$),
 with all other effects trending towards decreased probabilities.
-This small change leads to a total effect of sports on MHI5 as mediated by BMI of $0.002$ with an associated p-value of $0.095$.
+This small change leads to a total effect of sports on MHI5 as mediated by BMI of $0.002$ with an associated $p$-value of $0.095$.
 
 Combining the direct effect and the effects through the three mediators, we conclude that engaging in exercise decreases
 MHI5 on average by $-0.290 \pm 0.174$ percentage points ($p = 0.095$), equivalent to a long-run effect of $-1.45$
@@ -188,16 +189,18 @@ effect as unmeasured confounders.
 
 In terms of the model quality, the fit indices are appreciably worse than in the simpler model, as is to be expected
 considering the significantly increased complexity. Note there are 3100 model parameters compared to the 225 before.
-While the RMSEA of $0.027$ still indicates good and in fact excellent fit, the SRMR of $0.089$ barely does not and the
-CFI and TLI are around $0.85$ which is decidedly smaller than the cutoff value for good fit of $0.95$.
+While the RMSEA of $0.027$ still indicates good and in fact excellent fit, the SRMR of $0.089$ is just below the
+threshold of a good fit and the CFI and TLI are around $0.85$ which is decidedly smaller than the cutoff value for
+good fit of $0.95$.
 Considering the majority of the non-fixed variables are the mediators, the relatively poor fit is already an indicator
 that the assumption of parallel mediation is not accurate,
 i.e. that there are a lot of relationships between the mediators that are not accurately modelled.
 This is confirmed in the estimated residual covariances between different dummy levels of the same mediator,
-which are all statistically significant with $p \ll 0.01$ and z-scores as high as $70$.
-That being said, the relationships between mediators are only of interest in so far as they alter estimations
-of the parameters of interest (\Cref{tab:results:mediation_regression}), which is likely not an overwhelming influence.
-Combined with the acceptable to great SRMR and RMSEA, the results are taken to be sufficiently accurate for the
+which are all statistically significant with $p \ll 0.01$ and $z$-scores as high as $70$.
+While this does pose a threat to the model validity, the relationships between mediators are only of interest in so far
+as they alter estimations of the parameters of interest (\Cref{tab:results:mediation_regression}),
+which is likely not an overwhelming influence.
+Combined with the acceptable to excellent SRMR and RMSEA, the results are taken to be sufficiently accurate for the
 purpose of answering the research question.
 Considering the large number of insignificant effects in \cref{tab:results:mediation_regression}, the model might
 be simplified by removing insignificant mediators.
@@ -211,8 +214,8 @@ Out of the parameters of interest, the largest effect size found in mediation re
 Some other parameters are larger, like $0.283$ for the effect of being over 67 years old on disease status,
 but none of the parameters of interest are as large and the vast majority of parameters is below $0.050$,
 so the approximation of using linear models over a logit analysis is largely justified.
-The AR parameters are very similar to those in the model without mediation, so again time series stability is
-expected, confirmed by the roots of the characteristic polynomial at $z_{1, 2} = -1.19 \pm 1.85i$ and $z_3 = 1.13$,
+The AR parameters are very similar to those in the model without mediation, so time series stability is expected.
+Indeed, the roots of the characteristic polynomial are at $z_{1, 2} = -1.19 \pm 1.85i$ and $z_3 = 1.13$,
 which all fall outside the unit circle.
 
 \begin{table}[htbp]
@@ -221,7 +224,7 @@ which all fall outside the unit circle.
     \caption{Parameters of interest in the mediation analysis; controls are not reported.
     Regressands are in bold.
     Estimates are increases in mean MHI5 scores with respect to the dummy level in parentheses.
-    Fit indices are robust variants where applicable}
+    Fit indices are robust where applicable}
     \label{tab:results:mediation_regression}
     \begin{tabular}{
         L
@@ -359,13 +362,14 @@ which all fall outside the unit circle.
 There are two main conclusions that can be drawn from the results. First, we do not find strong evidence for a
 long-term benefit of exercise on mental health. Second, the complex model design obscures many of the effects of
 exercise that are very much of real-world interest.
-Both conclusions inform import decisions in future research and will thus be discussed in the following.
+Both conclusions inform important design choices in future research and will thus be discussed in the following.
 
 It is always a possibility that the absence of a strong long-term effect is due to various imperfections
 in the present study. For instance, it can naturally not be guaranteed that there are no unmeasured confounders
 (i.e. that the ignorability condition holds). Additionally, while perhaps not very likely, it may well be that
-the average effect is negligible but that there are significant and opposite effects in subgroups, that is there
-may be cause for moderation analysis. A different form of mediation than parallel mediation may also be considered,
+the average effect is negligible but that there are significant and opposite effects in subgroups.
+That is there may be cause for moderation analysis.
+A different form of mediation than parallel mediation may also be considered,
 though it is not likely this would majorly change the findings.
 Lastly, it may simply be that a dataset where the a priori correlation
 between sports and mental health is much larger than the present $\rho < 0.095$ provides more statistical power
@@ -390,7 +394,7 @@ to effects frequently switching from significantly positive to significantly neg
 This makes it hard to say how relevant it is.
 Beyond these biases, a more appropriate set of mediators than the small presently used set of three may help
 in finding an effect. For instance, body image may be measured directly as opposed to BMI for better precision,
-and especially the very broad concept of "physical health" may be refined.
+and especially the very broad concept of ``physical health'' might be refined.
 There is thus a need for further research in a similar vein to the present study but with more precise ways of measuring
 relevant mediators and outcomes, as well as with close attention paid to avoiding missingness.
 
@@ -423,8 +427,8 @@ the impact of sports on various components of mental wellbeing may be examined s
 \citeA{atlantis2004effective} find appreciably different outcomes on such different components.
 There are additional benefits to be had in using an objective measure of mental health over self-reporting and in
 tight quality control so as to avoid MNAR missingness, although perhaps solving those problems is wishful thinking.
-The randomisation in RCTs would control effectively for reverse causality. That being said, it is surprising that
-the findings even among RCTs in the literature is so varied, and the present study yields no insight as to why that may be.
+The randomisation in RCTs would control effectively for reverse causality. It is however surprising that
+the findings even among RCTs in the literature are so varied, and the present study yields no insight as to why that may be.
 A further consideration is that tightly controlling the environment when measuring long-term effects is infeasible,
 necessarily making measuring this effect more complicated, although a difference-in-differences design may partially
 offset this downside.
