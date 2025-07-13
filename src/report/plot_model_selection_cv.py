@@ -9,12 +9,10 @@ def plot(  # noqa: PLR0913
     stds: list[float],
     sigma_estimates: list[float] | None = None,
     sigma_stds: list[float] | None = None,
-    title: str = "Forecasting error for varying AR lag order",
-    xlabel: str = "Maximum $y$ lag",
+    xlabel: str = "$L_y$",
     save_path: str | None = None,
 ):
     plt.figure(figsize=(4, 3))
-    plt.title(title)
     plt.ylabel("RMSPE (MHI5)")
     plt.xlabel(xlabel)
 
@@ -80,7 +78,6 @@ plot(
     stds_x,
     sigma_estimates_x,
     sigma_stds_x,
-    title="Forecasting error for varying DL lag order",
-    xlabel="Maximum $x$ lag",
+    xlabel="$L_x$",
     save_path="../report/thesis/figures/modelling/cv_DL.svg",
 )
