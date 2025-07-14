@@ -376,9 +376,15 @@ def find_first_non_na(data: pd.DataFrame) -> pd.Series:
 
     variable_sorted = data[sorted(data.columns, key=lambda column: column.wave)]  # pyright: ignore[reportAttributeAccessIssue]
 
-    # Already asserted all columns are same variable, so same dtype
     name = Column(f"{variables[0]}_first")
-    result = pd.Series(index=data.index, name=name, dtype=data.dtypes.iloc[0])
+    # Already asserted all columns are same variable, so same dtype
+    # Only exception is categoricals, may have different categories
+    dtype = data.dtypes.iloc[0]
+
+    if isinstance(dtype, pd.CategoricalDtype):
+        dtype = combine_categoricals(data.dtypes)
+
+    result = pd.Series(index=data.index, name=name, dtype=dtype)
 
     # Have to loop because df.first_valid_index() not vectorised, returns index of first row containing any valid value
     for individual in variable_sorted.index:
@@ -389,6 +395,15 @@ def find_first_non_na(data: pd.DataFrame) -> pd.Series:
         result.loc[individual] = value
 
     return result
+
+
+def combine_categoricals(dtypes: "pd.Series[pd.CategoricalDtype]") -> pd.CategoricalDtype:
+    categories = set()
+
+    for dtype in dtypes:
+        categories.update(dtype.categories)
+
+    return pd.CategoricalDtype(list(categories))
 
 
 def add_first_non_na(variable: pd.DataFrame) -> pd.DataFrame:
