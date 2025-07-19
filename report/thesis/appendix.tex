@@ -73,6 +73,234 @@ All code used for the research as well as for the figures in this report is avai
 \chapter{Results of Mediation Regression}
 \label{chap:app:mediation_regression}
 
-TODO
+\begin{table}[htbp]
+    \centering
+    \footnotesize
+    \caption{Regression parameters for MHI5}
+    \label{tab:appendix:mediation_mhi5}
+    \begin{tabular}{
+        L
+        S[table-format=2.3] % three decimals, two digits before
+        S[table-format=2.3]
+        S[table-format=2.3]
+        S[table-format=1.3]
+    }
+    \toprule
 
-This'll sure be fun, it's only 9 complete regression tables hahaaaa
+    \textbf{Regressor} & \textbf{Estimate} & \textbf{Std. Error} & \textbf{z-value} & \textbf{p-value} \\
+
+    \midrule
+
+    MHI5$_{t-1}$                    & 0.391     & 0.007 & 54.302    & 0.000 *** \\
+    MHI5$_{t-2}$                    & 0.227     & 0.008 & 29.093    & 0.000 *** \\
+    MHI5$_{t-3}$                    & 0.182     & 0.007 & 25.401    & 0.000 *** \\
+
+    sports$_t$                      & 0.042     & 0.168 & 0.249     & 0.803 \\
+    sports$_{t-1}$                  & -0.167    & 0.172 & -0.969    & 0.332 \\
+
+    disease status                  & -1.384    & 0.216 & -6.398    & 0.000 *** \\
+
+    \multicolumn{5}{l}{\textit{physical health}$_t$ (excellent)} \\
+    good                            & -6.366    & 0.310 & -20.566   & 0.000 *** \\
+    moderate                        & -12.818   & 0.402 & -31.907   & 0.000 *** \\
+    poor                            & -19.840   & 0.861 & -23.050   & 0.000 *** \\
+    very good                       & -2.785    & 0.283 & -9.859    & 0.000 *** \\
+    \multicolumn{5}{l}{\textit{physical health}$_{t-1}$ (excellent)} \\
+    good                            & 2.952     & 0.342 & 8.631     & 0.000 *** \\
+    moderate                        & 6.176     & 0.422 & 14.642    & 0.000 *** \\
+    poor                            & 10.746    & 0.820 & 13.102    & 0.000 *** \\
+    very good                       & 1.694     & 0.320 & 5.288     & 0.000 *** \\
+
+    \multicolumn{5}{l}{\textit{BMI}$_t$ (underweight)} \\
+    normal weight                   & 0.306     & 0.518 & 0.591     & 0.554 \\
+    overweight                      & 1.241     & 0.552 & 2.247     & 0.025 * \\
+    obese                           & 1.232     & 0.603 & 2.042     & 0.041 * \\
+    \multicolumn{5}{l}{\textit{BMI}$_{t-1}$ (underweight)} \\
+    normal weight                   & 0.347     & 0.567 & 0.612     & 0.541 \\
+    overweight                      & -0.020    & 0.602 & -0.033    & 0.973 \\
+    obese                           & 0.207     & 0.656 & 0.315     & 0.752 \\
+
+    \multicolumn{5}{l}{\textit{age} (below 18 years)} \\
+    18-24 years                     & 0.031     & 0.358 & 0.087     & 0.931 \\
+    25-39 years                     & 0.576     & 0.421 & 1.368     & 0.171 \\
+    40-66 years                     & 1.969     & 0.432 & 4.563     & 0.000 *** \\
+    over 67 years                   & 1.843     & 0.479 & 3.845     & 0.000 *** \\
+
+    \multicolumn{5}{l}{\textit{income} (none)} \\
+    below € 15\,000                 & 1.129     & 0.447 & 2.527     & 0.012 * \\
+    over € 50\,000                  & 2.259     & 0.336 & 6.714     & 0.000 *** \\
+
+    \multicolumn{5}{l}{\textit{immigration status} (Dutch)} \\
+    first generation western        & -0.844    & 0.252 & -3.348    & 0.001 ** \\
+    first generation non-western    & -0.911    & 0.260 & -3.508    & 0.000 *** \\
+    second generation western       & -0.360    & 0.220 & -1.634    & 0.102 \\
+    second generation non-western   & -0.388    & 0.272 & -1.426    & 0.154 \\
+
+    \multicolumn{5}{l}{\textit{gender} (female)} \\
+    male                            & 0.502     & 0.102 & 4.940     & 0.000 *** \\
+
+    \multicolumn{5}{l}{\textit{marital status} (divorced)} \\
+    married                         & 0.101     & 0.171 & 0.591     & 0.554 \\
+    never been married              & -0.739    & 0.200 & -3.692    & 0.000 *** \\
+    separated                       & -0.245    & 0.834 & -0.293    & 0.769 \\
+    widow or widower                & 0.177     & 0.279 & 0.635     & 0.525 \\
+
+    \multicolumn{5}{l}{\textit{education level} (havo-vwo)} \\
+    hbo                             & -0.293    & 0.189 & -1.552    & 0.121 \\
+    mbo                             & -0.059    & 0.192 & -0.308    & 0.758 \\
+    primary school                  & -0.208    & 0.268 & -0.778    & 0.437 \\
+    vmbo                            & 0.030     & 0.202 & 0.146     & 0.884 \\
+    university (wo)                 & -0.820    & 0.215 & -3.821    & 0.000 *** \\
+
+    \multicolumn{5}{l}{\textit{employment status} (employed)} \\
+    homemaker                       & -0.377    & 0.192 & -1.965    & 0.049 * \\
+    retired                         & 0.372     & 0.190 & 1.957     & 0.050 $^+$ \\
+    student                         & -0.686    & 0.321 & -2.136    & 0.033 * \\
+    unable to work                  & 0.136     & 0.333 & 0.407     & 0.684 \\
+    unemployed                      & -0.206    & 0.348 & -0.591    & 0.555 \\
+
+    \bottomrule
+
+    \multicolumn{5}{l}{\textit{Significance levels:} $^+$ 0.10, * 0.05, ** 0.01, *** 0.001} \\
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+    \centering
+    \small
+    \caption{Regression parameters for disease status}
+    \label{tab:appendix:mediation_disease}
+    \begin{tabular}{
+        L
+        S[table-format=2.3] % three decimals, two digits before
+        S[table-format=2.3]
+        S[table-format=2.3]
+        S[table-format=1.3]
+    }
+    \toprule
+
+    \textbf{Regressor} & \textbf{Estimate} & \textbf{Std. Error} & \textbf{z-value} & \textbf{p-value} \\
+
+    \midrule
+
+    MHI5$_{t-1}$                    & -0.001    & 0.000 & -8.432    & 0.000 *** \\
+    MHI5$_{t-2}$                    & -0.001    & 0.000 & -5.496    & 0.000 *** \\
+    MHI5$_{t-3}$                    & -0.001    & 0.000 & -4.574    & 0.000 *** \\
+
+    sports$_t$                      & -0.007    & 0.004 & -1.608    & 0.108 \\
+    sports$_{t-1}$                  & -0.006    & 0.004 & -1.432    & 0.155 \\
+
+    \multicolumn{5}{l}{\textit{age} (below 18 years)} \\
+    18-24 years                     & 0.046     & 0.018 & 2.477     & 0.013 \\
+    25-39 years                     & 0.084     & 0.022 & 3.727     & 0.000 *** \\
+    40-66 years                     & 0.222     & 0.024 & 9.361     & 0.000 *** \\
+    over 67 years                   & 0.283     & 0.027 & 10.503    & 0.000 *** \\
+
+    \multicolumn{5}{l}{\textit{income} (none)} \\
+    below € 15\,000                 & 0.025     & 0.034 & 0.722     & 0.470 \\
+    over € 50\,000                  & 0.027     & 0.056 & 0.482     & 0.629 \\
+
+    \multicolumn{5}{l}{\textit{immigration status} (Dutch)} \\
+    first generation western        & -0.037    & 0.017 & -2.198    & 0.028 * \\
+    first generation non-western    & -0.004    & 0.015 & -0.274    & 0.784 \\
+    second generation western       & 0.002     & 0.014 & 0.109     & 0.913 \\
+    second generation non-western   & -0.055    & 0.018 & -3.087    & 0.002 ** \\
+
+    \multicolumn{5}{l}{\textit{gender} (female)} \\
+    male                            & -0.016    & 0.006 & -2.529    & 0.011 * \\
+
+    \multicolumn{5}{l}{\textit{marital status} (divorced)} \\
+    married                         & -0.010    & 0.011 & -0.886    & 0.376 \\
+    never been married              & -0.028    & 0.013 & -2.082    & 0.037 * \\
+    separated                       & -0.034    & 0.060 & -0.568    & 0.570 \\
+    widow or widower                & 0.017     & 0.018 & 0.955     & 0.339 \\
+
+    \multicolumn{5}{l}{\textit{education level} (havo-vwo)} \\
+    hbo                             & -0.007    & 0.012 & -0.539    & 0.590 \\
+    mbo                             & -0.005    & 0.012 & -0.422    & 0.673 \\
+    primary school                  & 0.035     & 0.014 & -1.685    & 0.092 $^+$ \\
+    vmbo                            & 0.024     & 0.012 & 1.986     & 0.047 * \\
+    university (wo)                 & -0.024    & 0.014 & -1.685    & 0.092 $^+$ \\
+
+    \multicolumn{5}{l}{\textit{employment status} (employed)} \\
+    homemaker                       & 0.015     & 0.012 & 1.284     & 0.199 \\
+    retired                         & 0.060     & 0.012 & 5.104     & 0.000 *** \\
+    student                         & 0.011     & 0.017 & 0.612     & 0.541  \\
+    unable to work                  & 0.162     & 0.015 & 11.029    & 0.000 *** \\
+    unemployed                      & 0.012     & 0.026 & 0.478     & 0.633 \\
+
+    \bottomrule
+
+    \multicolumn{5}{l}{\textit{Significance levels:} $^+$ 0.10, * 0.05, ** 0.01, *** 0.001} \\
+\end{tabular}
+\end{table}
+
+\begin{table}[htbp]
+    \centering
+    \small
+    \caption{Regression parameters for physical health - good}
+    \label{tab:appendix:mediation_physical_good}
+    \begin{tabular}{
+        L
+        S[table-format=2.3] % three decimals, two digits before
+        S[table-format=2.3]
+        S[table-format=2.3]
+        S[table-format=1.3]
+    }
+    \toprule
+
+    \textbf{Regressor} & \textbf{Estimate} & \textbf{Std. Error} & \textbf{z-value} & \textbf{p-value} \\
+
+    \midrule
+
+    MHI5$_{t-1}$                    & -0.000    & 0.000 & -0.905    & 0.366 \\
+    MHI5$_{t-2}$                    & 0.001     & 0.000 & 2.542     & 0.011 * \\
+    MHI5$_{t-3}$                    & 0.000     & 0.000 & 1.343     & 0.179 \\
+
+    sports$_t$                      & -0.020    & 0.007 & -3.007    & 0.003 ** \\
+    sports$_{t-1}$                  & -0.009    & 0.007 & -1.400    & 0.162 \\
+
+    \multicolumn{5}{l}{\textit{age} (below 18 years)} \\
+    18-24 years                     & -0.018    & 0.023 & -0.770    & 0.441 \\
+    25-39 years                     & 0.004     & 0.028 & 0.149     & 0.881 \\
+    40-66 years                     & 0.037     & 0.029 & 1.263     & 0.207 \\
+    over 67 years                   & 0.009     & 0.033 & 0.277     & 0.782 \\
+
+    \multicolumn{5}{l}{\textit{income} (none)} \\
+    below € 15\,000                 & 0.072     & 0.034 & 2.086     & 0.037 * \\
+    over € 50\,000                  & 0.121     & 0.105 & 1.152     & 0.249 \\
+
+    \multicolumn{5}{l}{\textit{immigration status} (Dutch)} \\
+    first generation western        & 0.025     & 0.018 & 1.375     & 0.169 \\
+    first generation non-western    & 0.000     & 0.017 & 0.020     & 0.984 \\
+    second generation western       & -0.011    & 0.016 & -0.685    & 0.494 \\
+    second generation non-western   & -0.001    & 0.020 & -0.044    & 0.965 \\
+
+    \multicolumn{5}{l}{\textit{gender} (female)} \\
+    male                            & -0.023    & 0.008 & -3.104    & 0.002 ** \\
+
+    \multicolumn{5}{l}{\textit{marital status} (divorced)} \\
+    married                         & 0.023     & 0.013 & 1.727     & 0.084 $^+$ \\
+    never been married              & -0.001    & 0.015 & -0.049    & 0.961 \\
+    separated                       & -0.043    & 0.058 & -0.736    & 0.462 \\
+    widow or widower                & 0.020     & 0.022 & 0.931     & 0.352 \\
+
+    \multicolumn{5}{l}{\textit{education level} (havo-vwo)} \\
+    hbo                             & -0.003    & 0.014 & -0.195    & 0.846 \\
+    mbo                             & 0.0145    & 0.014 & 0.956     & 0.339 \\
+    primary school                  & -0.043    & 0.018 & -2.440    & 0.015 * \\
+    vmbo                            & -0.006    & 0.015 & -0.380    & 0.704 \\
+    university (wo)                 & -0.060    & 0.016 & -3.650    & 0.000 *** \\
+
+    \multicolumn{5}{l}{\textit{employment status} (employed)} \\
+    homemaker                       & -0.015    & 0.014 & -1.101    & 0.271 \\
+    retired                         & 0.005     & 0.015 & 0.349     & 0.727 \\
+    student                         & -0.040    & 0.022 & -1.786    & 0.074 $^+$ \\
+    unable to work                  & -0.203    & 0.021 & -9.546    & 0.000 *** \\
+    unemployed                      & -0.054    & 0.025 & -2.121    & 0.034 * \\
+
+    \bottomrule
+
+    \multicolumn{5}{l}{\textit{Significance levels:} $^+$ 0.10, * 0.05, ** 0.01, *** 0.001} \\
+\end{tabular}
+\end{table}
