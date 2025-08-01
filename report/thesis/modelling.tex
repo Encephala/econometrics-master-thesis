@@ -82,19 +82,20 @@ given the mechanisms at play, and thus would likely be overfitting.
         \centering
         \includesvg[width=\textwidth]{figures/modelling/cv_AR.svg}
         \vspace{0.1em}
-        \subcaption{Varying maximum autoregressive lag $L_y$}
+        \subcaption{Varying maximum autoregressive lag ($L_y$)}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.49\textwidth}
         \centering
         \includesvg[width=\textwidth]{figures/modelling/cv_DL.svg}
         \vspace{0.1em}
-        \subcaption{Varying maximum distributed lag $L_x$}
+        \subcaption{Varying maximum distributed lag ($L_x$)}
     \end{subfigure}
     \caption{Cross validated out-of-sample forecasting accuracy for varying lag orders, measured by root mean square error
     $\mu_{\text{RMSPE}}$.
     Error bars are standard deviations of accuracy across folds. The horizontal line represents the 1-$\sigma$ decision rule.
-    The smaller red error bars represent uncertainty in $\mu_{\text{RMSPE}} + \sigma_{\text{RMSPE}}$}
+    The smaller red error bars represent uncertainty in the 1-$\sigma$ decision rule,
+    i.e. uncertainty in $\mu_{\text{RMSPE}} + \sigma_{\text{RMSPE}}$}
     \label{fig:modelling:cv_lags}
 \end{figure}
 
