@@ -1,47 +1,131 @@
 \chapter{LISS Questions for Studied Variables}
 \label{chap:app:liss_questions}
-The following lists the official (English) descriptions of the variables studied.
-Some variables are manually derived from the asked questions rather than calculated directly, for example MHI5 score and BMI.
-In this case, the derived variables are indicated in parentheses.
+The following describes how each variable was derived from the questions in the LISS panel, as well as providing
+descriptive statistics.
 
-\begin{table}[htbp]
-\scriptsize
-\begin{tabularx}{\textwidth}{lXX}
-\textbf{Variable} & \textbf{Question} & \textbf{Possible Answers} \\
-\hline
-Anxiety (MHI5) & This past month, I felt very anxious & never - seldom - sometimes - often - mostly - continuously \\
-Down (MHI5) & This past month, I felt so down that nothing could cheer me up & never - seldom - sometimes - often - mostly - continuously \\
-Calm/peaceful (MHI5) & This past month, I felt so calm and peaceful & never - seldom - sometimes - often - mostly - continuously \\
-Depressed (MHI5) & This past month, I felt depressed and gloomy & never - seldom - sometimes - often - mostly - continuously \\
-Happy (MHI5) & This past month, I felt happy & never - seldom - sometimes - often - mostly - continuously \\
+\section*{MHI5}
+Each of the five parts of the Mental Health Inventory-5 asks how often one felt a specific feeling over the past month.
+It queries how often the participant felt anxious; so down that nothing could cheer them up; calm and peaceful;
+depressed and gloomy; and happy.
+The questions take the form of ``this past month, i felt [...]'', and the possible responses are never; seldom; sometimes;
+often; mostly; and continuously.
+\Cref{fig:data:sample_moments_y_x:y} may be referred to for descriptive statistics of the MHI5 variable.
 
-\midrule
+\section*{Sports}
+The question is ``Do you practice sports?''. \Cref{fig:data:sample_moments_y_x:x} shows the frequency of
+the response ``yes''.
 
-Sports & Do you practice sports? & yes - no \\
+\section*{Physical Health}
+The question is ``How would you describe your health, generally speaking?''.
+We have the responses and their corresponding frequencies
 
-Physical health & How would you describe your health, generally speaking? & poor - moderate - good - very good - excellent \\
-Disease status & Has a physician told you this last year that you suffer from one of the following diseases / problems? - no diseases/problems & yes - no \\
+\begin{itemize}[nolistsep]
+    \item poor (1.4\%)
+    \item moderate (15.9\%)
+    \item good (42.3\%)
+    \item very good (19.9\%)
+    \item excellent (5.1\%)
+\end{itemize}
 
-Weight (BMI) & How much do you weight, without clothes and shoes? & - \\
-Height (BMI) & How tall are you? & - \\
+\section*{Disease Status}
+There is a series of questions of the form ``Has a physical told you this last year that you suffer from one of the following
+diseases / problems?''. The final one of these asks for ``no diseases / problems''. Disease status is taken
+as the inverse of the responses to this question, so for disease status the findings are
 
-\midrule
+\begin{itemize}[nolistsep]
+    \item yes (47.8\%)
+    \item no (52.2\%)
+\end{itemize}
 
-Age & Age of the household member & - \\
-Income & Net household income in Euros & - \\
-Ethnicity & Origin & Dutch background - First generation foreign, Western background - First generation foreign, non-western
-background - Second generation foreign, Western background - Second generation foreign, non-western background \\
-Gender & Gender self-identification & Male - Female - Intersex - Non-binary - Transgender - In a different way - I don't know -
-I prefer not to say\\
-Marital status & Civil status & Married - Separated - Divorced - Widow or widower - Never been married \\
-Education level & Level of education in CBS (Statistics Netherlands) categories & Primary school - vmbo - havo/vwo - mbo - hbo - wo \\
-Employment & Primary occupation & Paid employment - Works or assists in family business - Autonomous professional, freelancer, or self-employed -
-Job seeker following job loss - First-time job seeker - Exempted from job seeking following job loss - Attends school or is studying -
-Takes care of the housekeeping - Is pensioner ([voluntary] early retirement, old age pension scheme) -
-Has (partial) work disability - Performs unpaid work while retaining unemployment benefit -
-Performs voluntary work - Does something else - Is too young to have an occupation
-\end{tabularx}
-\end{table}
+\section*{BMI}
+BMI is derived from the questions ``How much do you weigh, without clothes and shoes?'' and ``How tall are you?''.
+It is then stratified by the WHO guidelines \cite{who_healthy_lifestyle_2010} into the following four groups.
+
+\begin{itemize}[nolistsep]
+    \item underweight (2.3\%)
+    \item normal weight (47.9\%)
+    \item overweight (35.2\%)
+    \item obese (14.8\%)
+\end{itemize}
+
+\section*{Age}
+The question is ``Age of the household member''.
+
+\begin{itemize}[nolistsep]
+    \item under 18 (2.3\%)
+    \item 18 to 24 (7.6\%)
+    \item 25 to 39 (19.0\%)
+    \item 40 to 66 (48.5\%)
+    \item over 67 (22.6\%)
+\end{itemize}
+
+\section*{Income}
+The question is ``Net household income in Euros''.
+
+\begin{itemize}[nolistsep]
+    \item none (€ 0) (0.9\%)
+    \item under € 15\,000 (99.0\%)
+    \item € 15\,000 to € 50\,000 (0.0\%)
+    \item over € 50\,000 (0.1\%)
+\end{itemize}
+
+\section*{Ethnicity}
+The question is ``Origin''.
+
+\begin{itemize}[nolistsep]
+    \item Dutch (83.8\%)
+    \item First generation foreign, Western background (3.7\%)
+    \item First generation foreign, non-Western background (4.4\%)
+    \item Second generation foreign, Western background (5.1\%)
+    \item Second generation foreign, non-Western background (2.9\%)
+\end{itemize}
+
+\section*{Gender}
+The question is ``Gender self-identification''.
+While the possible responses include various options like intersex, non-binary and transgender, in the data they are summarised
+to only male, female and other.
+
+\begin{itemize}[nolistsep]
+    \item male (53.7\%)
+    \item female (46.3\%)
+    \item other (0.1\%)
+\end{itemize}
+
+\section*{Marital status}
+The question is ``Civil status''.
+
+\begin{itemize}[nolistsep]
+    \item married (54.0\%)
+    \item separated (0.4\%)
+    \item divorced (9.7\%)
+    \item widow or widower (5.7\%)
+    \item never been married (30.1\%)
+\end{itemize}
+
+\section*{Education level}
+The question is ``Level of education in CBS (Statistics Netherlands) categories''.
+
+\begin{itemize}[nolistsep]
+    \item primary school (8.3\%)
+    \item vmbo (22.1\%)
+    \item havo/vwo (10.9\%)
+    \item mbo (23.6\%)
+    \item hbo (24.2\%)
+    \item wo (10.9\%)
+\end{itemize}
+
+\section*{Employment}
+Employment status is derived from the question ``Primary occupation'' as explained in \Cref{sec:data:preprocessing:employment},
+yielding the following distribution.
+
+\begin{itemize}[nolistsep]
+    \item employed (46.3\%)
+    \item homemaker (8.2\%)
+    \item retired (23.0\%)
+    \item student (8.7\%)
+    \item unable to work (4.0\%)
+    \item unemployed (2.4\%)
+\end{itemize}
 
 \chapter{Long-run Effect in ARDL Model}
 \label{chap:app:long_run_effect}
